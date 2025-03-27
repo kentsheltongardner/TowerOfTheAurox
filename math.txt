@@ -1,0 +1,528 @@
+1d collision equations
+
+Conservation of momentum
+m1 * v1i + m2 * v2i = m1 * v1f + m2 * v2f
+
+Conservation of kinetic energy (elastic)
+m1 * v1i^2 + m2 * v2i^2 = m1 * v1f^2 + m2 * v2f^2
+
+Equilibration of velocity (inelastic)
+v1f = v2f
+
+
+
+Solving for v1f and v2f
+
+Conservation of kinetic energy (elastic)
+
+m1 * v1i + m2 * v2i = m1 * v1f + m2 * v2f
+m1 * v1i^2 + m2 * v2i^2 = m1 * v1f^2 + m2 * v2f^2
+
+a * c + b * d = a * x + b * y
+a * c^2 + b * d^2 = a * x^2 + b * y^2
+
+x = (a * c - b * c + 2 * b * d) / (a + b)
+y = (b * d - a * d + 2 * a * c) / (a + b)
+
+x = (c * (a - b) + 2 * b * d) / (a + b)
+y = (d * (b - a) + 2 * a * c) / (a + b)
+
+Final velocities
+
+vf1 = (v1i * (m1 - m2) + 2 * m2 * v2i) / (m1 + m2)
+vf2 = (v2i * (m2 - m1) + 2 * m1 * v1i) / (m1 + m2)
+
+Impulses imparted
+
+Impulse = change in momentum = m * v2 - m * v1 = m * (v2 - v1)
+
+j1 = m1 * ((v1i * (m1 - m2) + 2 * m2 * v2i) / (m1 + m2) - v1i)
+j2 = m2 * ((v2i * (m2 - m1) + 2 * m1 * v1i) / (m1 + m2) - v2i)
+
+j1 = a * ((c * (a - b) + 2 * b * d) / (a + b) - c)
+j2 = b * ((d * (b - a) + 2 * a * c) / (a + b) - d)
+
+j1 = -j2 = 2 * a * b * (d - c) / (a + b)
+j2 = -j1 = 2 * a * b * (c - d) / (a + b)
+
+
+
+
+
+Equilibration of velocity (inelastic)
+
+m1 * v1i + m2 * v2i = m1 * v1f + m2 * v2f
+v1f = v2f
+
+a * c + b * d = a * x + b * y
+x = y
+
+x = y = (a * c + b * d) / (a + b)
+
+Final velocity
+
+v1f = v2f = (m1 * v1i + m2 * v2i) / (m1 + m2)
+
+Impulses imparted
+
+j1 = m1 * ((m1 * v1i + m2 * v2i) / (m1 + m2) - v1i)
+j2 = m2 * ((m1 * v1i + m2 * v2i) / (m1 + m2) - v2i)
+
+j1 = a * ((a * c + b * d) / (a + b) - c)
+j2 = b * ((a * c + b * d) / (a + b) - d)
+
+j1 = -j2 = a * b * (d - c) / (a + b)
+j2 = -j1 = a * b * (c - d) / (a + b)
+
+
+
+
+
+Elasticity coefficient
+
+Elastic impulses
+
+j1 = -j2 = 2 * a * b * (d - c) / (a + b)
+j2 = -j1 = 2 * a * b * (c - d) / (a + b)
+
+Inelastic impulses
+
+j1 = -j2 = a * b * (d - c) / (a + b)
+j2 = -j1 = a * b * (c - d) / (a + b)
+
+e = elasticity coefficient
+
+j1 = -j2 = (1 + e) * a * b * (d - c) / (a + b)
+j2 = -j1 = (1 + e) * a * b * (c - d) / (a + b)
+
+j1 = -j2 = (1 + e) * m1 * m2 * (v2i - v1i) / (m1 + m2)
+j2 = -j1 = (1 + e) * m1 * m2 * (v1i - v2i) / (m1 + m2)
+
+
+
+
+
+Velocities
+
+momentum = m * v
+j = change in momentum = m * change in velocity
+j = m * (vf - vi)
+j / m = vf - vi
+vi + j / m = vf
+vf = vi + j / m
+
+v1f = v1i + j1 / m1
+v1f = v1i + ((1 + e) * m1 * m2 * (v2i - v1i) / (m1 + m2)) / m1
+v1f = c + ((1 + e) * a * b * (d - c) / (a + b)) / a
+v1f = c + (1 + e) * b * (d - c) / (a + b)
+v1f = v1i + (1 + e) * m2 * (v2i - v1i) / (m1 + m2)
+
+v2f = v2i + j2 / m2
+v2f = v2i + ((1 + e) * m1 * m2 * (v1i - v2i) / (m1 + m2)) / m2
+v2f = d + ((1 + e) * a * b * (c - d) / (a + b)) / b
+v2f = d + (1 + e) * a * (c - d) / (a + b)
+v2f = v2i + (1 + e) * m1 * (v1i - v2i) / (m1 + m2)
+
+
+
+Solutions
+
+Elastic
+
+v1f = (c * (a - b) + 2 * b * d) / (a + b)
+v2f = (d * (b - a) + 2 * a * c) / (a + b)
+
+v1f = (v1i * (m1 - m2) + 2 * m2 * v2i) / (m1 + m2)
+v2f = (v2i * (m2 - m1) + 2 * m1 * v1i) / (m1 + m2)
+
+
+Inelastic
+
+v1f = v2f = (a * c + b * d) / (a + b)
+
+v1f = v2f = (m1 * v1i + m2 * v2i) / (m1 + m2)
+
+
+Variable
+
+x = c + (1 + e) * b * (d - c) / (a + b)
+y = d + (1 + e) * a * (c - d) / (a + b)
+
+v1f = c + (1 + e) * b * (d - c) / (a + b)
+v2f = d + (1 + e) * a * (c - d) / (a + b)
+
+v1f = v1i + (1 + e) * m2 * (v2i - v1i) / (m1 + m2)
+v2f = v2i + (1 + e) * m1 * (v1i - v2i) / (m1 + m2)
+
+
+m2 is infinitely massive
+v1f = v1i + (1 + e) * (v2i - v1i)
+
+
+
+Solving for e
+
+x = c + (1 + e) * b * (d - c) / (a + b)
+e = (a * c - a * x + b * d - b * x) / (b * c - b * d)
+e = (a * c - a * x + b * d - b * x) / (b * (c - d))
+e = (a * c - a * x) / (b * (c - d)) + (b * d - b * x) / (b * (c - d))
+e = (a * c - a * x) / (b * (c - d)) + (b * (d - x)) / (b * (c - d))
+e = (a * c - a * x) / (b * (c - d)) + (d - x) / (c - d)
+e = (a * (c - x)) / (b * (c - d)) + (d - x) / (c - d)
+
+((x - c) * (a + b)) / (b * (d - c)) - 1 = e
+e = ((x - c) * (a + b)) / (b * (d - c)) - 1
+e = (a * (x - c) + b * (x - c)) / (b * (d - c)) - 1
+e = (a * (x - c)) / (b * (d - c)) + (x - c) / (d - c) - 1
+
+e = (x - c) / (d - c) * ((a / b) + 1) - 1
+
+
+y = d + (1 + e) * a * (c - d) / (a + b)
+e = (a * y - a * c + b * y - b * d) / (a * c - a * d)
+
+e = (y - d) / (c - d) * ((b / a) + 1) - 1
+
+2 * e = (x - c) / (d - c) * ((a / b) + 1) - 1 + ((y - d) / (c - d) * ((b / a) + 1) - 1)
+
+
+y = d + (1 + e) * a * (c - d) / (a + b)
+e = (a * y - a * c + b * y - b * d) / (a * c - a * d)
+
+e = (1 / (d - c)) * (b / a * (d - y) + (c - y))
+
+
+
+x + y = c + (1 + e) * b * (d - c) / (a + b) + (d + (1 + e) * a * (c - d) / (a + b))
+e = (a (-2 c + x + y) + b (-2 d + x + y))/((a - b) (c - d))
+
+e = ((a + b) (x + y) - 2 (a c + b d)) / ((a - b) (c - d))
+
+
+
+
+
+
+
+
+
+
+
+Energy conservation in multiple collisions
+
+For each collision in the set of collisions, kinetic energy is conserved based on a constant scalar
+
+m1 * v1i + m2 * v2i = m1 * v1f + m2 * v2f
+
+a * c + b * d = a * x + b * y
+e * (a * c^2 + b * d^2) = a * x^2 + b * y^2
+
+e * (m1 * v1i^2 + m2 * v2i^2) = m1 * v1f^2 + m2 * v2f^2
+e * (a * c^2 + b * d^2) = a * x^2 + b * y^2
+e = (a * x^2 + b * y^2) / (a * c^2 + b * d^2)
+
+
+Strategies for handling simultaneous collisions
+
+Generate impulses for all collisions simultaneously and correct them
+    Correct how?
+
+Conserve momentum for the system, and conserve some value for individual collisions
+    Kinetic energy with coefficient of restitution?
+    Momentum?
+    
+
+
+
+
+
+Imagine a 2-dimensional world in an x-y plane. All objects in this world are axially aligned rectangles and they cannot rotate.
+
+
+
+
+
+
+
+
+
+
+
+Using coefficient of restitution
+
+Try to find a pattern
+
+m1 * v1i + m2 * v2i = m1 * v1f + m2 * v2f
+e = (v2f - v1f) / (v1i - v2i)
+
+m1 * v1i + m2 * v2i + m3 * v3i = m1 * v1f + m2 * v2f + m3 * v3f
+e = (v2f - v1f) / (v1i - v2i)
+e = (v3f - v1f) / (v1i - v3i)
+
+m1 * v1i + m2 * v2i + m3 * v3i + m4 * v4i = m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f
+e = (v2f - v1f) / (v1i - v2i)
+e = (v3f - v1f) / (v1i - v3i)
+e = (v4f - v1f) / (v1i - v4i)
+
+
+Masses                      a, b, c, d
+Initial velocities          i, j, k, l
+Final velocities            r, s, t, u
+Coefficient of restitution  e
+
+a * i + b * j = a * r + b * s
+e = (s - r) / (i - j)
+
+a * i + b * j + c * k = a * r + b * s + c * t
+e = (s - r) / (i - j)
+e = (t - r) / (i - k)
+
+a * i + b * j + c * k + d * l = a * r + b * s + c * t + d * u
+e = (s - r) / (i - j)
+e = (t - r) / (i - k)
+e = (u - r) / (i - l)
+
+
+a * i + b * j + c * k + d * l = a * r + b * s + c * t + d * u
+e * (i - j) = s - r
+e * (i - k) = t - r
+e * (i - l) = u - r
+
+
+Prepare for matrix
+
+a * r + b * s + c * t + d * u = a * i + b * j + c * k + d * l
+s - r = e * (i - j)
+t - r = e * (i - k)
+u - r = e * (i - l)
+
+a   b   c   d       a * i + b * j + c * k + d * l
+-1  1   0   0       e * (i - j)
+-1  0   1   0       e * (i - k)
+-1  0   0   1       e * (i - l)
+
+
+a * r + b * s + c * t + d * u = a * i + b * j + c * k + d * l
+s - r = e * (i - j)
+t - r = e * (i - k)
+u - r = e * (i - l)
+
+s = (r + e * (i - j))
+t = (r + e * (i - k))
+u = (r + e * (i - l))
+a * r + b * (r + e * (i - j)) + c * (r + e * (i - k)) + d * (r + e * (i - l)) = a * i + b * j + c * k + d * l
+
+
+Equations
+
+m1 * v1i + 
+m2 * v2i + 
+m3 * v3i + 
+m4 * v4i + 
+m5 * v5i =
+m1 * v1f + 
+m2 * v2f + 
+m3 * v3f + 
+m4 * v4f + 
+m5 * v5f
+
+e = (v2f - v1f) / (v1i - v2i)
+e = (v3f - v2f) / (v2i - v3i)
+e = (v4f - v2f) / (v2i - v4i)
+e = (v5f - v3f) / (v3i - v5i)
+
+Reform
+
+m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f + m5 * v5f = m1 * v1i + m2 * v2i + m3 * v3i + m4 * v4i + m5 * v5i
+v2f = v1f + e * (v1i - v2i)
+v3f = v2f + e * (v2i - v3i)
+v4f = v2f + e * (v2i - v4i)
+v5f = v3f + e * (v3i - v5i)
+
+Dummy variables
+
+a = m1 * v1i + m2 * v2i + m3 * v3i + m4 * v4i + m5 * v5i
+b = e * (v1i - v2i)
+c = e * (v2i - v3i)
+d = e * (v2i - v4i)
+f = e * (v3i - v5i)
+
+m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f + m5 * v5f = a
+v2f = v1f + b
+v3f = v2f + c
+v4f = v2f + d
+v5f = v3f + f
+
+Substitute
+
+m1 * v1f + m2 * (v1f + b) + m3 * (v2f + c) + m4 * (v2f + d) + m5 * (v3f + f) = a
+m1 * v1f + m2 * v1f + m2 * b + m3 * v2f + m3 * c + m4 * v2f + m4 * d + m5 * v3f + m5 * f = a
+v1f * (m1 + m2) + m2 * b + m3 * v2f + m3 * c + m4 * v2f + m4 * d + m5 * v3f + m5 * f = a
+v1f * (m1 + m2) = (a - (m2 * b + m3 * v2f + m3 * c + m4 * v2f + m4 * d + m5 * v3f + m5 * f))
+v1f = (a - (m2 * b + m3 * v2f + m3 * c + m4 * v2f + m4 * d + m5 * v3f + m5 * f)) / (m1 + m2)
+
+
+v2f = v1f + b
+v3f = v2f + c
+v4f = v2f + d
+v5f = v3f + f
+
+Find all collisions in a collision group
+
+Find all collisions
+Start with n collision groups each containing a single collision
+
+m0 * v0i + m1 * v1i + m2 * v2i + m3 * v3i + m4 * v4i = m0 * v0f + m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f
+
+e = (v1f - v0f) / (v0i - v1i)
+e = (v2f - v1f) / (v1i - v2i)
+e = (v3f - v1f) / (v1i - v3i)
+e = (v4f - v2f) / (v2i - v4i)
+
+
+m0 * v0f + m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f = m0 * v0i + m1 * v1i + m2 * v2i + m3 * v3i + m4 * v4i
+v1f - v0f = e * (v0i - v1i)
+v2f - v1f = e * (v1i - v2i)
+v3f - v1f = e * (v1i - v3i)
+v4f - v2f = e * (v2i - v4i)
+
+m0 * v0f + m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f    = r
+v1f - v0f                                               = s
+v2f - v1f                                               = t
+v3f - v1f                                               = u
+v4f - v2f                                               = v
+
+m0 * v0f + m1 * v1f + m2 * v2f + m3 * v3f + m4 * v4f    = r
+v1f - v0f                                               = s
+v2f - v1f                                               = t
+v3f - v1f                                               = u
+v4f - v2f                                               = v
+
+
+
+Solve
+
+a*j + b*k + c*l + d*m + f*n = a*r + b*s + c*t + d*u + f*v
+e = (s - r) / (j - k)
+e = (t - s) / (k - l)
+e = (u - s) / (k - m)
+e = (v - t) / (l - n)
+
+for r, s, t, u, and v
+
+r = vf0 = (a j - b e j + b e k + b k - c e j + c e l + c l - d e j + d e m + d m - e f j + e f n + f n) / (a + b + c + d + f)
+s = vf1 = (a e j - a e k + a j + b k - c e k + c e l + c l - d e k + d e m + d m - e f k + e f n + f n) / (a + b + c + d + f)
+t = vf2 = (a e j - a e l + a j + b e k - b e l + b k + c l - d e l + d e m + d m - e f l + e f n + f n) / (a + b + c + d + f)
+u = vf3 = (a e j - a e m + a j + b e k - b e m + b k + c e l - c e m + c l + d m - e f m + e f n + f n) / (a + b + c + d + f)
+v = vf4 = (a e j - a e n + a j + b e k - b e n + b k + c e l - c e n + c l + d e m - d e n + d m + f n) / (a + b + c + d + f)
+
+vf0 = (a j - b e j + b e k + b k - c e j + c e l + c l - d e j + d e m + d m - e f j + e f n + f n) / (a + b + c + d + f)
+vf0 = j + x
+j + x = (a j - b e j + b e k + b k - c e j + c e l + c l - d e j + d e m + d m - e f j + e f n + f n) / (a + b + c + d + f)
+x = -((e + 1) (b j - b k + c j - c l + d j - d m + f j - f n)) / (a + b + c + d + f)
+vf0 = j - ((e + 1) (b j - b k + c j - c l + d j - d m + f j - f n)) / (a + b + c + d + f)
+vf0 = j - ((e + 1) (b (j - k) + c (j - l) + d (j - m) + f (j - n))) / (a + b + c + d + f)
+
+vf0 = j - ((e + 1) (b (j - k) + c (j - l) + d (j - m) + f (j - n))) / (a + b + c + d + f)
+vf1 = k - ((e + 1) (a (k - j) + c (k - l) + d (k - m) + f (k - n))) / (a + b + c + d + f)
+vf2 = l - ((e + 1) (a (l - j) + b (l - k) + d (l - m) + f (l - n))) / (a + b + c + d + f)
+vf3 = m - ((e + 1) (a (m - j) + b (m - k) + c (m - l) + f (m - n))) / (a + b + c + d + f)
+vf4 = n - ((e + 1) (a (n - j) + b (n - k) + c (n - l) + d (n - m))) / (a + b + c + d + f)
+
+M = a + b + c + d + f
+E = e + 1
+
+vf0 = j - (E (b (j - k) + c (j - l) + d (j - m) + f (j - n))) / M
+vf1 = k - (E (a (k - j) + c (k - l) + d (k - m) + f (k - n))) / M
+vf2 = l - (E (a (l - j) + b (l - k) + d (l - m) + f (l - n))) / M
+vf3 = m - (E (a (m - j) + b (m - k) + c (m - l) + f (m - n))) / M
+vf4 = n - (E (a (n - j) + b (n - k) + c (n - l) + d (n - m))) / M
+
+
+
+
+
+
+vf0 = vi0 + (E (m1 (vi1 - vi0) + m2 (vi2 - vi0) + m3 (vi3 - vi0) + m4 (vi4 - vi0))) / M
+
+
+
+
+
+
+
+
+
+
+
+
+
+vf0 = j + (E (b (k - j) + c (l - j) + d (m - j) + f (n - j))) / M
+
+vf1 = k + (E (a (j - k) + c (l - k) + d (m - k) + f (n - k))) / M
+
+vf2 = l + (E (a (j - l) + b (k - l) + d (m - l) + f (n - l))) / M
+
+vf3 = m + (E (a (j - m) + b (k - m) + c (l - m) + f (n - m))) / M
+
+vf4 = n + (E (a (j - n) + b (k - n) + c (l - n) + d (m - n))) / M
+
+
+vf0 = j + 0
+
+vf1 = k + E (j - k)
+
+vf2 = l + E (j - l)
+
+vf3 = m + E (j - m)
+
+vf4 = n + E (j - n)
+
+
+
+Assuming a has an infinite mass
+
+Set all non-infinite group masses to zero?
+
+
+Assuming a and b have an infinite mass
+
+
+v1f = v1i + (1 + e) * m2 * (v2i - v1i) / (m1 + m2)
+v2f = v2i + (1 + e) * m1 * (v1i - v2i) / (m1 + m2)
+
+
+
+
+Assuming objects with infinite mass do not move
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Assume a is an infinite mass
+vf0 = j - E ( b (j - k) / M 
+            + c (j - l) / M 
+            + d (j - m) / M 
+            + f (j - n) / M) = j - 0
+
+vf1 = k - E ( a (k - j) / M 
+            + c (k - l) / M
+            + d (k - m) / M 
+            + f (k - n) / M) = k - E (k - j) = k + E (j - k)
+
+vf2 = l + E (j - l)
+vf3 = m + E (j - m)
+vf4 = n + E (j - n)
+
+Assuming blocks with infinite mass do not move
