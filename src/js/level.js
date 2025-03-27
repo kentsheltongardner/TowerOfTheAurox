@@ -913,7 +913,7 @@ export default class Level {
                 mover.stepTotal = Math.abs(mover.vy);
                 mover.fallDirection = Math.sign(mover.vy);
                 mover.step = Math.ceil(mover.stepTotal * nextStep / nextStepTotal) + 1; // TODO: WHY DO I NEED + 1 HERE?
-                if (squish || (mover instanceof Walker && acceleration > 10)) {
+                if (squish || (mover instanceof Walker && acceleration > 12)) {
                     this.splatterMover(mover, mover.vy * 0.125);
                     moverSet.delete(mover);
                     Sounds.playSplat();
