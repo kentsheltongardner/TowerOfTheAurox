@@ -110,6 +110,7 @@ export const testLevels: LevelData[] = [
             [285, 70, 1],
             [30, 320, 1],
             [64, 170, 1],
+            [400, 320, 1],
         ],
         creeperData: [
             [345, 204, 1],

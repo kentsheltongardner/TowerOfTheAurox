@@ -20,6 +20,7 @@ export default class Level {
     static BlockElasticity = 0.3;
     static MoverElasticity = 0.2;
     static InfiniteMass = Number.MAX_SAFE_INTEGER;
+    static ShakeMultiplier = 0.0005;
     levelData;
     camera;
     blocks = [];
@@ -768,7 +769,7 @@ export default class Level {
                     }
                     const vf = Math.trunc(vi[groupIndex] - (e * weightedMasses) / totalMass);
                     const dy = Math.abs(vf - vy[groupIndex]);
-                    this.camera.shake(dy * dy * this.groups[groupIndex].length * 0.001); // Mass has been adjusted, use group size instead
+                    this.camera.shake(dy * dy * this.groups[groupIndex].length * Level.ShakeMultiplier); // Mass has been adjusted, use group size instead
                     this.setGroupVY(groupIndex, vf);
                     vy[groupIndex] = vf;
                     stepTotal[groupIndex] = Math.abs(vf);

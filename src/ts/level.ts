@@ -24,6 +24,7 @@ export default class Level {
     static readonly BlockElasticity         = 0.3
     static readonly MoverElasticity         = 0.2
     static readonly InfiniteMass            = Number.MAX_SAFE_INTEGER
+    static readonly ShakeMultiplier         = 0.0005
 
     public levelData:           LevelData
     public camera:              Camera
@@ -882,7 +883,7 @@ export default class Level {
                     
                     const vf = Math.trunc(vi[groupIndex] - (e * weightedMasses) / totalMass)
                     const dy = Math.abs(vf - vy[groupIndex])
-                    this.camera.shake(dy * dy * this.groups[groupIndex].length * 0.001) // Mass has been adjusted, use group size instead
+                    this.camera.shake(dy * dy * this.groups[groupIndex].length * Level.ShakeMultiplier) // Mass has been adjusted, use group size instead
                     this.setGroupVY(groupIndex, vf)
                     vy[groupIndex]          = vf
                     stepTotal[groupIndex]   = Math.abs(vf)
