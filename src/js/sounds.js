@@ -30,6 +30,11 @@ export default class Sounds {
         new Audio('./res/sounds/splat_2.wav'),
         new Audio('./res/sounds/splat_3.wav')
     ];
+    static Zaps = [
+        new Audio('./res/sounds/zap_1.wav'),
+        new Audio('./res/sounds/zap_2.wav'),
+        new Audio('./res/sounds/zap_3.wav')
+    ];
     static Thumps = [
         new Audio('./res/sounds/thump_1.wav'),
         new Audio('./res/sounds/thump_2.wav')
@@ -64,5 +69,8 @@ export default class Sounds {
     }
     static playWhoosh() {
         Sounds.playRandom(Sounds.Whooshes);
+    }
+    static playZap() {
+        Sounds.playRandom(Sounds.Zaps);
     }
 }

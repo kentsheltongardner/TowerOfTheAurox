@@ -277,8 +277,8 @@ export default class Game {
             const x = block.x;
             const y = block.y;
             const group = level.groupIndex[i];
-            // context.fillText(group + '', x + 7, y + 18)
-            // context.fillText(i + '', x + 2, y + 18)
+            // context.fillText(group + '', x + 7, y + 11)
+            // context.fillText(i + '', x + 2, y + 25)
         }
         for (const block of level.blocks) {
             context.fillStyle = Game.SplatterRGB;

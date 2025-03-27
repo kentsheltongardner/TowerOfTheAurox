@@ -21,7 +21,7 @@ export default class Level {
     static readonly CellCountX              = Level.GridWidth  / Block.Width
     static readonly CellCountY              = Level.GridHeight / Block.Height
     static readonly MaxImmobilityVelocity   = 1
-    static readonly BlockElasticity         = 0.3
+    static readonly BlockElasticity         = 0.35
     static readonly MoverElasticity         = 0.2
     static readonly InfiniteMass            = Number.MAX_SAFE_INTEGER
     static readonly ShakeMultiplier         = 0.0005
@@ -754,7 +754,7 @@ export default class Level {
                 collisionSet.add(group)
                 const contacts = this.groupContactsAbove[group]
                 for (const groupAbove of contacts) {
-                    if (vy[groupAbove] = vy[group]) {
+                    if (vy[groupAbove] === vy[group]) {
                         buildCollisionSetAbove(groupAbove, collisionSet)
                     }
                 }
@@ -766,7 +766,7 @@ export default class Level {
                 collisionSet.add(group)
                 const contacts = this.groupContactsBelow[group]
                 for (const groupBelow of contacts) {
-                    if (vy[groupBelow] = vy[group]) {
+                    if (vy[groupBelow] === vy[group]) {
                         buildCollisionSetBelow(groupBelow, collisionSet)
                     }
                 }
@@ -880,23 +880,21 @@ export default class Level {
 
                         weightedMasses += m[otherIndex] * (vi[groupIndex] - vi[otherIndex])
                     }
-                    
+
                     const vf = Math.trunc(vi[groupIndex] - (e * weightedMasses) / totalMass)
                     const dy = Math.abs(vf - vy[groupIndex])
                     this.camera.shake(dy * dy * this.groups[groupIndex].length * Level.ShakeMultiplier) // Mass has been adjusted, use group size instead
                     this.setGroupVY(groupIndex, vf)
-                    vy[groupIndex]          = vf
-                    stepTotal[groupIndex]   = Math.abs(vf)
-                    direction[groupIndex]   = Math.sign(vf)
-                    // if (stepTotal[groupIndex] === 0) {
-                    //     // not sure that we need this
-                    //     step[groupIndex]   = Number.MAX_SAFE_INTEGER
-                    // } else {
-                        // step / stepTotal >= nextStep / nextStepTotal
-                        // step >= stepTotal * nextStep / nextStepTotal
-                        step[groupIndex]   = Math.ceil(stepTotal[groupIndex] * nextStep / nextStepTotal)
-                    // }
+                    vy[groupIndex]              = vf
+                    stepTotal[groupIndex]       = Math.abs(vf)
+                    direction[groupIndex]       = Math.sign(vf)
 
+                    if (stepTotal[groupIndex] === 0) {
+                        step[groupIndex]        = 2
+                        stepTotal[groupIndex]   = 1
+                    } else {
+                        step[groupIndex]        = Math.ceil(stepTotal[groupIndex] * nextStep / nextStepTotal)
+                    }
                 }
             }
 
@@ -946,11 +944,7 @@ export default class Level {
                 }
                 step[groupIndex]++
             }
-
-            // Fire beams after block movement
             this.fireBeams()
-
-            // Then fire beams after mover movement
 
 
 // #     #  #######  #######  
@@ -1050,7 +1044,13 @@ export default class Level {
                 mover.vy            = vyf
                 mover.stepTotal     = Math.abs(mover.vy)
                 mover.fallDirection = Math.sign(mover.vy)
-                mover.step          = Math.ceil(mover.stepTotal * nextStep / nextStepTotal) + 1 // TODO: WHY DO I NEED + 1 HERE?
+
+                if (mover.stepTotal === 0) {
+                    mover.step      = 2
+                    mover.stepTotal = 1
+                } else {
+                    mover.step          = Math.ceil(mover.stepTotal * nextStep / nextStepTotal)
+                }
 
                 if (squish || (mover instanceof Walker && acceleration > 12)) {
                     this.splatterMover(mover, mover.vy * 0.125)
@@ -1253,7 +1253,7 @@ export default class Level {
         if (this.beamIntersects(beam.x, beam.y, beam.w, beam.h, mover.x, mover.y, mover.width(), mover.height())) {
             this.splatterMover(mover, mover.vy)
             moverSet.delete(mover)
-            Sounds.playSplat()
+            Sounds.playZap()
         }
     }
     fireBeams() {
