@@ -9,6 +9,7 @@ import Block        from './block.js'
 import RNG          from './rng.js'
 import Walker       from './walker.js'
 import Creeper      from './creeper.js'
+import Color from './color.js'
 
 export default class Game {
 
@@ -305,30 +306,32 @@ export default class Game {
                 Creeper.Height)
         }
 
+
+
+        const intensity = 0.25 + 0.25 * this.smooth(this.frame * 0.05)
+        for (const block of level.blocks) {
+            if (!block.altar && !block.warp) continue
+
+            const height = Block.Height * 0.25
+            const gradient = context.createLinearGradient(block.x, block.y - height, block.x, block.y - 1)
+
+            if (block.altar) {
+                gradient.addColorStop(0, Color.cssColor(255, 255, 255, 0))
+                gradient.addColorStop(1, Color.cssColor(255, 255, 255, intensity))
+            } else {
+                gradient.addColorStop(0, Color.colorWithAlpha(block.color, 0))
+                gradient.addColorStop(1, Color.colorWithAlpha(block.color, intensity))
+            }
+
+            context.fillStyle = gradient
+            context.fillRect(block.x, block.y - height, Block.Width, height)
+
+        }
+
         for (const block of level.blocks) {
             if (block.invisible) continue
             
-            if (block.ethereal) {
-                context.globalAlpha = 0.25
-            }
             switch (block.type) {
-                case Block.Goal: {
-                    context.drawImage(Images.Aurox, block.x, block.y)
-                    break
-                }
-                case Block.Portal: {
-                    context.drawImage(
-                        Images.Portals, 
-                        block.color * Block.Width, 
-                        0, 
-                        Block.Width, 
-                        Block.Height,
-                        block.x, 
-                        block.y, 
-                        Block.Width, 
-                        Block.Height)
-                    break
-                }
                 case Block.Beam: {
                     context.drawImage(
                         Images.Beams, 

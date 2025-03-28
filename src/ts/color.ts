@@ -19,4 +19,16 @@ export default class Color {
         'P': Color.Purple,
         'M': Color.Magenta,
     }
+
+    static rValues = [255,  255,    255,    0,      0,      0,      128,    255]
+    static gValues = [0,    128,    255,    255,    255,    0,      0,      0]
+    static bValues = [0,    0,      0,      0,      255,    255,    255,    255]
+
+    static colorWithAlpha(color: number, alpha: number) {
+        return this.cssColor(Color.rValues[color], Color.gValues[color], Color.bValues[color], alpha)
+    }
+
+    static cssColor(r: number, g: number, b: number, a: number) {
+        return `rgba(${r}, ${g}, ${b}, ${a})`
+    }
 }

@@ -43,7 +43,6 @@ export default class Level {
     public indexGrid:           Uint16Array     = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty)
     public removalIndex:        number          = -1
     public deaths:              number          = 0
-    public frameDeaths:         number          = 0
     public teleport:            boolean         = false
 
 
@@ -669,7 +668,7 @@ export default class Level {
 //   # #    #     #  #    #      #     #     #  #     #  #        #        #     #  
 //    #     #     #  #     #  #######  #     #  ######   #######  #######   #####   
 
-// Variables nextstep, nextstepTotal and nextDirection indicate which cohorts of 
+// Variables nextStep, nextStepTotal and nextDirection indicate which cohorts of 
 // objects will attempt a move. Downward movements are prioritized.
 
             let nextStep        = Number.MAX_SAFE_INTEGER
@@ -1054,7 +1053,7 @@ export default class Level {
 
                 if (squish || (mover instanceof Walker && acceleration > 12)) {
                     this.splatterMover(mover, mover.vy * 0.125)
-                    moverSet.delete(mover)
+                    this.kill(mover, moverSet)
                     Sounds.playSplat()
                 }
 
@@ -1089,13 +1088,44 @@ export default class Level {
                 const floor         = head + mover.height()
                 const foot          = floor - 1
 
+
+
                 const blockHead     = this.getIndex(x, head) !== Level.GridEmpty
                 const blockFoot     = this.getIndex(x, foot) !== Level.GridEmpty
                 const emptyFloor    = this.getIndex(x, floor) === Level.GridEmpty
                 if (blockHead || blockFoot || (emptyFloor && mover.grounded)) {
                     mover.walkDirection *= -1
                 } else {
-                    mover.x += mover.walkDirection
+                    const middleX           = mover.x + Walker.Width / 2
+                    const middleBlockIndex  = this.getIndex(middleX, floor)
+                    if (mover instanceof Walker
+                        && mover.grounded
+                        && middleBlockIndex !== Level.GridEmpty
+                        && middleX % Block.Width === Block.Width / 2
+                    ) {
+                        const block = this.blocks[middleBlockIndex]
+                        if (block.altar) {
+                            this.walkers.delete(mover)
+                            Sounds.playVanish()
+                        } else if (block.warp) {
+                            for (const pair of this.blocks) {
+                                if (!pair.warp)                                                         continue
+                                if (pair === block)                                                     continue
+                                if (pair.color !== block.color)                                         continue
+                                if (this.getIndex(pair.x, pair.y - Walker.Height) !== Level.GridEmpty)  continue
+
+                                mover.y = pair.y - Walker.Height
+                                mover.x = pair.x + (mover.x - block.x)
+                                Sounds.playWhoosh()
+                                break
+                            }
+                            mover.x += mover.walkDirection
+                        } else {
+                            mover.x += mover.walkDirection
+                        }
+                    } else {
+                        mover.x += mover.walkDirection
+                    }
                 }
             }
 
@@ -1169,10 +1199,35 @@ export default class Level {
 
 
     complete() {
-        return false
+        return this.deaths === 0 && this.walkers.size === 0
+    }
+    kill(mover: Mover, moverSet: Set<Mover>) {
+        moverSet.delete(mover)
+        if (mover instanceof Walker) {
+            this.deaths++
+        }
     }
 
 
+    lift() {
+        for (const block of this.blocks) {
+            if (!block.altar) continue
+
+            const blockLeft     = block.x
+            const blockRight    = blockLeft + Block.Width - 1
+            const blockTop      = block.y
+
+            for (const walker of this.walkers) {
+                const left     = walker.x
+                const right    = left + Walker.Width - 1
+                const floor    = walker.y + Walker.Height
+
+                if (floor === blockTop && left >= blockLeft && right <= blockRight) {
+                    this.walkers.delete(walker)
+                }
+            }
+        }
+    }
 
     beamIntersects(
         x1: number, y1: number, w1: number, h1: number, 
@@ -1252,7 +1307,7 @@ export default class Level {
     fireBeam(beam: Rect, mover: Mover, moverSet: Set<Mover>) {
         if (this.beamIntersects(beam.x, beam.y, beam.w, beam.h, mover.x, mover.y, mover.width(), mover.height())) {
             this.splatterMover(mover, mover.vy)
-            moverSet.delete(mover)
+            this.kill(mover, moverSet)
             Sounds.playZap()
         }
     }
@@ -1275,7 +1330,7 @@ export default class Level {
             for (const walker of this.walkers) {
                 if (this.contact(creeper, walker)) {
                     this.splatterMover(walker, walker.vy)
-                    this.walkers.delete(walker)
+                    this.kill(walker, this.walkers)
                     Sounds.playSplat()
                 }
             }

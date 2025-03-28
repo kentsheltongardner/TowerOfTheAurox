@@ -9,11 +9,8 @@ export default class Block extends Faller {
     static Clay = 1;
     static Crate = 2;
     static Box = 3;
-    static Goal = 4;
-    static Magnet = 5;
-    static Portal = 6;
-    static Beam = 7;
-    static Mirror = 8;
+    static Magnet = 4;
+    static Beam = 5;
     static TypeCount = 9;
     static CharToType = {
         '.': Block.None,
@@ -21,20 +18,14 @@ export default class Block extends Faller {
         '*': Block.Clay,
         '$': Block.Crate,
         '%': Block.Box,
-        '@': Block.Goal,
         '+': Block.Magnet,
-        '&': Block.Portal,
         '!': Block.Beam,
-        '^': Block.Mirror,
     };
     static TypeIsDestructible = [
         false,
         true,
         false,
         true,
-        false,
-        false,
-        false,
         false,
         false,
     ];
@@ -45,17 +36,15 @@ export default class Block extends Faller {
         true,
         true,
         true,
-        true,
-        true,
-        true,
     ];
     type;
     hardConnections = 0;
     softConnections = 0;
     direction = Connection.None;
     color = Color.None;
-    ethereal = false;
     invisible = false;
+    altar = false;
+    warp = false;
     splatters = [];
     constructor(x, y, type) {
         super(x, y);
@@ -64,6 +53,7 @@ export default class Block extends Faller {
     setAttribute(char) {
         if (char in Color.CharToColor) {
             this.color = Color.CharToColor[char];
+            this.warp = true;
             return;
         }
         if (char in Connection.CharToDirection) {
@@ -71,12 +61,12 @@ export default class Block extends Faller {
             return;
         }
         switch (char) {
-            case 'E': {
-                this.ethereal = true;
-                break;
-            }
             case 'I': {
                 this.invisible = true;
+                break;
+            }
+            case 'A': {
+                this.altar = true;
                 break;
             }
         }
