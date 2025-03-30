@@ -54,6 +54,8 @@ export default class Block extends Faller {
     public altar:           boolean     = false
     public warp:            boolean     = false
     public splatters:       Splatter[]  = []
+    public primed:          boolean     = false
+    public activated:       boolean     = false
 
     constructor(x: number, y: number, type: number) {
         super(x, y)

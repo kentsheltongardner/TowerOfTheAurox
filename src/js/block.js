@@ -46,6 +46,8 @@ export default class Block extends Faller {
     altar = false;
     warp = false;
     splatters = [];
+    primed = false;
+    activated = false;
     constructor(x, y, type) {
         super(x, y);
         this.type = type;

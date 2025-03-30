@@ -35,6 +35,7 @@ export default class Game {
     public displayCanvas:   HTMLCanvasElement
     public displayContext:  CanvasRenderingContext2D
     public levelIndex:      number
+    public levelCount:      number
     public levelPrev:       Level
     public levelCurr:       Level
     public levelNext:       Level
@@ -55,6 +56,7 @@ export default class Game {
         this.camera             = new Camera()
         this.levelData          = levelData
         this.levelIndex         = 1
+        this.levelCount         = this.levelData.length
         this.levelPrev          = new Level(this.levelData[this.levelIndex - 1], this.camera)
         this.levelCurr          = new Level(this.levelData[this.levelIndex], this.camera)
         this.levelNext          = new Level(this.levelData[this.levelIndex + 1], this.camera)
@@ -110,6 +112,8 @@ export default class Game {
                 break
             }
             case 'KeyN': {
+                if (this.levelIndex >= this.levelCount - 2) break
+
                 this.levelIndex++
                 this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
                 this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
@@ -119,6 +123,8 @@ export default class Game {
                 break
             }
             case 'KeyP': {
+                if (this.levelIndex <= 1) break
+
                 this.levelIndex--
                 this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
                 this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
@@ -162,7 +168,7 @@ export default class Game {
             this.levelCurr.update(this.frame)
         }
 
-        if (this.levelCurr.complete()) {
+        if (this.levelCurr.complete() && this.levelIndex < this.levelCount - 2) {
             Sounds.playBell()
             this.scrollFrame = 1
         }
@@ -268,7 +274,8 @@ export default class Game {
             }
         }
 
-        context.strokeStyle = 'red'
+        const beamIntensity = 0.5 + 0.5 * this.smooth(this.frame * 0.075)
+        context.strokeStyle = `rgba(255, 128, 0, ${beamIntensity})`
         context.beginPath()
         for (const beam of level.beams()) {
             context.moveTo(beam.x, beam.y)
@@ -308,7 +315,7 @@ export default class Game {
 
 
 
-        const intensity = 0.25 + 0.25 * this.smooth(this.frame * 0.05)
+        const altarIntensity = 0.25 + 0.25 * this.smooth(this.frame * 0.05)
         for (const block of level.blocks) {
             if (!block.altar && !block.warp) continue
 
@@ -317,10 +324,10 @@ export default class Game {
 
             if (block.altar) {
                 gradient.addColorStop(0, Color.cssColor(255, 255, 255, 0))
-                gradient.addColorStop(1, Color.cssColor(255, 255, 255, intensity))
+                gradient.addColorStop(1, Color.cssColor(255, 255, 255, altarIntensity))
             } else {
                 gradient.addColorStop(0, Color.colorWithAlpha(block.color, 0))
-                gradient.addColorStop(1, Color.colorWithAlpha(block.color, intensity))
+                gradient.addColorStop(1, Color.colorWithAlpha(block.color, altarIntensity))
             }
 
             context.fillStyle = gradient
