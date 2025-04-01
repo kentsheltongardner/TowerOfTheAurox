@@ -53,7 +53,86 @@ import LevelData from './level_data.js'
 //  
 //  Controllable guy that has to shoot blocks to make them fall
 //  
-
+//      Ropes
+//      Swinging
+//      Stretching
+//      Repulsion
+//      Wrecking ball
+//      Bombs
+//      Fluids
+//      Ice
+//      Fluid as a way to lift blocks
+//  Leaders
+//  Classes
+//      Fear
+//      Warriors
+//      Pickups
+//      Climb
+//  Ladders
+//  Porous
+//  Water and lights
+//  Water and lava interactions
+//  Drowning
+//  Poisonous
+//  Electricity
+//  Hold the player
+//  Player control
+//  
+//  Time
+//      Accelerate
+//      Slow
+//      Pause
+//      Reverse
+//      
+//  Ice, slime, sand, magnet
+//  Instantaneous movement
+//  Cutting/partitioning blocks
+//  Rescuable class
+//  Classes, expendable game
+//      King
+//      Captain
+//      Wizard
+//      Soldier
+//      Peasant
+//      Damsel
+//      Child
+//  Switches and buttons, flags, one time switches, pressure plates
+//      Activate lasers, lifts, gates, 
+//  
+//  Retrieval
+//      
+//  
+//  Blocks that shatter when they fall
+//  
+//  Sand 
+//  
+//  Elevator
+//      Has a direction variable
+//      Activated blocks have a color icon
+//      Switches, buttons, etc have a color
+//      Infinite mass, no ability to push
+//      
+//  Slime - slows down movement
+//  Ice - allows for falling
+//  
+//  Toggleable blocks - Tap to render ethereal/solid
+//      Can only become solid when not overlapped (by blocks, maybe they can kill movers)
+//  
+//  Activation of blocks (click)
+//      Destroy (self or others? chain reaction?)
+//      Power on/off
+//      Ethereal/physical
+//      Growth
+//      Move up or down
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 export const testLevels: LevelData[] = [
@@ -109,64 +188,69 @@ export const testLevels: LevelData[] = [
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
         ],
         walkerData: [],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
-    {
-        typeGrid: [
-            '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
-            '=                         =         =                         =',
-            '# . . . . . . . . . . . . # . % . . # . . . . . . . . . . . . #',
-            '                                                               ',
-            '#=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=#',
-        ],
-        attributeGrid: [
-            '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
-            '                                                               ',
-            '# . . . . . . . . . . . . # . % . . # . . . . . . . . . . . . #',
-            '                                                               ',
-            '# # # # # # # # # # # # # # # # # A # # # # # # # # # # # # # #',
-        ],
-        walkerData: [
-            [290, 320, 1]
-        ],
-        creeperData: []
-    },
+    // {
+    //     typeGrid: [
+    //         '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '=                                                             =',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '=                                                             =',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '=                                                             =',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . # . . . . . . . . . . . . . . . . . . #',
+    //         '=                                                             =',
+    //         '# . . . . . . . . . . . . @=@=@ %=%-@ . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . @ # . . . . # @ . . . . . . . . . . . #',
+    //         '=                         =         =                         =',
+    //         '# . . . . . . . . . . @=@ # . % . . # @=@ . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '#=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=#',
+    //     ],
+    //     attributeGrid: [
+    //         '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# . . . . . . . . . . . . # . % . . # . . . . . . . . . . . . #',
+    //         '                                                               ',
+    //         '# # # # # # # # # # # # # # # # # A # # # # # # # # # # # # # #',
+    //     ],
+    //     walkerData: [
+    //         [290, 320, 1],
+    //         [290, 230, 1],
+    //         [320, 230, -1],
+    //         [360, 230, -1]
+    //     ],
+    //     creeperData: [],
+    //     torches: [],
+    // },
     {
         typeGrid: [
             '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
@@ -221,7 +305,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [290, 290, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [[13, 8], [18, 8]],
     },
     {
         typeGrid: [
@@ -277,7 +362,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [290, 290, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -334,7 +420,8 @@ export const testLevels: LevelData[] = [
             [290, 320, 1],
             [312, 260, -1],
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -392,7 +479,8 @@ export const testLevels: LevelData[] = [
             [312, 260, -1],
             [352, 200, 1],
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -448,7 +536,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [300, 200, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -505,7 +594,8 @@ export const testLevels: LevelData[] = [
             [328, 170, 1],
             [328, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -561,7 +651,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [290, 290, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -619,7 +710,8 @@ export const testLevels: LevelData[] = [
         ],
         creeperData: [
             [310, 324, -1]
-        ]
+        ],
+        torches: [],
     },
     // {
     //     typeGrid: [
@@ -749,7 +841,8 @@ export const testLevels: LevelData[] = [
             [497, 49, 1],
             [488, 89, 1],
             [521, 143, 1],
-        ]
+        ],
+        torches: [],
     },
     {
         typeGrid: [
@@ -811,7 +904,8 @@ export const testLevels: LevelData[] = [
             [440, 324, -1],
             [480, 324, -1],
             [520, 324, -1],
-        ]
+        ],
+        torches: [],
     },
     // {
     //     typeGrid: [
@@ -927,7 +1021,8 @@ export const testLevels: LevelData[] = [
         ],
         creeperData: [
             [280, 54, 1]
-        ]
+        ],
+        torches: [],
     },
     {
         typeGrid: [
@@ -983,7 +1078,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [200, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1039,7 +1135,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [330, 200, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1095,7 +1192,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [284, 200, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1160,7 +1258,8 @@ export const testLevels: LevelData[] = [
             [390, 264, 1],
             [230, 294, 1],
             [410, 294, 1],
-        ]
+        ],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1216,7 +1315,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [240, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1272,7 +1372,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [240, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1328,7 +1429,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [240, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1384,7 +1486,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [240, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1440,7 +1543,8 @@ export const testLevels: LevelData[] = [
         walkerData: [
             [120, 320, 1]
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1505,7 +1609,8 @@ export const testLevels: LevelData[] = [
             [320, 324, -1],
             [365, 324, 1],
             [397, 324, -1],
-        ]
+        ],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1573,7 +1678,8 @@ export const testLevels: LevelData[] = [
             [290, 50, -1],
             [550, 276, -1],
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1641,7 +1747,8 @@ export const testLevels: LevelData[] = [
             [290, 50, -1],
             [550, 276, -1],
         ],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
     {
         typeGrid: [
@@ -1695,6 +1802,7 @@ export const testLevels: LevelData[] = [
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
         ],
         walkerData: [],
-        creeperData: []
+        creeperData: [],
+        torches: [],
     },
 ]

@@ -5,10 +5,12 @@ export default class Mover extends Faller {
     step = 0;
     stepTotal = 0;
     fallDirection = 0;
+    vx = 0;
     // public collisionVelocity:   number  = 0
     constructor(x, y, walkDirection) {
         super(x, y);
         this.walkDirection = walkDirection;
+        this.vx = walkDirection;
     }
     setStepVariables() {
         this.step = 1;

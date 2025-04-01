@@ -5,17 +5,17 @@ export default class Images {
     public static ClayTemplate      = new Image()
     public static CrateTemplate     = new Image()
     public static BoxTemplate       = new Image()
-    public static GoalTemplate      = new Image()
     public static StrappingTemplate = new Image()
     public static MagnetTemplate    = new Image()
+    public static IceTemplate       = new Image()
 
     public static WallTileset       = new Image()
     public static ClayTileset       = new Image()
     public static CrateTileset      = new Image()
     public static BoxTileset        = new Image()
-    public static GoalTileset       = new Image()
     public static StrappingTileset  = new Image()
     public static MagnetTileset     = new Image()
+    public static IceTileset        = new Image()
 
     public static WalkerRight       = new Image()
     public static WalkerLeft        = new Image()
@@ -23,10 +23,14 @@ export default class Images {
     public static CreeperRight      = new Image()
     public static CreeperLeft       = new Image()
 
+    public static Torch             = new Image()
+
     public static Aurox             = new Image()
     public static Brick             = new Image()
     public static Portals           = new Image()
     public static Beams             = new Image()
+
+    public static Title             = new Image()
 
     public static OffsetMap         = new Array(256).fill(-1)
     public static SoutheastMap      = new Array(256).fill(-1)
@@ -40,9 +44,9 @@ export default class Images {
         Images.ClayTemplate.src         = './res/images/clay_template.png'
         Images.CrateTemplate.src        = './res/images/crate_template.png'
         Images.BoxTemplate.src          = './res/images/box_template.png'
-        Images.GoalTemplate.src         = './res/images/goal_template.png'
         Images.StrappingTemplate.src    = './res/images/strapping_template.png'
         Images.MagnetTemplate.src       = './res/images/magnet_template.png'
+        Images.IceTemplate.src          = './res/images/ice_template.png'
 
         Images.WalkerRight.src          = './res/images/walker_right.png'
         Images.WalkerLeft.src           = './res/images/walker_left.png'
@@ -55,6 +59,10 @@ export default class Images {
         Images.Portals.src              = './res/images/portals.png'
         Images.Beams.src                = './res/images/beams.png'
 
+        Images.Torch.src                = './res/images/torch.png'
+
+        Images.Title.src                = './res/images/title.png'
+
         Images.initializeMaps()
     }
 
@@ -63,16 +71,16 @@ export default class Images {
         Images.ClayTileset      = Images.tilesetImage(Images.ClayTemplate)
         Images.CrateTileset     = Images.tilesetImage(Images.CrateTemplate)
         Images.BoxTileset       = Images.tilesetImage(Images.BoxTemplate)
-        Images.GoalTileset      = Images.tilesetImage(Images.GoalTemplate)
         Images.StrappingTileset = Images.tilesetImage(Images.StrappingTemplate)
         Images.MagnetTileset    = Images.tilesetImage(Images.MagnetTemplate)
+        Images.IceTileset       = Images.tilesetImage(Images.IceTemplate)
 
         Images.BlockTilesetMap[Block.Wall]      = Images.WallTileset
         Images.BlockTilesetMap[Block.Clay]      = Images.ClayTileset
         Images.BlockTilesetMap[Block.Crate]     = Images.CrateTileset
         Images.BlockTilesetMap[Block.Box]       = Images.BoxTileset
-        Images.BlockTilesetMap[Block.Goal]      = Images.GoalTileset
         Images.BlockTilesetMap[Block.Magnet]    = Images.MagnetTileset
+        Images.BlockTilesetMap[Block.Ice]       = Images.IceTileset
     }
 
     // direction 

@@ -21,34 +21,32 @@ export default class Game {
     public static readonly ScrollTimeMilliseconds   = 1000
     public static readonly ScrollFrames             = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds)
     public static readonly FrameSkipCount           = 8
+    public static readonly TitleFadeoutMilliseconds = 500
+    public static readonly TitleFadeoutFrames       = Math.floor(Game.TitleFadeoutMilliseconds / Game.FrameTimeMilliseconds)
 
-    public canvasPrev:      HTMLCanvasElement
-    public canvasCurr:      HTMLCanvasElement
-    public canvasNext:      HTMLCanvasElement
-    public canvasAll:       HTMLCanvasElement
+    public canvasPrev:          HTMLCanvasElement
+    public canvasCurr:          HTMLCanvasElement
+    public canvasNext:          HTMLCanvasElement
+    public canvasAll:           HTMLCanvasElement
 
-    public contextPrev:     CanvasRenderingContext2D
-    public contextCurr:     CanvasRenderingContext2D
-    public contextNext:     CanvasRenderingContext2D
-    public contextAll:      CanvasRenderingContext2D
-
-    public displayCanvas:   HTMLCanvasElement
-    public displayContext:  CanvasRenderingContext2D
-    public levelIndex:      number
-    public levelCount:      number
-    public levelPrev:       Level
-    public levelCurr:       Level
-    public levelNext:       Level
-    public levelData:       LevelData[]
-    public musicPlaying:    boolean
-    public lastTimestamp:   number
-    public frame:           number
-    public scrollFrame:     number
-    public tapPoint:        Point
-    public tapped:          boolean
-    public camera:          Camera
-    public overlayOpacity:  number
-    public skip:            boolean
+    public displayCanvas:       HTMLCanvasElement
+    public displayContext:      CanvasRenderingContext2D
+    public levelIndex:          number
+    public levelCount:          number
+    public levelPrev:           Level
+    public levelCurr:           Level
+    public levelNext:           Level
+    public levelData:           LevelData[]
+    public musicPlaying:        boolean
+    public lastTimestamp:       number
+    public frame:               number
+    public titleFadeOutFrame:   number
+    public scrollFrame:         number
+    public tapPoint:            Point
+    public tapped:              boolean
+    public camera:              Camera
+    public overlayOpacity:      number
+    public skip:                boolean
 
     // Numeric scroll system based on direction of movement (up or down)
 
@@ -66,20 +64,16 @@ export default class Game {
         this.canvasNext         = document.createElement('canvas')
         this.canvasAll          = document.createElement('canvas')
 
-        this.contextPrev        = this.canvasPrev.getContext('2d')!
-        this.contextCurr        = this.canvasCurr.getContext('2d')!
-        this.contextNext        = this.canvasNext.getContext('2d')!
-        this.contextAll         = this.canvasAll.getContext('2d')!
 
-        this.canvasPrev.width   = Level.GridWidth
-        this.canvasCurr.width   = Level.GridWidth
-        this.canvasNext.width   = Level.GridWidth
-        this.canvasAll.width    = Level.GridWidth
+        this.canvasPrev.width           = Level.GridWidth
+        this.canvasCurr.width           = Level.GridWidth
+        this.canvasNext.width           = Level.GridWidth
+        this.canvasAll.width            = Level.GridWidth
 
-        this.canvasPrev.height  = Level.GridHeight
-        this.canvasCurr.height  = Level.GridHeight
-        this.canvasNext.height  = Level.GridHeight
-        this.canvasAll.height   = Level.GridHeight * 3
+        this.canvasPrev.height          = Level.GridHeight
+        this.canvasCurr.height          = Level.GridHeight
+        this.canvasNext.height          = Level.GridHeight
+        this.canvasAll.height           = Level.GridHeight * 3
 
         this.displayCanvas      = displayCanvas
         this.displayContext     = this.displayCanvas.getContext('2d')!
@@ -88,6 +82,7 @@ export default class Game {
         this.lastTimestamp      = 0
         this.frame              = 0
         this.scrollFrame        = 0
+        this.titleFadeOutFrame  = 0
         this.tapPoint           = new Point(0, 0)
         this.tapped             = false
         this.overlayOpacity     = 0
@@ -95,10 +90,15 @@ export default class Game {
 
         this.resize()
         window.addEventListener('resize',       () => { this.resize() })
-        window.addEventListener('mousedown',    e => { this.tap(e) })
+        window.addEventListener('mousedown',    e => { this.tap(e.offsetX, e.offsetY) })
+        window.addEventListener('touchstart',   e => {
+            const touch = e.touches[0]
+            this.tap(touch.clientX, touch.clientY) 
+        })
         window.addEventListener('keydown',      e => { this.keyDown(e) })
         window.addEventListener('keyup',        e => { this.keyUp(e) })
         window.addEventListener('contextmenu',  e => e.preventDefault())
+
 
         requestAnimationFrame(timestamp => this.loop(timestamp))
     }
@@ -149,9 +149,18 @@ export default class Game {
         }
     }
 
-    tap(e: MouseEvent) {
+    
+    tap(x: number, y: number) {
+        if (this.titleFadeOutFrame === 0) {
+            this.titleFadeOutFrame = 1
+            return
+        }
+        if (this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+            return
+        }
+
         this.tapped     = true
-        this.tapPoint   = this.gamePoint(e.offsetX, e.offsetY)
+        this.tapPoint   = this.gamePoint(x, y)
         console.log(this.tapPoint.x, this.tapPoint.y)
 
         if (!this.musicPlaying) {
@@ -164,6 +173,11 @@ export default class Game {
     }
 
     update() {
+        if (this.titleFadeOutFrame > 0 
+            && this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+            this.titleFadeOutFrame++
+        }
+
         if (this.frame % 1 === 0) {
             this.levelCurr.update(this.frame)
         }
@@ -251,11 +265,14 @@ export default class Game {
 
 
 
-    renderLevel(level: Level, canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, frame: number) {
+    renderLevel(level: Level, canvas: HTMLCanvasElement, frame: number) {
+        const context           = canvas.getContext('2d')!
         context.clearRect(0, 0, canvas.width, canvas.height)
 
         const rng = new RNG()
         context.fillStyle = '#0002'
+
+
 
         for (let i = 0; i < Level.GridWidth; i += Level.BrickWidth) {
             for (let j = 0; j < Level.GridHeight; j += Level.BrickHeight * 2) {
@@ -272,6 +289,30 @@ export default class Game {
                     context.fillRect(i, j, Level.BrickWidth, Level.BrickHeight)
                 }
             }
+        }
+
+
+        for (const torch of level.torches) {
+            const offsetX = Math.floor((frame + torch.frame) / 2) % 5 * Block.Width
+            context.drawImage(
+                Images.Torch, 
+                offsetX, 0, Block.Width, Block.Height, 
+                torch.x, torch.y, Block.Width, Block.Height)
+        }
+
+        
+        for (const torch of level.torches) {
+            const radius = 28 + Math.random() * 3
+            const diameter = radius * 2
+            const cx = torch.x + Block.Width / 2 + Math.random() * 2 - 1
+            const cy = torch.y + Block.Height / 2 + Math.random() * 2 - 1
+            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
+            gradient.addColorStop(0, 'rgba(255, 255, 0, 0.25')
+            gradient.addColorStop(0.5, 'rgba(255, 128, 0, 0.125')
+            gradient.addColorStop(0.75, 'rgba(255, 0, 0, 0.0625')
+            gradient.addColorStop(1, 'rgba(128, 0, 0, 0')
+            context.fillStyle = gradient
+            context.fillRect(cx - radius, cy - radius, diameter, diameter)
         }
 
         const beamIntensity = 0.5 + 0.5 * this.smooth(this.frame * 0.075)
@@ -427,25 +468,30 @@ export default class Game {
             context.fillRect(x, y, 1, 1)
         }
 
+
+
         // xor, multiply, overlay, darken, soft-light, hue, color
         context.globalCompositeOperation = 'multiply'
         context.fillStyle = 'rgba(255, 128, 64, 0.6)'
         context.fillRect(0, 0, Level.GridWidth, Level.GridHeight)
+
+
         context.globalCompositeOperation = 'source-over'
     }
 
 
 
     render(frame: number) {
-        this.renderLevel(this.levelPrev, this.canvasPrev, this.contextPrev, 0)
-        this.renderLevel(this.levelCurr, this.canvasCurr, this.contextCurr, frame)
-        this.renderLevel(this.levelNext, this.canvasNext, this.contextNext, 0)
+        this.renderLevel(this.levelPrev, this.canvasPrev, 0)
+        this.renderLevel(this.levelCurr, this.canvasCurr, frame)
+        this.renderLevel(this.levelNext, this.canvasNext, 0)
 
-        this.contextAll.clearRect(0, 0, this.canvasAll.width, this.canvasAll.height)
+        const contextAll = this.canvasAll.getContext('2d')!
+        contextAll.clearRect(0, 0, this.canvasAll.width, this.canvasAll.height)
         
-        this.contextAll.drawImage(this.canvasNext, 0, 0)
-        this.contextAll.drawImage(this.canvasCurr, 0, Level.GridHeight)
-        this.contextAll.drawImage(this.canvasPrev, 0, Level.GridHeight * 2)
+        contextAll.drawImage(this.canvasNext, 0, 0)
+        contextAll.drawImage(this.canvasCurr, 0, Level.GridHeight)
+        contextAll.drawImage(this.canvasPrev, 0, Level.GridHeight * 2)
 
         const displayRect       = this.displayRect()
         const displayScalar     = this.displayScalar()
@@ -474,6 +520,15 @@ export default class Game {
 
         this.displayContext.fillStyle = `rgba(255, 0, 0, ${this.overlayOpacity})`
         this.displayContext.fillRect(displayRect.x, displayRect.y, displayRect.w, displayRect.h)
+
+        if (this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+            this.displayContext.globalAlpha = this.smooth(1.0 - this.titleFadeOutFrame / Game.TitleFadeoutFrames)
+            // generate falling stars?
+            this.displayContext.fillStyle = 'rgba(0, 0, 0, 0.75)'
+            this.displayContext.fillRect(displayRect.x, displayRect.y, displayRect.w, displayRect.h)
+            this.displayContext.drawImage(Images.Title, displayRect.x, displayRect.y, displayRect.w, displayRect.h)
+            this.displayContext.globalAlpha = 1.0
+        }
     }
 
     smooth(x: number) {

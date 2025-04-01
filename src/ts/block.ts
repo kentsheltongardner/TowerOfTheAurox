@@ -14,8 +14,9 @@ export default class Block extends Faller {
     static readonly Box         = 3
     static readonly Magnet      = 4
     static readonly Beam        = 5
+    static readonly Ice         = 6
 
-    static readonly TypeCount   = 9
+    static readonly TypeCount   = 7
 
     static readonly CharToType: Record<string, number> = {
         '.': Block.None,
@@ -25,6 +26,7 @@ export default class Block extends Faller {
         '%': Block.Box,
         '+': Block.Magnet,
         '!': Block.Beam,
+        '@': Block.Ice,
     }
 
     static readonly TypeIsDestructible = [
@@ -34,6 +36,7 @@ export default class Block extends Faller {
         true, 
         false,
         false,
+        true,
     ]
 
     static readonly TypeFalls = [
@@ -41,6 +44,7 @@ export default class Block extends Faller {
         false, 
         true, 
         true, 
+        true,
         true,
         true,
     ]

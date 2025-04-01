@@ -18,14 +18,12 @@ export default class Game {
     static ScrollTimeMilliseconds = 1000;
     static ScrollFrames = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds);
     static FrameSkipCount = 8;
+    static TitleFadeoutMilliseconds = 500;
+    static TitleFadeoutFrames = Math.floor(Game.TitleFadeoutMilliseconds / Game.FrameTimeMilliseconds);
     canvasPrev;
     canvasCurr;
     canvasNext;
     canvasAll;
-    contextPrev;
-    contextCurr;
-    contextNext;
-    contextAll;
     displayCanvas;
     displayContext;
     levelIndex;
@@ -37,6 +35,7 @@ export default class Game {
     musicPlaying;
     lastTimestamp;
     frame;
+    titleFadeOutFrame;
     scrollFrame;
     tapPoint;
     tapped;
@@ -56,10 +55,6 @@ export default class Game {
         this.canvasCurr = document.createElement('canvas');
         this.canvasNext = document.createElement('canvas');
         this.canvasAll = document.createElement('canvas');
-        this.contextPrev = this.canvasPrev.getContext('2d');
-        this.contextCurr = this.canvasCurr.getContext('2d');
-        this.contextNext = this.canvasNext.getContext('2d');
-        this.contextAll = this.canvasAll.getContext('2d');
         this.canvasPrev.width = Level.GridWidth;
         this.canvasCurr.width = Level.GridWidth;
         this.canvasNext.width = Level.GridWidth;
@@ -74,13 +69,18 @@ export default class Game {
         this.lastTimestamp = 0;
         this.frame = 0;
         this.scrollFrame = 0;
+        this.titleFadeOutFrame = 0;
         this.tapPoint = new Point(0, 0);
         this.tapped = false;
         this.overlayOpacity = 0;
         this.skip = false;
         this.resize();
         window.addEventListener('resize', () => { this.resize(); });
-        window.addEventListener('mousedown', e => { this.tap(e); });
+        window.addEventListener('mousedown', e => { this.tap(e.offsetX, e.offsetY); });
+        window.addEventListener('touchstart', e => {
+            const touch = e.touches[0];
+            this.tap(touch.clientX, touch.clientY);
+        });
         window.addEventListener('keydown', e => { this.keyDown(e); });
         window.addEventListener('keyup', e => { this.keyUp(e); });
         window.addEventListener('contextmenu', e => e.preventDefault());
@@ -130,9 +130,16 @@ export default class Game {
             }
         }
     }
-    tap(e) {
+    tap(x, y) {
+        if (this.titleFadeOutFrame === 0) {
+            this.titleFadeOutFrame = 1;
+            return;
+        }
+        if (this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+            return;
+        }
         this.tapped = true;
-        this.tapPoint = this.gamePoint(e.offsetX, e.offsetY);
+        this.tapPoint = this.gamePoint(x, y);
         console.log(this.tapPoint.x, this.tapPoint.y);
         if (!this.musicPlaying) {
             this.musicPlaying = true;
@@ -143,6 +150,10 @@ export default class Game {
         }
     }
     update() {
+        if (this.titleFadeOutFrame > 0
+            && this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+            this.titleFadeOutFrame++;
+        }
         if (this.frame % 1 === 0) {
             this.levelCurr.update(this.frame);
         }
@@ -212,7 +223,8 @@ export default class Game {
         this.displayCanvas.width = window.innerWidth;
         this.displayCanvas.height = window.innerHeight;
     }
-    renderLevel(level, canvas, context, frame) {
+    renderLevel(level, canvas, frame) {
+        const context = canvas.getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
         const rng = new RNG();
         context.fillStyle = '#0002';
@@ -231,6 +243,23 @@ export default class Game {
                     context.fillRect(i, j, Level.BrickWidth, Level.BrickHeight);
                 }
             }
+        }
+        for (const torch of level.torches) {
+            const offsetX = Math.floor((frame + torch.frame) / 2) % 5 * Block.Width;
+            context.drawImage(Images.Torch, offsetX, 0, Block.Width, Block.Height, torch.x, torch.y, Block.Width, Block.Height);
+        }
+        for (const torch of level.torches) {
+            const radius = 28 + Math.random() * 3;
+            const diameter = radius * 2;
+            const cx = torch.x + Block.Width / 2 + Math.random() * 2 - 1;
+            const cy = torch.y + Block.Height / 2 + Math.random() * 2 - 1;
+            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius);
+            gradient.addColorStop(0, 'rgba(255, 255, 0, 0.25');
+            gradient.addColorStop(0.5, 'rgba(255, 128, 0, 0.125');
+            gradient.addColorStop(0.75, 'rgba(255, 0, 0, 0.0625');
+            gradient.addColorStop(1, 'rgba(128, 0, 0, 0');
+            context.fillStyle = gradient;
+            context.fillRect(cx - radius, cy - radius, diameter, diameter);
         }
         const beamIntensity = 0.5 + 0.5 * this.smooth(this.frame * 0.075);
         context.strokeStyle = `rgba(255, 128, 0, ${beamIntensity})`;
@@ -331,13 +360,14 @@ export default class Game {
         context.globalCompositeOperation = 'source-over';
     }
     render(frame) {
-        this.renderLevel(this.levelPrev, this.canvasPrev, this.contextPrev, 0);
-        this.renderLevel(this.levelCurr, this.canvasCurr, this.contextCurr, frame);
-        this.renderLevel(this.levelNext, this.canvasNext, this.contextNext, 0);
-        this.contextAll.clearRect(0, 0, this.canvasAll.width, this.canvasAll.height);
-        this.contextAll.drawImage(this.canvasNext, 0, 0);
-        this.contextAll.drawImage(this.canvasCurr, 0, Level.GridHeight);
-        this.contextAll.drawImage(this.canvasPrev, 0, Level.GridHeight * 2);
+        this.renderLevel(this.levelPrev, this.canvasPrev, 0);
+        this.renderLevel(this.levelCurr, this.canvasCurr, frame);
+        this.renderLevel(this.levelNext, this.canvasNext, 0);
+        const contextAll = this.canvasAll.getContext('2d');
+        contextAll.clearRect(0, 0, this.canvasAll.width, this.canvasAll.height);
+        contextAll.drawImage(this.canvasNext, 0, 0);
+        contextAll.drawImage(this.canvasCurr, 0, Level.GridHeight);
+        contextAll.drawImage(this.canvasPrev, 0, Level.GridHeight * 2);
         const displayRect = this.displayRect();
         const displayScalar = this.displayScalar();
         const shakeIntensity = this.camera.shakeIntensity;
@@ -352,6 +382,14 @@ export default class Game {
             this.overlayOpacity + (0 - this.overlayOpacity) * 0.05;
         this.displayContext.fillStyle = `rgba(255, 0, 0, ${this.overlayOpacity})`;
         this.displayContext.fillRect(displayRect.x, displayRect.y, displayRect.w, displayRect.h);
+        if (this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+            this.displayContext.globalAlpha = this.smooth(1.0 - this.titleFadeOutFrame / Game.TitleFadeoutFrames);
+            // generate falling stars?
+            this.displayContext.fillStyle = 'rgba(0, 0, 0, 0.75)';
+            this.displayContext.fillRect(displayRect.x, displayRect.y, displayRect.w, displayRect.h);
+            this.displayContext.drawImage(Images.Title, displayRect.x, displayRect.y, displayRect.w, displayRect.h);
+            this.displayContext.globalAlpha = 1.0;
+        }
     }
     smooth(x) {
         const sin = Math.sin(Math.PI * x / 2);

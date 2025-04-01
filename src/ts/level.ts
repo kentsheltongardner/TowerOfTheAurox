@@ -8,6 +8,7 @@ import Mover        from './mover.js'
 import Rect         from './rect.js'
 import Sounds       from './sounds.js'
 import Splatter     from './splatter.js'
+import Torch        from './torch.js'
 import Walker       from './walker.js'
 
 export default class Level {
@@ -36,6 +37,7 @@ export default class Level {
     public groupContactsBelow:  number[][]      = []
     public groupFixedUp:        boolean[]       = []
     public groupFixedDown:      boolean[]       = []
+    public torches:             Torch[]         = []
     public walkers:             Set<Walker>     = new Set()
     public creepers:            Set<Creeper>    = new Set()
     public splatters:           Splatter[]      = []
@@ -207,6 +209,11 @@ export default class Level {
         // Add creepers
         for (const creeperData of this.levelData.creeperData) {
             this.creepers.add(new Creeper(creeperData[0], creeperData[1], creeperData[2]))
+        }
+
+        // Add torches
+        for (const torch of this.levelData.torches) {
+            this.torches.push(new Torch(torch[0], torch[1]))
         }
     }
     setIndices(x: number, y: number, w: number, h: number, index: number) {
@@ -1083,18 +1090,39 @@ export default class Level {
             this.groundMovers()
 
             const walk = (mover: Mover) => {
-                const x             = mover.walkDirection === 1 ? mover.x + mover.width() : mover.x - 1
+                let xFront          = 0
+                let xBack           = 0
+                let xNext           = 0
+            
+                if (mover.vx === 1) {
+                    xBack   = mover.x
+                    xNext   = xBack + mover.width()
+                    xFront  = xNext + 1
+                } else {
+                    xFront  = mover.x
+                    xBack   = xFront + mover.width() - 1
+                    xNext   = xFront - 1
+                }
+                // const x 
+                // const nextX         = mover.vx === 1 ? mover.x + mover.width() : mover.x - 1
+                // const backX         = mover.vx === 1 ? mover.x : mover.x + mover.width() - 1
+
                 const head          = mover.y
                 const floor         = head + mover.height()
                 const foot          = floor - 1
 
+                const blockHead     = this.getIndex(xNext, head) !== Level.GridEmpty
+                const blockFoot     = this.getIndex(xNext, foot) !== Level.GridEmpty
+                const emptyFloor    = this.getIndex(xNext, floor) === Level.GridEmpty
 
+                const backIndex     = this.getIndex(xBack, floor)
+                const frontIndex    = this.getIndex(xFront, floor)
+                const slide         =       (backIndex === Level.GridEmpty || this.blocks[backIndex].type === Block.Ice)
+                                        &&  (frontIndex === Level.GridEmpty || this.blocks[frontIndex].type === Block.Ice)
 
-                const blockHead     = this.getIndex(x, head) !== Level.GridEmpty
-                const blockFoot     = this.getIndex(x, foot) !== Level.GridEmpty
-                const emptyFloor    = this.getIndex(x, floor) === Level.GridEmpty
-                if (blockHead || blockFoot || (emptyFloor && mover.grounded)) {
+                if (blockHead || blockFoot || (emptyFloor && mover.grounded && !slide)) {
                     mover.walkDirection *= -1
+                    mover.vx *= -1
                 } else {
                     const middleX           = mover.x + Walker.Width / 2
                     const middleBlockIndex  = this.getIndex(middleX, floor)
@@ -1107,6 +1135,7 @@ export default class Level {
                         if (block.altar) {
                             this.walkers.delete(mover)
                             Sounds.playVanish()
+                            return
                         } else if (block.warp) {
                             for (const pair of this.blocks) {
                                 if (!pair.warp)                                                         continue
@@ -1119,13 +1148,14 @@ export default class Level {
                                 Sounds.playWhoosh()
                                 break
                             }
-                            mover.x += mover.walkDirection
-                        } else {
-                            mover.x += mover.walkDirection
                         }
-                    } else {
-                        mover.x += mover.walkDirection
                     }
+                    if (slide) {
+                        mover.walkDirection *= -1
+                    } else {
+                        mover.walkDirection = mover.vx
+                    }
+                    mover.x += mover.vx
                 }
             }
 

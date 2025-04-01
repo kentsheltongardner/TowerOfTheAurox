@@ -6,11 +6,13 @@ export default abstract class Mover extends Faller {
     public step:                number  = 0
     public stepTotal:           number  = 0
     public fallDirection:       number  = 0
+    public vx:                  number  = 0
     // public collisionVelocity:   number  = 0
 
     constructor(x: number, y: number, walkDirection: number) {
         super(x, y)
         this.walkDirection  = walkDirection
+        this.vx             = walkDirection
     }
 
     setStepVariables() {

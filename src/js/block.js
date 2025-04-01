@@ -11,7 +11,8 @@ export default class Block extends Faller {
     static Box = 3;
     static Magnet = 4;
     static Beam = 5;
-    static TypeCount = 9;
+    static Ice = 6;
+    static TypeCount = 7;
     static CharToType = {
         '.': Block.None,
         '#': Block.Wall,
@@ -20,6 +21,7 @@ export default class Block extends Faller {
         '%': Block.Box,
         '+': Block.Magnet,
         '!': Block.Beam,
+        '@': Block.Ice,
     };
     static TypeIsDestructible = [
         false,
@@ -28,10 +30,12 @@ export default class Block extends Faller {
         true,
         false,
         false,
+        true,
     ];
     static TypeFalls = [
         false,
         false,
+        true,
         true,
         true,
         true,
