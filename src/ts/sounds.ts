@@ -30,6 +30,11 @@ export default class Sounds {
         new Audio('./res/sounds/splat_2.wav'),
         new Audio('./res/sounds/splat_3.wav')
     ]
+    static readonly Splashes = [
+        new Audio('./res/sounds/splash_1.wav'),
+        new Audio('./res/sounds/splash_2.wav'),
+        new Audio('./res/sounds/splash_3.wav')
+    ]
     static readonly Zaps = [
         new Audio('./res/sounds/zap_1.wav'),
         new Audio('./res/sounds/zap_2.wav'),
@@ -72,5 +77,8 @@ export default class Sounds {
     }
     static playZap() {
         Sounds.playRandom(Sounds.Zaps)
+    }
+    static playSplash() {
+        Sounds.playRandom(Sounds.Splashes)
     }
 }

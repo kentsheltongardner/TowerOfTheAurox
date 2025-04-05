@@ -1,13 +1,19 @@
 import Block        from './block.js'
 import Camera       from './camera.js'
+import Color from './color.js'
 import Connection   from './connection.js'
 import Creeper      from './creeper.js'
 import Debris       from './debris.js'
+import Droplet from './droplet.js'
+import Images from './images.js'
 import LevelData    from './level_data.js'
 import Mover        from './mover.js'
 import Rect         from './rect.js'
+import RNG from './rng.js'
 import Sounds       from './sounds.js'
+import Splash from './splash.js'
 import Splatter     from './splatter.js'
+import TextRenderer from './text.js'
 import Torch        from './torch.js'
 import Walker       from './walker.js'
 
@@ -30,23 +36,28 @@ export default class Level {
     public levelData:           LevelData
     public camera:              Camera
 
-    public blocks:              Block[]         = []
-    public groups:              number[][]      = []    // What blocks are in each group?
-    public groupIndex:          number[]        = []    // Which group does a block belong to? (indexed)
-    public groupContactsAbove:  number[][]      = []
-    public groupContactsBelow:  number[][]      = []
-    public groupFixedUp:        boolean[]       = []
-    public groupFixedDown:      boolean[]       = []
-    public torches:             Torch[]         = []
-    public walkers:             Set<Walker>     = new Set()
-    public creepers:            Set<Creeper>    = new Set()
-    public splatters:           Splatter[]      = []
-    public debris:              Debris[]        = []
-    public indexGrid:           Uint16Array     = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty)
-    public removalIndex:        number          = -1
-    public deaths:              number          = 0
-    public teleport:            boolean         = false
+    public blocks:              Block[]             = []
+    public groups:              number[][]          = []    // What blocks are in each group?
+    public groupIndex:          number[]            = []    // Which group does a block belong to? (indexed)
+    public groupContactsAbove:  number[][]          = []
+    public groupContactsBelow:  number[][]          = []
+    public groupFixedUp:        boolean[]           = []
+    public groupFixedDown:      boolean[]           = []
+    public torches:             Torch[]             = []
+    public walkers:             Set<Walker>         = new Set()
+    public creepers:            Set<Creeper>        = new Set()
+    public splatters:           Splatter[]          = []
+    public debris:              Debris[]            = []
+    public indexGrid:           Uint16Array         = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty)
+    public removalIndex:        number              = -1
+    public deaths:              number              = 0
+    public teleport:            boolean             = false
+    public message:             string              = ''
+    public splashes:            Set<Splash>         = new Set<Splash>()
+    public droplets:            Set<Droplet>        = new Set<Droplet>()
 
+    public canvas:              HTMLCanvasElement   = document.createElement('canvas')
+    public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
 
 // #         #####      #     ######   
 // #        #     #    # #    #     #  
@@ -57,8 +68,12 @@ export default class Level {
 // #######   #####   #     #  ######   
 
     constructor(levelData: LevelData, camera: Camera) {
-        this.levelData  = levelData
-        this.camera     = camera
+        this.levelData              = levelData
+        this.camera                 = camera
+        this.canvas.width           = Level.GridWidth
+        this.lightCanvas.width      = Level.GridWidth
+        this.canvas.height          = Level.GridHeight
+        this.lightCanvas.height     = Level.GridHeight
         this.load()
     }
     load() {
@@ -95,6 +110,14 @@ export default class Level {
                 const block     = new Block(x, y, type)
                 blockGrid[i][j] = block
             }
+        }
+
+        // Add messages
+        for (const message of this.levelData.messages) {
+            const text              = message[0]
+            const x                 = message[1]
+            const y                 = message[2]
+            blockGrid[x][y].message = text
         }
 
         // Set char attributes
@@ -197,10 +220,6 @@ export default class Level {
             this.setIndices(block.x, block.y, Block.Width, Block.Height, i)
         }
 
-        //  Build block groups
-        // this.buildBlockGroups()
-        // this.groundGroups()
-
         // Add walkers
         for (const walkerData of this.levelData.walkerData) {
             this.walkers.add(new Walker(walkerData[0], walkerData[1], walkerData[2]))
@@ -243,12 +262,21 @@ export default class Level {
 // #     #  #######  #     #   #####      #     #######  
 
     tap(gridX: number, gridY: number) {
+        if (this.message !== '') {
+            this.message = ''
+            return
+        }
+
         if (gridX < 0 || gridY < 0 || gridX >= Level.GridWidth || gridY >= Level.GridHeight) return
         
         const index = this.getIndex(gridX, gridY)
         if (index === Level.GridEmpty) return
 
         const block = this.blocks[index]
+        if (block.message !== '') {
+            this.message = block.message
+        }
+
         if (!Block.TypeIsDestructible[block.type]) return
 
         this.remove(index)
@@ -608,17 +636,17 @@ export default class Level {
             for (let j = 0; j < group.length; j++) {
                 const blockIndex = group[j]
                 const block = this.blocks[blockIndex]
-                block.vy++
+                block.vy += 0.6
             }
         }
         for (const walker of this.walkers) {
             if (!walker.grounded) {
-                walker.vy++
+                walker.vy += 0.6
             }
         }
         for (const creeper of this.creepers) {
             if (!creeper.grounded) {
-                creeper.vy++
+                creeper.vy += 0.6
             }
         }
 
@@ -644,9 +672,9 @@ export default class Level {
             const group         = this.groups[i]
             const block         = this.blocks[group[0]]
             step[i]             = 1
-            stepTotal[i]        = Math.abs(block.vy)
-            direction[i]        = Math.sign(block.vy)
-            vy[i]               = block.vy
+            vy[i]               = Math.floor(block.vy)
+            stepTotal[i]        = Math.abs(vy[i])
+            direction[i]        = Math.sign(vy[i])
         }
         for (const walker of this.walkers) {
             walker.setStepVariables()
@@ -1117,8 +1145,9 @@ export default class Level {
 
                 const backIndex     = this.getIndex(xBack, floor)
                 const frontIndex    = this.getIndex(xFront, floor)
-                const slide         =       (backIndex === Level.GridEmpty || this.blocks[backIndex].type === Block.Ice)
-                                        &&  (frontIndex === Level.GridEmpty || this.blocks[frontIndex].type === Block.Ice)
+
+                const slide         =       (backIndex !== Level.GridEmpty && this.blocks[backIndex].type === Block.Ice)
+                                        ||  (frontIndex !== Level.GridEmpty && this.blocks[frontIndex].type === Block.Ice)
 
                 if (blockHead || blockFoot || (emptyFloor && mover.grounded && !slide)) {
                     mover.walkDirection *= -1
@@ -1169,8 +1198,13 @@ export default class Level {
             this.eat()
         }
 
+
+        this.createDroplets()
+
         this.updateSplatters()
         this.updateDebris()
+        this.updateDroplets()
+        this.updateSplashes()
     }
 
 
@@ -1414,5 +1448,394 @@ export default class Level {
             }
         }
         this.splatters = this.splatters.filter(splatter => splatter.y < Level.GridHeight && !splatter.splattered)
+    }
+
+
+    createDroplets() {
+        if (Math.random() > 0.6) return
+
+        // Find a stationary block that has room underneath it to create a drop
+        let dropletBlocks: Block[] = []
+        for (const block of this.blocks) {
+            if (Block.TypeFalls[block.type]) continue
+            
+            const y = block.y + Block.Height
+            if (block.y === Level.GridHeight - Block.Height) continue
+            if (this.getIndex(block.x, y) !== Level.GridEmpty) continue
+               
+            dropletBlocks.push(block)
+        }
+
+        const count = dropletBlocks.length
+        if (count === 0) return
+
+        const block     = dropletBlocks[Math.floor(Math.random() * count)]
+        const y         = block.y + Block.Height
+        const x         = block.x + Math.floor(Math.random() * Block.Width)
+
+        this.droplets.add(new Droplet(x, y))
+    }
+    updateDroplets() {
+        for (const droplet of this.droplets) {
+            droplet.vy  += 0.3
+            droplet.y   += droplet.vy
+            const x     = Math.floor(droplet.x)
+            let y       = Math.floor(droplet.y)
+            if (droplet.y >= Level.GridHeight || this.getIndex(x, y) !== Level.GridEmpty) {
+                this.droplets.delete(droplet)
+
+                let index = this.getIndex(x, y)
+                let validIndex = index
+                while (index !== Level.GridEmpty) {
+                    validIndex = index
+                    y--
+                    index = this.getIndex(x, y)
+                }
+
+                const block = this.blocks[validIndex]
+                const splashCount = 6 + Math.floor(Math.random() * 3)
+                for (let i = 0; i < splashCount; i++) {
+                    const speed     = 1.0 + Math.random() * 0.5
+                    const theta     = Math.PI + Math.random() * Math.PI
+                    const vx        = Math.cos(theta) * speed
+                    const vy        = Math.sin(theta) * speed + block.vy
+                    const splash    = new Splash(x, y, vx, vy)
+                    this.splashes.add(splash)
+                }
+
+                Sounds.playSplash()
+            }
+        }
+    }
+    updateSplashes() {
+        for (const splash of this.splashes) {
+            splash.vy   += 0.3
+            splash.y    += splash.vy
+            splash.x    += splash.vx
+            splash.frames++
+            const x = Math.floor(splash.x)
+            const y = Math.floor(splash.y)
+            if (splash.y >= Level.GridHeight || this.getIndex(x, y) !== Level.GridEmpty) {
+                this.splashes.delete(splash)
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static readonly SplatterRGB              = '#9f040460'
+    public static readonly DebrisRGBPrefix          = 'rgba(115, 65, 32, '
+    smooth(x: number) {
+        const sin = Math.sin(Math.PI * x / 2)
+        return sin * sin
+    }
+    render(frame: number) {
+        const context = this.canvas.getContext('2d')!
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+        context.fillStyle = '#0002'
+
+        const rng = new RNG()
+
+        for (let i = 0; i < Level.GridWidth; i += Level.BrickWidth) {
+            for (let j = 0; j < Level.GridHeight; j += Level.BrickHeight * 2) {
+                context.drawImage(Images.Brick, i, j)
+                if (rng.nextInt() % 3 === 0) {
+                    context.fillRect(i, j, Level.BrickWidth, Level.BrickHeight)
+                }
+            }
+        }
+        for (let i = -Level.BrickWidth / 2; i < Level.GridWidth; i += Level.BrickWidth) {
+            for (let j = Level.BrickHeight; j < Level.GridHeight; j += Level.BrickHeight * 2) {
+                context.drawImage(Images.Brick, i, j)
+                if (rng.nextInt() % 3 === 0) {
+                    context.fillRect(i, j, Level.BrickWidth, Level.BrickHeight)
+                }
+            }
+        }
+
+
+        for (const torch of this.torches) {
+            const offsetX = Math.floor((frame + torch.frame) / 2) % 5 * Block.Width
+            context.drawImage(
+                Images.Torch, 
+                offsetX, 0, Block.Width, Block.Height, 
+                torch.x, torch.y, Block.Width, Block.Height)
+        }
+        
+        for (const torch of this.torches) {
+            const radius = 28 + Math.random() * 3
+            const diameter = radius * 2
+            const cx = torch.x + Block.Width / 2 + Math.random() * 2 - 1
+            const cy = torch.y + Block.Height / 2 + Math.random() * 2 - 1
+            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
+            gradient.addColorStop(0, 'rgba(255, 255, 0, 0.06')
+            gradient.addColorStop(0.5, 'rgba(255, 128, 0, 0.04')
+            gradient.addColorStop(0.75, 'rgba(255, 0, 0, 0.02')
+            gradient.addColorStop(1, 'rgba(128, 0, 0, 0')
+            context.fillStyle = gradient
+            context.fillRect(cx - radius, cy - radius, diameter, diameter)
+        }
+
+        const beamIntensity = 0.5 + 0.5 * this.smooth(frame * 0.075)
+        context.strokeStyle = `rgba(255, 128, 0, ${beamIntensity})`
+        context.beginPath()
+        for (const beam of this.beams()) {
+            context.moveTo(beam.x, beam.y)
+            context.lineTo(beam.x + beam.w, beam.y + beam.h)
+        }
+        context.stroke()
+
+        for (const walker of this.walkers) {
+            const offsetX       = (Math.floor(frame / 3) + walker.frameOffset) % Walker.Frames
+            const spriteSheet   = walker.walkDirection === 1 ? Images.WalkerRight : Images.WalkerLeft
+            context.drawImage(
+                spriteSheet, 
+                offsetX * Walker.Width, 
+                0, 
+                Walker.Width, 
+                Walker.Height,
+                walker.x, 
+                walker.y, 
+                Walker.Width, 
+                Walker.Height)
+        }
+
+        for (const creeper of this.creepers) {
+            const offsetX       = (Math.floor(frame / 3) + creeper.frameOffset) % Creeper.Frames
+            const spriteSheet   = creeper.walkDirection === 1 ? Images.CreeperRight : Images.CreeperLeft
+            context.drawImage(
+                spriteSheet, 
+                offsetX * Creeper.Width, 
+                0, 
+                Creeper.Width, 
+                Creeper.Height,
+                creeper.x, 
+                creeper.y, 
+                Creeper.Width, 
+                Creeper.Height)
+        }
+
+
+
+        const altarIntensity = 0.25 + 0.25 * this.smooth(frame * 0.05)
+        const radius = Block.Width / 2 - 2
+        for (const block of this.blocks) {
+            if (!block.altar && !block.warp) continue
+
+            const height = Block.Height * 0.25
+            const x = block.x + Block.Width / 2
+            const gradient = context.createRadialGradient(x, block.y, 0, x, block.y, radius)
+
+            if (block.altar) {
+                gradient.addColorStop(0, Color.cssColor(255, 255, 255, altarIntensity))
+                gradient.addColorStop(1, Color.cssColor(255, 255, 255, 0))
+            } else {
+                gradient.addColorStop(0, Color.colorWithAlpha(block.color, altarIntensity))
+                gradient.addColorStop(1, Color.colorWithAlpha(block.color, 0))
+            }
+
+            context.fillStyle = gradient
+            context.fillRect(block.x, block.y - height, Block.Width, height)
+
+        }
+
+        for (const block of this.blocks) {
+            if (block.invisible) continue
+            
+            switch (block.type) {
+                case Block.Aurox: {
+                    context.drawImage(
+                        Images.Aurox, 
+                        block.x, 
+                        block.y)
+                    break
+                }
+                case Block.Beam: {
+                    context.drawImage(
+                        Images.Beams, 
+                        block.direction * Block.Width, 
+                        0, 
+                        Block.Width, 
+                        Block.Height,
+                        block.x, 
+                        block.y, 
+                        Block.Width, 
+                        Block.Height)
+                    break
+                }
+                default: {
+                    context.drawImage(
+                        Images.BlockTilesetMap[block.type], 
+                        Images.OffsetMap[block.hardConnections] * Block.Width, 
+                        0, 
+                        Block.Width, 
+                        Block.Height,
+                        block.x, 
+                        block.y, 
+                        Block.Width, 
+                        Block.Height)
+                    break
+                }
+            }
+            context.globalAlpha = 1.0
+            
+            if (block.softConnections === 0) continue
+
+            context.drawImage(
+                Images.StrappingTileset, 
+                Images.OffsetMap[block.softConnections] * Block.Width, 
+                0, 
+                Block.Width, 
+                Block.Height,
+                block.x, 
+                block.y, 
+                Block.Width, 
+                Block.Height)
+        }
+
+        context.fillStyle = 'white'
+        for (let i = 0; i < this.blocks.length; i++) {
+            const block = this.blocks[i]
+            const x     = block.x
+            const y     = block.y
+            const group = this.groupIndex[i]
+            // context.fillText(group + '', x + 7, y + 11)
+            // context.fillText(i + '', x + 2, y + 25)
+        }
+
+        for (const block of this.blocks) {
+            context.fillStyle = Level.SplatterRGB
+            for (const splatter of block.splatters) {
+                const x = block.x + Math.floor(splatter.x)
+                const y = block.y + Math.floor(splatter.y)
+                context.fillRect(x, y, 1, 1)
+            }
+        }
+
+        // for (let i = 0; i < Level.GridWidth; i++) {
+        //     for (let j = 0; j < Level.GridHeight; j++) {
+        //         const block = level.getIndex(i, j)
+        //         if (block === Level.GridEmpty) continue
+
+        //         const intensity = block * 10 % 200 + 20
+        //         context.fillStyle = `rgba(${intensity}, ${intensity}, 0, 0.5)`
+        //         context.fillRect(i, j, 1, 1)
+        //     }
+        // }
+
+        context.fillStyle = Level.SplatterRGB
+        for (const splatter of this.splatters) {
+            const x = Math.floor(splatter.x)
+            const y = Math.floor(splatter.y)
+            context.fillRect(x, y, 1, 1)
+        }
+
+        for (const debris of this.debris) {
+            const x             = Math.floor(debris.x)
+            const y             = Math.floor(debris.y)
+            const opacity       = 1.0 / debris.frame
+            context.fillStyle   = `${Level.DebrisRGBPrefix} ${ opacity })`
+            context.fillRect(x, y, 1, 1)
+        }
+
+        context.fillStyle = '#248'
+        // context.fillStyle = 'white'
+        for (const droplet of this.droplets) {
+            const x             = Math.floor(droplet.x)
+            const y             = Math.floor(droplet.y)
+            context.fillRect(x, y, 1, 1)
+        }
+        context.fillStyle = '#2488'
+        for (const splash of this.splashes) {
+            const x             = Math.floor(splash.x)
+            const y             = Math.floor(splash.y)
+            context.fillRect(x, y, 1, 1)
+        }
+        context.fillStyle = '#fff4'
+        for (const droplet of this.droplets) {
+            if (Math.random() > 0.1) continue
+
+            const x             = Math.floor(droplet.x)
+            const y             = Math.floor(droplet.y)
+            context.fillRect(x, y, 1, 1)
+        }
+        context.fillStyle = '#fff2'
+        for (const splash of this.splashes) {
+            if (Math.random() > 0.1) continue
+
+            const x             = Math.floor(splash.x)
+            const y             = Math.floor(splash.y)
+            context.fillRect(x, y, 1, 1)
+        }
+
+
+
+        // xor, multiply, overlay, darken, soft-light, hue, color
+        context.globalCompositeOperation = 'soft-light'
+        context.fillStyle = 'rgba(255, 128, 64, 0.6)'
+        context.fillRect(0, 0, Level.GridWidth, Level.GridHeight)
+
+        context.globalCompositeOperation = 'source-over'
+
+        if (this.message !== '') {
+            const renderedText = TextRenderer.paragraphCanvas(this.message, Images.Font, 360)
+            const w = renderedText.width
+            const h = renderedText.height
+            const x = Math.floor((Level.GridWidth - w) / 2)
+            const y = Math.floor((Level.GridHeight - h) / 2)
+            context.drawImage(renderedText, x, y)
+        }
+
+        
+
+        const lightContext = this.lightCanvas.getContext('2d')!
+        lightContext.clearRect(0, 0, Level.GridWidth, Level.GridHeight)
+        lightContext.globalCompositeOperation = 'source-over'
+        lightContext.fillStyle = '#000f'
+        lightContext.fillRect(0, 0, Level.GridWidth, Level.GridHeight)
+        lightContext.globalCompositeOperation = 'destination-out'
+
+        for (const torch of this.torches) {
+            const radius = 128 + Math.random() * 3
+            const diameter = radius * 2
+            const cx = torch.x + Block.Width / 2 + Math.random() * 2 - 1
+            const cy = torch.y + Block.Height / 2 + Math.random() * 2 - 1
+            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1')
+            gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.5')
+            gradient.addColorStop(1, 'rgba(128, 255, 255, 0')
+            lightContext.fillStyle = gradient
+            lightContext.fillRect(cx - radius, cy - radius, diameter, diameter)
+        }
+
+        context.drawImage(this.lightCanvas, 0, 0)
     }
 }

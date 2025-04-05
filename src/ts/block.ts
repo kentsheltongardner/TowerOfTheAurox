@@ -15,8 +15,9 @@ export default class Block extends Faller {
     static readonly Magnet      = 4
     static readonly Beam        = 5
     static readonly Ice         = 6
+    static readonly Aurox       = 7
 
-    static readonly TypeCount   = 7
+    static readonly TypeCount   = 8
 
     static readonly CharToType: Record<string, number> = {
         '.': Block.None,
@@ -27,6 +28,7 @@ export default class Block extends Faller {
         '+': Block.Magnet,
         '!': Block.Beam,
         '@': Block.Ice,
+        '&': Block.Aurox,
     }
 
     static readonly TypeIsDestructible = [
@@ -37,6 +39,7 @@ export default class Block extends Faller {
         false,
         false,
         true,
+        false,
     ]
 
     static readonly TypeFalls = [
@@ -44,6 +47,7 @@ export default class Block extends Faller {
         false, 
         true, 
         true, 
+        true,
         true,
         true,
         true,
@@ -60,6 +64,7 @@ export default class Block extends Faller {
     public splatters:       Splatter[]  = []
     public primed:          boolean     = false
     public activated:       boolean     = false
+    public message:         string      = ''
 
     constructor(x: number, y: number, type: number) {
         super(x, y)

@@ -24,6 +24,7 @@ export default class Images {
     static Portals = new Image();
     static Beams = new Image();
     static Title = new Image();
+    static Font = new Image();
     static OffsetMap = new Array(256).fill(-1);
     static SoutheastMap = new Array(256).fill(-1);
     static SouthwestMap = new Array(256).fill(-1);
@@ -48,6 +49,7 @@ export default class Images {
         Images.Beams.src = './res/images/beams.png';
         Images.Torch.src = './res/images/torch.png';
         Images.Title.src = './res/images/title.png';
+        Images.Font.src = './res/images/small_font.png';
         Images.initializeMaps();
     }
     static createTilesetImages() {

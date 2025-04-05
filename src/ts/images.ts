@@ -31,6 +31,7 @@ export default class Images {
     public static Beams             = new Image()
 
     public static Title             = new Image()
+    public static Font              = new Image()
 
     public static OffsetMap         = new Array(256).fill(-1)
     public static SoutheastMap      = new Array(256).fill(-1)
@@ -62,6 +63,8 @@ export default class Images {
         Images.Torch.src                = './res/images/torch.png'
 
         Images.Title.src                = './res/images/title.png'
+        Images.Font.src                 = './res/images/small_font.png'
+
 
         Images.initializeMaps()
     }
