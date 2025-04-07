@@ -7,6 +7,7 @@ export default class Images {
     static StrappingTemplate = new Image();
     static MagnetTemplate = new Image();
     static IceTemplate = new Image();
+    static SelectionTemplate = new Image();
     static WallTileset = new Image();
     static ClayTileset = new Image();
     static CrateTileset = new Image();
@@ -14,17 +15,20 @@ export default class Images {
     static StrappingTileset = new Image();
     static MagnetTileset = new Image();
     static IceTileset = new Image();
+    static SelectionTileset = new Image();
     static WalkerRight = new Image();
     static WalkerLeft = new Image();
     static CreeperRight = new Image();
     static CreeperLeft = new Image();
     static Torch = new Image();
     static Aurox = new Image();
-    static Brick = new Image();
+    static Bricks = new Image();
     static Portals = new Image();
     static Beams = new Image();
     static Title = new Image();
     static Font = new Image();
+    static Cursor = new Image();
+    static CursorClosed = new Image();
     static OffsetMap = new Array(256).fill(-1);
     static SoutheastMap = new Array(256).fill(-1);
     static SouthwestMap = new Array(256).fill(-1);
@@ -39,17 +43,20 @@ export default class Images {
         Images.StrappingTemplate.src = './res/images/strapping_template.png';
         Images.MagnetTemplate.src = './res/images/magnet_template.png';
         Images.IceTemplate.src = './res/images/ice_template.png';
+        Images.SelectionTemplate.src = './res/images/selection_template.png';
         Images.WalkerRight.src = './res/images/walker_right.png';
         Images.WalkerLeft.src = './res/images/walker_left.png';
         Images.CreeperRight.src = './res/images/creeper_right.png';
         Images.CreeperLeft.src = './res/images/creeper_left.png';
         Images.Aurox.src = './res/images/aurox.png';
-        Images.Brick.src = './res/images/brick.png';
+        Images.Bricks.src = './res/images/bricks.png';
         Images.Portals.src = './res/images/portals.png';
         Images.Beams.src = './res/images/beams.png';
         Images.Torch.src = './res/images/torch.png';
         Images.Title.src = './res/images/title.png';
         Images.Font.src = './res/images/small_font.png';
+        Images.Cursor.src = './res/images/cursor.png';
+        Images.CursorClosed.src = './res/images/cursor_closed.png';
         Images.initializeMaps();
     }
     static createTilesetImages() {
@@ -60,6 +67,7 @@ export default class Images {
         Images.StrappingTileset = Images.tilesetImage(Images.StrappingTemplate);
         Images.MagnetTileset = Images.tilesetImage(Images.MagnetTemplate);
         Images.IceTileset = Images.tilesetImage(Images.IceTemplate);
+        Images.SelectionTileset = Images.tilesetImage(Images.SelectionTemplate);
         Images.BlockTilesetMap[Block.Wall] = Images.WallTileset;
         Images.BlockTilesetMap[Block.Clay] = Images.ClayTileset;
         Images.BlockTilesetMap[Block.Crate] = Images.CrateTileset;

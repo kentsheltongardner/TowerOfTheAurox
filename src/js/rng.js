@@ -1,8 +1,11 @@
 export default class RNG {
-    static A = 1664525;
-    static C = 1013904223;
-    static M = Math.pow(2, 32);
-    seed = 2817880113;
+    static A = 75;
+    static C = 74;
+    static M = 65521;
+    seed;
+    constructor(seed = 0) {
+        this.seed = seed % RNG.M;
+    }
     nextInt() {
         this.seed = (RNG.A * this.seed + RNG.C) % RNG.M;
         return this.seed;

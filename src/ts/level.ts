@@ -27,8 +27,8 @@ export default class Level {
     static readonly BrickHeight             = 30
     static readonly CellCountX              = Level.GridWidth  / Block.Width
     static readonly CellCountY              = Level.GridHeight / Block.Height
-    static readonly MaxImmobilityVelocity   = 1
-    static readonly BlockElasticity         = 0.35
+    static readonly MaxImmobilityVelocity   = 0.5
+    static readonly BlockElasticity         = 0.3
     static readonly MoverElasticity         = 0.2
     static readonly InfiniteMass            = Number.MAX_SAFE_INTEGER
     static readonly ShakeMultiplier         = 0.0005
@@ -43,6 +43,7 @@ export default class Level {
     public groupContactsBelow:  number[][]          = []
     public groupFixedUp:        boolean[]           = []
     public groupFixedDown:      boolean[]           = []
+    public hoverGroup:          Set<number>         = new Set()    // What blocks are in the hover group?
     public torches:             Torch[]             = []
     public walkers:             Set<Walker>         = new Set()
     public creepers:            Set<Creeper>        = new Set()
@@ -56,8 +57,8 @@ export default class Level {
     public splashes:            Set<Splash>         = new Set<Splash>()
     public droplets:            Set<Droplet>        = new Set<Droplet>()
 
-    public canvas:              HTMLCanvasElement   = document.createElement('canvas')
-    public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
+    // public canvas:              HTMLCanvasElement   = document.createElement('canvas')
+    // public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
 
 // #         #####      #     ######   
 // #        #     #    # #    #     #  
@@ -70,10 +71,10 @@ export default class Level {
     constructor(levelData: LevelData, camera: Camera) {
         this.levelData              = levelData
         this.camera                 = camera
-        this.canvas.width           = Level.GridWidth
-        this.lightCanvas.width      = Level.GridWidth
-        this.canvas.height          = Level.GridHeight
-        this.lightCanvas.height     = Level.GridHeight
+        // this.canvas.width           = Level.GridWidth
+        // this.lightCanvas.width      = Level.GridWidth
+        // this.canvas.height          = Level.GridHeight
+        // this.lightCanvas.height     = Level.GridHeight
         this.load()
     }
     load() {
@@ -261,6 +262,9 @@ export default class Level {
 // #    #   #        #     #  #     #    # #    #        
 // #     #  #######  #     #   #####      #     #######  
 
+
+    // show 
+
     tap(gridX: number, gridY: number) {
         if (this.message !== '') {
             this.message = ''
@@ -281,6 +285,7 @@ export default class Level {
 
         this.remove(index)
         this.buildBlockGroups()
+        this.hoverGroup.clear()
         Sounds.playBoom()
     }
     remove(index: number) {
@@ -376,6 +381,27 @@ export default class Level {
 
 
 
+    hover(gridX: number, gridY: number) {
+        this.hoverGroup.clear()
+
+        if (gridX < 0 || gridY < 0 || gridX >= Level.GridWidth || gridY >= Level.GridHeight) return
+        
+        const index = this.getIndex(gridX, gridY)
+        if (index === Level.GridEmpty) return
+
+        const block = this.blocks[index]
+        if (block.message !== '') {
+            this.hoverGroup.add(index)
+            return
+        }
+
+        if (!Block.TypeIsDestructible[block.type]) return
+
+        this.buildHardGroup(gridX, gridY, this.hoverGroup)
+    }
+
+
+
 //  #####   ######    #####   #     #  ######   
 // #     #  #     #  #     #  #     #  #     #  
 // #        #     #  #     #  #     #  #     #  
@@ -402,27 +428,7 @@ export default class Level {
         this.groupIndex.length      = this.blocks.length
         this.groupIndex.fill(-1)
 
-        const buildBlockGroup = (x: number, y: number, groupIndex: number, group: number[]) => {
-            const blockIndex = this.getIndex(x, y)
-            if (blockIndex === Level.GridEmpty)     return
-            if (this.groupIndex[blockIndex] !== -1) return
 
-            const block = this.blocks[blockIndex]
-            this.groupIndex[blockIndex] = groupIndex
-            group.push(blockIndex)
-
-            for (let i = 0; i < Connection.DirectionCount; i++) {
-                const directionBit = Connection.DirectionBits[i]
-                if ((block.softConnections & directionBit) === directionBit
-                    || (block.hardConnections & directionBit) === directionBit
-                ) {
-                    const vector        = Connection.DirectionVectors[i]
-                    const connectedX    = x + vector.dx * Block.Width
-                    const connectedY    = y + vector.dy * Block.Height
-                    buildBlockGroup(connectedX, connectedY, groupIndex, group)
-                }
-            }
-        }
 
         //  For physics purposes, all fixed blocks are in group zero
         const staticGroup: number[] = []
@@ -432,7 +438,7 @@ export default class Level {
             const block = this.blocks[i]
             if (Block.TypeFalls[block.type]) continue
 
-            buildBlockGroup(block.x, block.y, 0, staticGroup)
+            this.buildBlockGroup(block.x, block.y, 0, staticGroup)
         }
         this.groups.push(staticGroup)
 
@@ -441,10 +447,50 @@ export default class Level {
 
             const block             = this.blocks[i]
             const group: number[]   = []
-            buildBlockGroup(block.x, block.y, this.groups.length, group)
+            this.buildBlockGroup(block.x, block.y, this.groups.length, group)
             this.groups.push(group)
         }
     }
+    buildBlockGroup(x: number, y: number, groupIndex: number, group: number[]) {
+        const blockIndex = this.getIndex(x, y)
+        if (blockIndex === Level.GridEmpty)     return
+        if (this.groupIndex[blockIndex] !== -1) return
+
+        const block = this.blocks[blockIndex]
+        this.groupIndex[blockIndex] = groupIndex
+        group.push(blockIndex)
+
+        for (let i = 0; i < Connection.DirectionCount; i++) {
+            const directionBit = Connection.DirectionBits[i]
+            if ((block.softConnections & directionBit) === directionBit
+                || (block.hardConnections & directionBit) === directionBit
+            ) {
+                const vector        = Connection.DirectionVectors[i]
+                const connectedX    = x + vector.dx * Block.Width
+                const connectedY    = y + vector.dy * Block.Height
+                this.buildBlockGroup(connectedX, connectedY, groupIndex, group)
+            }
+        }
+    }
+    buildHardGroup(x: number, y: number, hardGroup: Set<number>) {
+        const blockIndex = this.getIndex(x, y)
+        if (blockIndex === Level.GridEmpty) return
+        if (hardGroup.has(blockIndex))      return
+
+        hardGroup.add(blockIndex)
+        const block = this.blocks[blockIndex]
+
+        for (let i = 0; i < Connection.DirectionCount; i++) {
+            const directionBit = Connection.DirectionBits[i]
+            if ((block.hardConnections & directionBit) === directionBit) {
+                const vector        = Connection.DirectionVectors[i]
+                const connectedX    = x + vector.dx * Block.Width
+                const connectedY    = y + vector.dy * Block.Height
+                this.buildHardGroup(connectedX, connectedY, hardGroup)
+            }
+        }
+    }
+
 
     // Establish contacts between all groups
     buildGroupContacts() {
@@ -502,6 +548,7 @@ export default class Level {
         this.groupFixedDown = new Array(groupCount).fill(false)
         // First group contains all fixed blocks
         // Upward contacts cannot move down, downward contacts cannot move up
+
         propagateImmobility(0, this.groupContactsAbove, this.groupFixedDown)
         propagateImmobility(0, this.groupContactsBelow, this.groupFixedUp)
     }
@@ -636,7 +683,7 @@ export default class Level {
             for (let j = 0; j < group.length; j++) {
                 const blockIndex = group[j]
                 const block = this.blocks[blockIndex]
-                block.vy += 0.6
+                block.vy += 0.75
             }
         }
         for (const walker of this.walkers) {
@@ -1086,7 +1133,7 @@ export default class Level {
                     mover.step          = Math.ceil(mover.stepTotal * nextStep / nextStepTotal)
                 }
 
-                if (squish || (mover instanceof Walker && acceleration > 12)) {
+                if (squish || (mover instanceof Walker && acceleration > 9)) {
                     this.splatterMover(mover, mover.vy * 0.125)
                     this.kill(mover, moverSet)
                     Sounds.playSplat()
@@ -1502,8 +1549,6 @@ export default class Level {
                     const splash    = new Splash(x, y, vx, vy)
                     this.splashes.add(splash)
                 }
-
-                Sounds.playSplash()
             }
         }
     }
@@ -1556,63 +1601,76 @@ export default class Level {
         const sin = Math.sin(Math.PI * x / 2)
         return sin * sin
     }
-    render(frame: number) {
-        const context = this.canvas.getContext('2d')!
-        context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        context.fillStyle = '#0002'
 
-        const rng = new RNG()
-
-        for (let i = 0; i < Level.GridWidth; i += Level.BrickWidth) {
-            for (let j = 0; j < Level.GridHeight; j += Level.BrickHeight * 2) {
-                context.drawImage(Images.Brick, i, j)
-                if (rng.nextInt() % 3 === 0) {
-                    context.fillRect(i, j, Level.BrickWidth, Level.BrickHeight)
-                }
+    renderBricks(context: CanvasRenderingContext2D, offsetY: number) {
+        const rng                           = new RNG()
+        const brickWidth                    = Block.Width * 2
+        context.fillStyle                   = 'black'
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
+        for (let j = 0; j < Level.CellCountY; j++) {
+            const y = j * Block.Height + offsetY
+            for (let i = j % 2 === 0 ? -1 : 0; i < Level.CellCountX; i += 2) {
+                const x = i * Block.Width
+                context.drawImage(
+                    Images.Bricks, 
+                    brickWidth * (rng.nextInt() % 3), 
+                    0, 
+                    brickWidth, 
+                    Block.Height, 
+                    x,
+                    y,
+                    brickWidth, 
+                    Block.Height
+                )
             }
         }
-        for (let i = -Level.BrickWidth / 2; i < Level.GridWidth; i += Level.BrickWidth) {
-            for (let j = Level.BrickHeight; j < Level.GridHeight; j += Level.BrickHeight * 2) {
-                context.drawImage(Images.Brick, i, j)
-                if (rng.nextInt() % 3 === 0) {
-                    context.fillRect(i, j, Level.BrickWidth, Level.BrickHeight)
-                }
-            }
-        }
-
-
+    }
+    renderTorches(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
+        const rng                           = new RNG(frame)
+        
         for (const torch of this.torches) {
             const offsetX = Math.floor((frame + torch.frame) / 2) % 5 * Block.Width
             context.drawImage(
                 Images.Torch, 
                 offsetX, 0, Block.Width, Block.Height, 
-                torch.x, torch.y, Block.Width, Block.Height)
+                torch.x, torch.y + offsetY, Block.Width, Block.Height)
         }
         
         for (const torch of this.torches) {
-            const radius = 28 + Math.random() * 3
-            const diameter = radius * 2
-            const cx = torch.x + Block.Width / 2 + Math.random() * 2 - 1
-            const cy = torch.y + Block.Height / 2 + Math.random() * 2 - 1
-            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
-            gradient.addColorStop(0, 'rgba(255, 255, 0, 0.06')
-            gradient.addColorStop(0.5, 'rgba(255, 128, 0, 0.04')
-            gradient.addColorStop(0.75, 'rgba(255, 0, 0, 0.02')
-            gradient.addColorStop(1, 'rgba(128, 0, 0, 0')
+            const radius    = 35 + rng.nextFloat() * 3
+            const diameter  = radius * 2
+            const cx        = torch.x + Block.Width / 2 + rng.nextFloat() * 2 - 1
+            const cy        = torch.y + Block.Height / 2 + rng.nextFloat() * 2 - 1
+            const gradient  = context.createRadialGradient(cx, cy + offsetY, 0, cx, cy + offsetY, radius)
+            gradient.addColorStop(0, 'rgba(255, 255, 0, 0.2)')
+            gradient.addColorStop(0.5, 'rgba(255, 128, 0, 0.015)')
+            gradient.addColorStop(0.75, 'rgba(255, 0, 0, 0.01)')
+            gradient.addColorStop(1, 'rgba(128, 0, 0, 0)')
             context.fillStyle = gradient
-            context.fillRect(cx - radius, cy - radius, diameter, diameter)
+            context.fillRect(cx - radius, cy - radius + offsetY, diameter, diameter)
         }
+    }
 
+    renderBeams(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
         const beamIntensity = 0.5 + 0.5 * this.smooth(frame * 0.075)
         context.strokeStyle = `rgba(255, 128, 0, ${beamIntensity})`
         context.beginPath()
         for (const beam of this.beams()) {
-            context.moveTo(beam.x, beam.y)
-            context.lineTo(beam.x + beam.w, beam.y + beam.h)
+            context.moveTo(beam.x, beam.y + offsetY)
+            context.lineTo(beam.x + beam.w, beam.y + beam.h + offsetY)
         }
         context.stroke()
+    }
 
+    renderWalkers(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
         for (const walker of this.walkers) {
             const offsetX       = (Math.floor(frame / 3) + walker.frameOffset) % Walker.Frames
             const spriteSheet   = walker.walkDirection === 1 ? Images.WalkerRight : Images.WalkerLeft
@@ -1623,11 +1681,15 @@ export default class Level {
                 Walker.Width, 
                 Walker.Height,
                 walker.x, 
-                walker.y, 
+                walker.y + offsetY, 
                 Walker.Width, 
                 Walker.Height)
         }
+    }
 
+    renderCreepers(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
         for (const creeper of this.creepers) {
             const offsetX       = (Math.floor(frame / 3) + creeper.frameOffset) % Creeper.Frames
             const spriteSheet   = creeper.walkDirection === 1 ? Images.CreeperRight : Images.CreeperLeft
@@ -1638,35 +1700,41 @@ export default class Level {
                 Creeper.Width, 
                 Creeper.Height,
                 creeper.x, 
-                creeper.y, 
+                creeper.y + offsetY, 
                 Creeper.Width, 
                 Creeper.Height)
         }
+    }
 
+    renderAltars(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        const rng                           = new RNG()
+        const height                        = Block.Height / 2
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
 
-
-        const altarIntensity = 0.25 + 0.25 * this.smooth(frame * 0.05)
-        const radius = Block.Width / 2 - 2
         for (const block of this.blocks) {
             if (!block.altar && !block.warp) continue
 
-            const height = Block.Height * 0.25
-            const x = block.x + Block.Width / 2
-            const gradient = context.createRadialGradient(x, block.y, 0, x, block.y, radius)
-
-            if (block.altar) {
-                gradient.addColorStop(0, Color.cssColor(255, 255, 255, altarIntensity))
-                gradient.addColorStop(1, Color.cssColor(255, 255, 255, 0))
-            } else {
-                gradient.addColorStop(0, Color.colorWithAlpha(block.color, altarIntensity))
-                gradient.addColorStop(1, Color.colorWithAlpha(block.color, 0))
+            for (let i = 0; i < 30; i++) {
+                const rand              = rng.nextInt()
+                const h                 = Math.floor(height * rng.nextFloat() * 1.5)
+                const x                 = block.x + 1 + rand % (Block.Width - 2)
+                const position          = (rng.nextInt() + Math.floor(frame / 2)) % h / h
+                const scaledPosition    = position * position
+                const y                 = block.y - 1 - scaledPosition * h + offsetY
+                if (block.warp) {
+                    context.fillStyle = Color.colorWithAlpha(block.color, 1.0 - scaledPosition)
+                } else {
+                    context.fillStyle = `rgba(255, 255, 255, ${ 1.0 - scaledPosition })`
+                }
+                context.fillRect(x, y, 1, 1)
             }
-
-            context.fillStyle = gradient
-            context.fillRect(block.x, block.y - height, Block.Width, height)
-
         }
+    }
 
+    renderBlocks(context: CanvasRenderingContext2D, offsetY: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
         for (const block of this.blocks) {
             if (block.invisible) continue
             
@@ -1675,7 +1743,7 @@ export default class Level {
                     context.drawImage(
                         Images.Aurox, 
                         block.x, 
-                        block.y)
+                        block.y + offsetY)
                     break
                 }
                 case Block.Beam: {
@@ -1686,7 +1754,7 @@ export default class Level {
                         Block.Width, 
                         Block.Height,
                         block.x, 
-                        block.y, 
+                        block.y + offsetY, 
                         Block.Width, 
                         Block.Height)
                     break
@@ -1699,13 +1767,12 @@ export default class Level {
                         Block.Width, 
                         Block.Height,
                         block.x, 
-                        block.y, 
+                        block.y + offsetY, 
                         Block.Width, 
                         Block.Height)
                     break
                 }
             }
-            context.globalAlpha = 1.0
             
             if (block.softConnections === 0) continue
 
@@ -1716,126 +1783,176 @@ export default class Level {
                 Block.Width, 
                 Block.Height,
                 block.x, 
-                block.y, 
+                block.y + offsetY, 
                 Block.Width, 
                 Block.Height)
         }
+    }
 
-        context.fillStyle = 'white'
+    renderSelection(context: CanvasRenderingContext2D, offsetY: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
+        for (const index of this.hoverGroup) {
+            const block = this.blocks[index]
+            context.drawImage(
+                Images.SelectionTileset, 
+                Images.OffsetMap[block.hardConnections] * Block.Width, 
+                0, 
+                Block.Width, 
+                Block.Height,
+                block.x, 
+                block.y + offsetY, 
+                Block.Width, 
+                Block.Height)
+        }
+    }
+
+    renderInfo(context: CanvasRenderingContext2D, offsetY: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
+        context.fillStyle                   = 'white'
         for (let i = 0; i < this.blocks.length; i++) {
             const block = this.blocks[i]
             const x     = block.x
             const y     = block.y
             const group = this.groupIndex[i]
-            // context.fillText(group + '', x + 7, y + 11)
-            // context.fillText(i + '', x + 2, y + 25)
+            context.fillText(group + '', x + 7, y + offsetY + 11)
+            context.fillText(i + '', x + 2, y + offsetY  + 25)
         }
+    }
 
+    renderSplatters(context: CanvasRenderingContext2D, offsetY: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
+        context.fillStyle                   = Level.SplatterRGB
         for (const block of this.blocks) {
-            context.fillStyle = Level.SplatterRGB
             for (const splatter of block.splatters) {
                 const x = block.x + Math.floor(splatter.x)
                 const y = block.y + Math.floor(splatter.y)
-                context.fillRect(x, y, 1, 1)
+                context.fillRect(x, y + offsetY, 1, 1)
             }
         }
-
-        // for (let i = 0; i < Level.GridWidth; i++) {
-        //     for (let j = 0; j < Level.GridHeight; j++) {
-        //         const block = level.getIndex(i, j)
-        //         if (block === Level.GridEmpty) continue
-
-        //         const intensity = block * 10 % 200 + 20
-        //         context.fillStyle = `rgba(${intensity}, ${intensity}, 0, 0.5)`
-        //         context.fillRect(i, j, 1, 1)
-        //     }
-        // }
-
-        context.fillStyle = Level.SplatterRGB
         for (const splatter of this.splatters) {
             const x = Math.floor(splatter.x)
             const y = Math.floor(splatter.y)
-            context.fillRect(x, y, 1, 1)
+            context.fillRect(x, y + offsetY, 1, 1)
         }
+    }
 
+    renderDebris(context: CanvasRenderingContext2D, offsetY: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
         for (const debris of this.debris) {
             const x             = Math.floor(debris.x)
             const y             = Math.floor(debris.y)
             const opacity       = 1.0 / debris.frame
             context.fillStyle   = `${Level.DebrisRGBPrefix} ${ opacity })`
-            context.fillRect(x, y, 1, 1)
+            context.fillRect(x, y + offsetY, 1, 1)
         }
+    }
 
-        context.fillStyle = '#248'
-        // context.fillStyle = 'white'
+    renderDroplets(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
+        context.fillStyle                   = '#248'
+        const rng                           = new RNG(frame)
+        
         for (const droplet of this.droplets) {
             const x             = Math.floor(droplet.x)
             const y             = Math.floor(droplet.y)
-            context.fillRect(x, y, 1, 1)
+            context.fillRect(x, y + offsetY, 1, 1)
         }
         context.fillStyle = '#2488'
         for (const splash of this.splashes) {
             const x             = Math.floor(splash.x)
             const y             = Math.floor(splash.y)
-            context.fillRect(x, y, 1, 1)
+            context.fillRect(x, y + offsetY, 1, 1)
         }
         context.fillStyle = '#fff4'
         for (const droplet of this.droplets) {
-            if (Math.random() > 0.1) continue
+            if (rng.nextFloat() > 0.1) continue
 
             const x             = Math.floor(droplet.x)
             const y             = Math.floor(droplet.y)
-            context.fillRect(x, y, 1, 1)
+            context.fillRect(x, y + offsetY, 1, 1)
         }
         context.fillStyle = '#fff2'
         for (const splash of this.splashes) {
-            if (Math.random() > 0.1) continue
+            if (rng.nextFloat() > 0.1) continue
 
             const x             = Math.floor(splash.x)
             const y             = Math.floor(splash.y)
-            context.fillRect(x, y, 1, 1)
+            context.fillRect(x, y + offsetY, 1, 1)
         }
+    }
+
+
+    render(canvas: HTMLCanvasElement, offsetY: number, frame: number) {
+        const context = canvas.getContext('2d')!
+
+        this.renderBricks(context, offsetY)
+        this.renderBeams(context, offsetY, frame)
+        this.renderWalkers(context, offsetY, frame)
+        this.renderCreepers(context, offsetY, frame)
+        this.renderAltars(context, offsetY, frame)
+        this.renderBlocks(context, offsetY)
+        // this.renderInfo(context, offsetY)
+        this.renderSplatters(context, offsetY)
+        this.renderDebris(context, offsetY)
+        this.renderDroplets(context, offsetY, frame)
+        this.renderSelection(context, offsetY)
+
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha = 1
+
+
+
+
+
+
+
+
+
+
 
 
 
         // xor, multiply, overlay, darken, soft-light, hue, color
-        context.globalCompositeOperation = 'soft-light'
-        context.fillStyle = 'rgba(255, 128, 64, 0.6)'
-        context.fillRect(0, 0, Level.GridWidth, Level.GridHeight)
 
-        context.globalCompositeOperation = 'source-over'
 
-        if (this.message !== '') {
-            const renderedText = TextRenderer.paragraphCanvas(this.message, Images.Font, 360)
-            const w = renderedText.width
-            const h = renderedText.height
-            const x = Math.floor((Level.GridWidth - w) / 2)
-            const y = Math.floor((Level.GridHeight - h) / 2)
-            context.drawImage(renderedText, x, y)
-        }
 
-        
+    }
 
-        const lightContext = this.lightCanvas.getContext('2d')!
-        lightContext.clearRect(0, 0, Level.GridWidth, Level.GridHeight)
-        lightContext.globalCompositeOperation = 'source-over'
-        lightContext.fillStyle = '#000f'
-        lightContext.fillRect(0, 0, Level.GridWidth, Level.GridHeight)
-        lightContext.globalCompositeOperation = 'destination-out'
+    // renderText(canvas: HTMLCanvasElement, offsetY: number) {
+    //     const context = canvas.getContext('2d')!
+    //     if (this.message !== '') {
+    //         const renderedText = TextRenderer.paragraphCanvas(this.message, Images.Font, 360)
+    //         const w = renderedText.width
+    //         const h = renderedText.height
+    //         const x = Math.floor((Level.GridWidth - w) / 2)
+    //         const y = Math.floor((Level.GridHeight - h) / 2)
+    //         context.drawImage(renderedText, x, y + offsetY)
+    //     }
+    // }
+
+    renderLight(lightCanvas: HTMLCanvasElement, offsetY: number, frame: number) {
+        const lightContext                      = lightCanvas.getContext('2d')!
+        lightContext.globalCompositeOperation   = 'destination-out'
+        const rng                               = new RNG(frame)
 
         for (const torch of this.torches) {
-            const radius = 128 + Math.random() * 3
+            const radius = 196 + rng.nextFloat() * 3
             const diameter = radius * 2
-            const cx = torch.x + Block.Width / 2 + Math.random() * 2 - 1
-            const cy = torch.y + Block.Height / 2 + Math.random() * 2 - 1
-            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1')
-            gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.5')
-            gradient.addColorStop(1, 'rgba(128, 255, 255, 0')
+            const cx = torch.x + Block.Width / 2 + rng.nextFloat() * 2 - 1
+            const cy = torch.y + Block.Height / 2 + rng.nextFloat() * 2 - 1 + offsetY
+            const gradient = lightContext.createRadialGradient(cx, cy, 0, cx, cy, radius)
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+            gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.5)')
+            gradient.addColorStop(1, 'rgba(128, 255, 255, 0)')
             lightContext.fillStyle = gradient
             lightContext.fillRect(cx - radius, cy - radius, diameter, diameter)
         }
 
-        context.drawImage(this.lightCanvas, 0, 0)
+        this.renderTorches(lightContext, offsetY, frame)
     }
 }

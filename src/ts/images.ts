@@ -8,6 +8,7 @@ export default class Images {
     public static StrappingTemplate = new Image()
     public static MagnetTemplate    = new Image()
     public static IceTemplate       = new Image()
+    public static SelectionTemplate = new Image()
 
     public static WallTileset       = new Image()
     public static ClayTileset       = new Image()
@@ -16,6 +17,7 @@ export default class Images {
     public static StrappingTileset  = new Image()
     public static MagnetTileset     = new Image()
     public static IceTileset        = new Image()
+    public static SelectionTileset  = new Image()
 
     public static WalkerRight       = new Image()
     public static WalkerLeft        = new Image()
@@ -26,12 +28,14 @@ export default class Images {
     public static Torch             = new Image()
 
     public static Aurox             = new Image()
-    public static Brick             = new Image()
+    public static Bricks            = new Image()
     public static Portals           = new Image()
     public static Beams             = new Image()
 
     public static Title             = new Image()
     public static Font              = new Image()
+    public static Cursor            = new Image()
+    public static CursorClosed      = new Image()
 
     public static OffsetMap         = new Array(256).fill(-1)
     public static SoutheastMap      = new Array(256).fill(-1)
@@ -48,6 +52,7 @@ export default class Images {
         Images.StrappingTemplate.src    = './res/images/strapping_template.png'
         Images.MagnetTemplate.src       = './res/images/magnet_template.png'
         Images.IceTemplate.src          = './res/images/ice_template.png'
+        Images.SelectionTemplate.src     = './res/images/selection_template.png'
 
         Images.WalkerRight.src          = './res/images/walker_right.png'
         Images.WalkerLeft.src           = './res/images/walker_left.png'
@@ -56,7 +61,7 @@ export default class Images {
         Images.CreeperLeft.src          = './res/images/creeper_left.png'
 
         Images.Aurox.src                = './res/images/aurox.png'
-        Images.Brick.src                = './res/images/brick.png'
+        Images.Bricks.src               = './res/images/bricks.png'
         Images.Portals.src              = './res/images/portals.png'
         Images.Beams.src                = './res/images/beams.png'
 
@@ -64,7 +69,8 @@ export default class Images {
 
         Images.Title.src                = './res/images/title.png'
         Images.Font.src                 = './res/images/small_font.png'
-
+        Images.Cursor.src               = './res/images/cursor.png'
+        Images.CursorClosed.src         = './res/images/cursor_closed.png'
 
         Images.initializeMaps()
     }
@@ -77,6 +83,7 @@ export default class Images {
         Images.StrappingTileset = Images.tilesetImage(Images.StrappingTemplate)
         Images.MagnetTileset    = Images.tilesetImage(Images.MagnetTemplate)
         Images.IceTileset       = Images.tilesetImage(Images.IceTemplate)
+        Images.SelectionTileset = Images.tilesetImage(Images.SelectionTemplate)
 
         Images.BlockTilesetMap[Block.Wall]      = Images.WallTileset
         Images.BlockTilesetMap[Block.Clay]      = Images.ClayTileset

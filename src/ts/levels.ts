@@ -1,7 +1,7 @@
 import LevelData from './level_data.js'
 
 // TODO: Custom mouse cursor indicating actions
-// 
+// Sparks at laser endpoints, energy pulses
 
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
@@ -311,7 +311,7 @@ export const testLevels: LevelData[] = [
             [290, 230, 1]
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6]],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [
             ['Text.', 
                 12, 8], 
@@ -440,25 +440,25 @@ export const testLevels: LevelData[] = [
         typeGrid: [
             '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
             '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '# . . . . . . . . # . . . . . . . . . . . . # . . . . . . . . #',
+            '=                 =                         =                 =',
+            '# . . . . . . . . # . . . . . . . . . . . . # . . . . . . . . #',
             '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '# . . . . . . . . #-$=$=$=$-$=$=$=$-$=$=$=$-# . . . . . . . . #',
+            '=                 =                         =                 =',
+            '# . . . . . . . . # . . . . . . . . . . . . # . . . . . . . . #',
             '                                                               ',
-            '# . . . . . . . . . . . . . . . %=%=% . . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . %=%=%=%=% . . . . . . . . . . . . . . #',
+            '# . . . . . . . . # . . . . . . %=%=% . . . # . . . . . . . . #',
+            '=                 =                         =                 =',
+            '# . . . . . . . . # . . %=%=%=%=% . . . . . # . . . . . . . . #',
             '                                                               ',
-            '# . . . . . . . . . . . . . . %=%=%=%=% . . . . . . . . . . . #',
-            '=                                                             =',
-            '# . . . . . . . . . . . # . . . . . . # . . . . . . . . . . . #',
+            '# . . . . . . . . # . . . . . %=%=%=%=% . . # . . . . . . . . #',
+            '=                 =                         =                 =',
+            '# . . . . . . . . # . . # . . . . . . # . . # . . . . . . . . #',
             '                        =             =                        ',
-            '# . . . . . . . . . . . # . . %=% . . # . . . . . . . . . . . #',
-            '=                       =             =                       =',
-            '# . . . . . . . . . . . # . . . % . . # . . . . . . . . . . . #',
+            '# . . . . . . . . # . . # . . %=% . . # . . # . . . . . . . . #',
+            '=                 =     =             =     =                 =',
+            '# . . . . . . . . # . . # . . . % . . # . . # . . . . . . . . #',
             '                                                               ',
             '#=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=#',
         ],
@@ -493,7 +493,7 @@ export const testLevels: LevelData[] = [
             [352, 200, 1],
         ],
         creeperData: [],
-        torches: [[11, 8], [20, 8]],
+        torches: [[10, 8], [21, 8], [10, 4], [21, 4]],
         messages: [],
     },
     {
@@ -668,7 +668,7 @@ export const testLevels: LevelData[] = [
             [290, 290, 1]
         ],
         creeperData: [],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -728,7 +728,7 @@ export const testLevels: LevelData[] = [
         creeperData: [
             [310, 324, -1]
         ],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     // {
@@ -794,7 +794,7 @@ export const testLevels: LevelData[] = [
         typeGrid: [
             '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
             '                                -                       -      ',
-            '# . . . %=%=%=% %=% %=% . . . . ! . . . . . . . . . . . % . . #',
+            '# . . . %=%=%=% %=% %=% . . . . ! . . . % . . . . . . . % . . #',
             '=             =   =   =                                 -     =',
             '# . . . . . . %=% %=% %=% . . . . . . . . . . . $=$=$=$=$ . . #',
             '                                                               ',
@@ -860,7 +860,7 @@ export const testLevels: LevelData[] = [
             [488, 89, 1],
             [521, 143, 1],
         ],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2], [6, 2], [25, 2]],
         messages: [],
     },
     {
@@ -924,7 +924,7 @@ export const testLevels: LevelData[] = [
             [480, 324, -1],
             [520, 324, -1],
         ],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     // {
@@ -1042,7 +1042,7 @@ export const testLevels: LevelData[] = [
         creeperData: [
             [280, 54, 1]
         ],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -1100,7 +1100,7 @@ export const testLevels: LevelData[] = [
             [200, 320, 1]
         ],
         creeperData: [],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -1158,7 +1158,7 @@ export const testLevels: LevelData[] = [
             [330, 200, 1]
         ],
         creeperData: [],
-        torches: [],
+        torches: [[9, 7], [22, 7], [9, 4], [22, 4]],
         messages: [],
     },
     {
@@ -1216,7 +1216,7 @@ export const testLevels: LevelData[] = [
             [284, 200, 1]
         ],
         creeperData: [],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -1283,7 +1283,7 @@ export const testLevels: LevelData[] = [
             [230, 294, 1],
             [410, 294, 1],
         ],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     // {
@@ -1640,7 +1640,7 @@ export const testLevels: LevelData[] = [
             [365, 324, 1],
             [397, 324, -1],
         ],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -1710,7 +1710,7 @@ export const testLevels: LevelData[] = [
             [550, 276, -1],
         ],
         creeperData: [],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -1780,7 +1780,7 @@ export const testLevels: LevelData[] = [
             [550, 276, -1],
         ],
         creeperData: [],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
     {
@@ -1836,7 +1836,7 @@ export const testLevels: LevelData[] = [
         ],
         walkerData: [],
         creeperData: [],
-        torches: [],
+        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
         messages: [],
     },
 ]

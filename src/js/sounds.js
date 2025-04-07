@@ -1,5 +1,5 @@
 export default class Sounds {
-    static Bell = new Audio('./res/sounds/bell.mp3');
+    static Bell = new Audio('./res/sounds/long_bell.mp3');
     static Whooshes = [
         new Audio('./res/sounds/whoosh_1.wav'),
         new Audio('./res/sounds/whoosh_2.wav'),
@@ -29,11 +29,6 @@ export default class Sounds {
         new Audio('./res/sounds/splat_1.wav'),
         new Audio('./res/sounds/splat_2.wav'),
         new Audio('./res/sounds/splat_3.wav')
-    ];
-    static Splashes = [
-        new Audio('./res/sounds/splash_1.wav'),
-        new Audio('./res/sounds/splash_2.wav'),
-        new Audio('./res/sounds/splash_3.wav')
     ];
     static Zaps = [
         new Audio('./res/sounds/zap_1.wav'),
@@ -77,8 +72,5 @@ export default class Sounds {
     }
     static playZap() {
         Sounds.playRandom(Sounds.Zaps);
-    }
-    static playSplash() {
-        Sounds.playRandom(Sounds.Splashes);
     }
 }

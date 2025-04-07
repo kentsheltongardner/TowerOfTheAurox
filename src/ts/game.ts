@@ -5,11 +5,6 @@ import Point        from './point.js'
 import Images       from './images.js'
 import Camera       from './camera.js'
 import Sounds       from './sounds.js'
-import Block        from './block.js'
-import RNG          from './rng.js'
-import Walker       from './walker.js'
-import Creeper      from './creeper.js'
-import Color from './color.js'
 import TextRenderer from './text.js'
 
 export default class Game {
@@ -26,11 +21,9 @@ export default class Game {
     public static readonly TitleFadeoutMilliseconds = 500
     public static readonly TitleFadeoutFrames       = Math.floor(Game.TitleFadeoutMilliseconds / Game.FrameTimeMilliseconds)
 
-    // public canvasPrev:          HTMLCanvasElement
-    // public canvasCurr:          HTMLCanvasElement
-    // public canvasNext:          HTMLCanvasElement
-    public canvasAll:           HTMLCanvasElement
-
+    public canvas:              HTMLCanvasElement = document.createElement('canvas')
+    public uiCanvas:            HTMLCanvasElement = document.createElement('canvas')
+    public lightCanvas:         HTMLCanvasElement = document.createElement('canvas')
 
 
     public displayCanvas:       HTMLCanvasElement
@@ -40,6 +33,7 @@ export default class Game {
     public levelPrev:           Level
     public levelCurr:           Level
     public levelNext:           Level
+    public levelNextNext:       Level
     public levelData:           LevelData[]
     public musicPlaying:        boolean
     public lastTimestamp:       number
@@ -51,6 +45,9 @@ export default class Game {
     public camera:              Camera
     public overlayOpacity:      number
     public skip:                boolean
+    public mousePosition:       Point
+    public mousePressed:        boolean
+    public mousePresent:        boolean
 
     // Numeric scroll system based on direction of movement (up or down)
 
@@ -62,22 +59,15 @@ export default class Game {
         this.levelPrev          = new Level(this.levelData[this.levelIndex - 1], this.camera)
         this.levelCurr          = new Level(this.levelData[this.levelIndex], this.camera)
         this.levelNext          = new Level(this.levelData[this.levelIndex + 1], this.camera)
+        this.levelNextNext      = new Level(this.levelData[this.levelIndex + 2], this.camera)
 
-        // this.canvasPrev         = document.createElement('canvas')
-        // this.canvasCurr         = document.createElement('canvas')
-        // this.canvasNext         = document.createElement('canvas')
-        this.canvasAll          = document.createElement('canvas')
+        this.canvas.width       = Level.GridWidth
+        this.uiCanvas.width     = Level.GridWidth
+        this.lightCanvas.width  = Level.GridWidth
 
-
-        // this.canvasPrev.width           = Level.GridWidth
-        // this.canvasCurr.width           = Level.GridWidth
-        // this.canvasNext.width           = Level.GridWidth
-        this.canvasAll.width            = Level.GridWidth
-
-        // this.canvasPrev.height          = Level.GridHeight
-        // this.canvasCurr.height          = Level.GridHeight
-        // this.canvasNext.height          = Level.GridHeight
-        this.canvasAll.height           = Level.GridHeight * 3
+        this.canvas.height      = Level.GridHeight * 4
+        this.uiCanvas.height    = Level.GridHeight
+        this.lightCanvas.height = Level.GridHeight * 4
 
         this.displayCanvas      = displayCanvas
         this.displayContext     = this.displayCanvas.getContext('2d')!
@@ -91,20 +81,31 @@ export default class Game {
         this.tapped             = false
         this.overlayOpacity     = 0
         this.skip               = false
+        this.mousePosition      = new Point(0, 0)
+        this.mousePressed       = false
+        this.mousePresent       = false
 
         this.resize()
-        window.addEventListener('resize',       () => { this.resize() })
-        window.addEventListener('mousedown',    e => { this.tap(e.offsetX, e.offsetY) })
-        window.addEventListener('touchstart',   e => {
-            const touch = e.touches[0]
-            this.tap(touch.clientX, touch.clientY) 
-        })
+        window.addEventListener('resize',       ()  => { this.resize() })
+        this.displayCanvas.addEventListener('mousedown',    e   => { this.tap(e.offsetX, e.offsetY) })
+        this.displayCanvas.addEventListener('mouseup',      ()  => { this.mousePressed = false })
+        this.displayCanvas.addEventListener('mouseenter',   ()  => { this.mousePresent = true })
+        this.displayCanvas.addEventListener('mouseleave',   ()  => { this.mousePresent = false })
+        this.displayCanvas.addEventListener('mousemove',    e   => { this.mouseMove(e.offsetX, e.offsetY) })
+
         window.addEventListener('keydown',      e => { this.keyDown(e) })
         window.addEventListener('keyup',        e => { this.keyUp(e) })
         window.addEventListener('contextmenu',  e => e.preventDefault())
 
 
         requestAnimationFrame(timestamp => this.loop(timestamp))
+    }
+
+    mouseMove(x: number, y: number) {
+        this.mousePresent   = true
+        const gamePoint     = this.gamePoint(x, y)
+        this.mousePosition  = this.displayPoint(gamePoint.x, gamePoint.y)
+        this.levelCurr.hover(gamePoint.x, gamePoint.y)
     }
 
     keyDown(e: KeyboardEvent) {
@@ -122,6 +123,7 @@ export default class Game {
                 this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
                 this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
                 this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
+                this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
                 this.scrollFrame    = 0
                 this.overlayOpacity = 0
                 break
@@ -133,6 +135,7 @@ export default class Game {
                 this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
                 this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
                 this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
+                this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
                 this.scrollFrame    = 0
                 this.overlayOpacity = 0
                 break
@@ -155,6 +158,8 @@ export default class Game {
 
     
     tap(x: number, y: number) {
+        this.mousePressed = true
+
         if (this.titleFadeOutFrame === 0) {
             this.titleFadeOutFrame = 1
             return
@@ -169,7 +174,7 @@ export default class Game {
 
         if (!this.musicPlaying) {
             this.musicPlaying = true
-            const audio = new Audio('./res/music/ambience.mp3')
+            const audio = new Audio('./res/music/ambience_2.mp3')
             audio.volume = 0.5
             audio.loop = true
             audio.play()
@@ -200,25 +205,30 @@ export default class Game {
 
                 if (this.scrollFrame === Game.ScrollFrames) {
                     this.levelIndex++
-                    this.levelPrev = this.levelCurr
-                    this.levelCurr = new Level(this.levelData[this.levelIndex], this.camera)
-                    this.levelNext = new Level(this.levelData[this.levelIndex + 1], this.camera)
-                    this.scrollFrame = 0
+                    this.levelPrev      = this.levelCurr
+                    this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
+                    this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
+                    this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
+                    this.scrollFrame    = 0
                 }
             } else {
                 if (this.tapped) {
                     this.levelCurr.tap(this.tapPoint.x, this.tapPoint.y)
                     this.tapped = false
                 }
-                if (this.skip) {
-                    for (let i = 0; i < Game.FrameSkipCount; i++) {
+                if (this.levelCurr.message === '') {
+                    if (this.skip) {
+                        for (let i = 0; i < Game.FrameSkipCount; i++) {
+                            this.update()
+                            this.camera.update()
+                        }
+                    } else {
                         this.update()
+                        this.camera.update()
                     }
-                } else {
-                    this.update()
                 }
             }
-            this.camera.update()
+            
 
             this.render(this.frame)
         }
@@ -256,6 +266,15 @@ export default class Game {
         return new Point(x, y)
     }
 
+    displayPoint(gameX: number, gameY: number) {
+        const scalar    = this.displayScalar()
+        const rect      = this.displayRect()
+        const x         = rect.x + gameX * scalar
+        const y         = rect.y + gameY * scalar
+        
+        return new Point(x, y)
+    }
+
     resize() {
         this.displayCanvas.width    = window.innerWidth
         this.displayCanvas.height   = window.innerHeight
@@ -268,30 +287,48 @@ export default class Game {
 
 
     render(frame: number) {
-        this.levelPrev.render(0)
-        this.levelCurr.render(frame)
-        this.levelNext.render(0)
+        const context       = this.canvas.getContext('2d')!
+        const lightContext  = this.lightCanvas.getContext('2d')!
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        lightContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        const contextAll = this.canvasAll.getContext('2d')!
-        contextAll.clearRect(0, 0, this.canvasAll.width, this.canvasAll.height)
-        
-        contextAll.drawImage(this.levelNext.canvas, 0, 0)
-        contextAll.drawImage(this.levelCurr.canvas, 0, Level.GridHeight)
-        contextAll.drawImage(this.levelPrev.canvas, 0, Level.GridHeight * 2)
-
-        const displayRect       = this.displayRect()
-        const displayScalar     = this.displayScalar()
         const shakeIntensity    = this.camera.shakeIntensity
-        const shakeY            = Math.round((Math.random() * shakeIntensity * 2 - shakeIntensity) * displayScalar)
+        const shakeY            = Math.round((Math.random() * shakeIntensity * 2 - shakeIntensity) * 10)
         const scrollY           = Math.round(this.smooth(this.scrollFrame / Game.ScrollFrames) * Level.GridHeight)
-        const offsetY           = Level.GridHeight - scrollY + shakeY
+        const offsetY           = shakeY + scrollY
+        
+        this.levelNextNext.render(this.canvas, offsetY, 0)
+        this.levelNext.render(this.canvas, Level.GridHeight + offsetY, 0)
+        this.levelCurr.render(this.canvas, Level.GridHeight * 2 + offsetY, frame)
+        this.levelPrev.render(this.canvas, Level.GridHeight * 3 + offsetY, 0)
+
+        lightContext.globalCompositeOperation = 'source-over'
+        lightContext.fillStyle = '#000000fd'
+        lightContext.fillRect(0, 0, this.canvas.width, this.canvas.height)
+
+        this.levelNextNext.renderLight(this.lightCanvas, offsetY, frame)
+        this.levelNext.renderLight(this.lightCanvas, Level.GridHeight + offsetY, frame)
+        this.levelCurr.renderLight(this.lightCanvas, Level.GridHeight * 2 + offsetY, frame)
+        this.levelPrev.renderLight(this.lightCanvas, Level.GridHeight * 3 + offsetY, frame)
+
+        context.globalCompositeOperation = 'source-over'
+        context.drawImage(this.lightCanvas, 0, 0)
+
+        context.globalCompositeOperation = 'soft-light'
+        context.fillStyle = 'rgba(255, 128, 64, 0.6)'
+        context.fillRect(0, 0, this.canvas.width, this.canvas.height)
+        context.globalCompositeOperation = 'source-over'
+
+        this.renderText(context, offsetY)
+        const displayRect       = this.displayRect()
+        const screenY           = Level.GridHeight * 2
 
         this.displayContext.imageSmoothingEnabled = false
         this.displayContext.clearRect(0, 0, this.displayCanvas.width, this.displayCanvas.height)
         this.displayContext.drawImage(
-            this.canvasAll, 
+            this.canvas, 
             0, 
-            offsetY, 
+            screenY, 
             Level.GridWidth, 
             Level.GridHeight, 
             displayRect.x,
@@ -299,6 +336,8 @@ export default class Game {
             displayRect.w, 
             displayRect.h
         )
+
+
 
         this.overlayOpacity = this.levelCurr.deaths > 0 ? 
             this.overlayOpacity + (0.25 - this.overlayOpacity) * 0.05 :
@@ -315,7 +354,41 @@ export default class Game {
             this.displayContext.drawImage(Images.Title, displayRect.x, displayRect.y, displayRect.w, displayRect.h)
             this.displayContext.globalAlpha = 1.0
         }
+
+        this.renderMouse()
     }
+
+
+
+    renderMouse() {
+        if (this.mousePresent) {
+            const displayScalar = this.displayScalar()
+            const image = this.mousePressed ? Images.CursorClosed : Images.Cursor
+            this.displayContext.drawImage(
+                image, 
+                Math.floor(this.mousePosition.x), 
+                Math.floor(this.mousePosition.y), 
+                Images.Cursor.width * displayScalar, 
+                Images.Cursor.height * displayScalar
+            )
+        }
+    }
+
+    renderText(context: CanvasRenderingContext2D, offsetY: number) {
+        const message = this.levelCurr.message
+        if (message === '') return
+
+        context.globalCompositeOperation = 'source-over'
+        context.globalAlpha = 1
+        const renderedText  = TextRenderer.paragraphCanvas(message, Images.Font, 360)
+        const w             = renderedText.width
+        const h             = renderedText.height
+        const x             = Math.floor((Level.GridWidth - w) / 2)
+        const y             = Math.floor((Level.GridHeight - h) / 2) + Level.GridHeight * 2 + offsetY
+        context.drawImage(renderedText, x, y)
+    }
+
+    // Render 
 
     smooth(x: number) {
         const sin = Math.sin(Math.PI * x / 2)
