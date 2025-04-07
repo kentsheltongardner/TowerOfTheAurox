@@ -210,6 +210,10 @@ export default class Game {
         return window.innerWidth * Level.GridHeight > window.innerHeight * Level.GridWidth;
     }
     displayScalar() {
+        // if (this.horizontalDisplay()) {
+        //     return Math.floor(window.innerHeight / Level.GridHeight)
+        // }
+        // return Math.floor(window.innerWidth / Level.GridWidth)
         if (this.horizontalDisplay()) {
             return window.innerHeight / Level.GridHeight;
         }

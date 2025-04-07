@@ -242,6 +242,10 @@ export default class Game {
     }
 
     displayScalar() {
+        // if (this.horizontalDisplay()) {
+        //     return Math.floor(window.innerHeight / Level.GridHeight)
+        // }
+        // return Math.floor(window.innerWidth / Level.GridWidth)
         if (this.horizontalDisplay()) {
             return window.innerHeight / Level.GridHeight
         }

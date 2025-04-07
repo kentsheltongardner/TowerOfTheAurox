@@ -1,5 +1,5 @@
 export default class Sounds {
-    static Bell = new Audio('./res/sounds/long_bell.mp3');
+    static Bell = document.getElementById('bell');
     static Whooshes = [
         document.getElementById('whoosh-1'),
         document.getElementById('whoosh-2'),

@@ -1,5 +1,5 @@
 export default class Sounds {
-    static readonly Bell = new Audio('./res/sounds/long_bell.mp3')
+    static readonly Bell = <HTMLAudioElement>document.getElementById('bell')
     static readonly Whooshes: HTMLAudioElement[] = [
         <HTMLAudioElement>document.getElementById('whoosh-1'),
         <HTMLAudioElement>document.getElementById('whoosh-2'),
