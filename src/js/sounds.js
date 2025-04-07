@@ -1,43 +1,43 @@
 export default class Sounds {
     static Bell = new Audio('./res/sounds/long_bell.mp3');
     static Whooshes = [
-        new Audio('./res/sounds/whoosh_1.wav'),
-        new Audio('./res/sounds/whoosh_2.wav'),
-        new Audio('./res/sounds/whoosh_3.wav'),
-        new Audio('./res/sounds/whoosh_4.wav'),
-        new Audio('./res/sounds/whoosh_5.wav')
+        document.getElementById('whoosh-1'),
+        document.getElementById('whoosh-2'),
+        document.getElementById('whoosh-3'),
+        document.getElementById('whoosh-4'),
+        document.getElementById('whoosh-5'),
     ];
     static Vanishes = [
-        new Audio('./res/sounds/vanish_1.mp3'),
-        new Audio('./res/sounds/vanish_2.mp3')
+        document.getElementById('vanish-1'),
+        document.getElementById('vanish-2'),
     ];
     static Booms = [
-        new Audio('./res/sounds/boom_1.wav'),
-        new Audio('./res/sounds/boom_2.wav'),
-        new Audio('./res/sounds/boom_3.wav'),
-        new Audio('./res/sounds/boom_4.wav'),
-        new Audio('./res/sounds/boom_5.wav')
+        document.getElementById('boom-1'),
+        document.getElementById('boom-2'),
+        document.getElementById('boom-3'),
+        document.getElementById('boom-4'),
+        document.getElementById('boom-5'),
     ];
     static Pops = [
-        new Audio('./res/sounds/pop_1.wav'),
-        new Audio('./res/sounds/pop_2.wav'),
-        new Audio('./res/sounds/pop_3.wav'),
-        new Audio('./res/sounds/pop_4.wav'),
-        new Audio('./res/sounds/pop_5.wav')
+        document.getElementById('pop-1'),
+        document.getElementById('pop-2'),
+        document.getElementById('pop-3'),
+        document.getElementById('pop-4'),
+        document.getElementById('pop-5'),
     ];
     static Splats = [
-        new Audio('./res/sounds/splat_1.wav'),
-        new Audio('./res/sounds/splat_2.wav'),
-        new Audio('./res/sounds/splat_3.wav')
+        document.getElementById('splat-1'),
+        document.getElementById('splat-2'),
+        document.getElementById('splat-3'),
     ];
     static Zaps = [
-        new Audio('./res/sounds/zap_1.wav'),
-        new Audio('./res/sounds/zap_2.wav'),
-        new Audio('./res/sounds/zap_3.wav')
+        document.getElementById('zap-1'),
+        document.getElementById('zap-2'),
+        document.getElementById('zap-3'),
     ];
     static Thumps = [
-        new Audio('./res/sounds/thump_1.wav'),
-        new Audio('./res/sounds/thump_2.wav')
+        document.getElementById('thump-1'),
+        document.getElementById('thump-2'),
     ];
     static playRandom(sounds) {
         const index = Math.floor(Math.random() * sounds.length);

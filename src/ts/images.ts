@@ -1,14 +1,14 @@
 import Block from './block.js'
 
 export default class Images {
-    public static WallTemplate      = new Image()
-    public static ClayTemplate      = new Image()
-    public static CrateTemplate     = new Image()
-    public static BoxTemplate       = new Image()
-    public static StrappingTemplate = new Image()
-    public static MagnetTemplate    = new Image()
-    public static IceTemplate       = new Image()
-    public static SelectionTemplate = new Image()
+    public static WallTemplate: HTMLImageElement        = <HTMLImageElement>document.getElementById('wall-template')
+    public static ClayTemplate: HTMLImageElement        = <HTMLImageElement>document.getElementById('clay-template')
+    public static CrateTemplate: HTMLImageElement       = <HTMLImageElement>document.getElementById('crate-template')
+    public static BoxTemplate: HTMLImageElement         = <HTMLImageElement>document.getElementById('box-template')
+    public static StrappingTemplate: HTMLImageElement   = <HTMLImageElement>document.getElementById('strapping-template')
+    public static MagnetTemplate: HTMLImageElement      = <HTMLImageElement>document.getElementById('magnet-template')
+    public static IceTemplate: HTMLImageElement         = <HTMLImageElement>document.getElementById('ice-template')
+    public static SelectionTemplate: HTMLImageElement   = <HTMLImageElement>document.getElementById('selection-template')
 
     public static WallTileset       = new Image()
     public static ClayTileset       = new Image()
@@ -19,23 +19,18 @@ export default class Images {
     public static IceTileset        = new Image()
     public static SelectionTileset  = new Image()
 
-    public static WalkerRight       = new Image()
-    public static WalkerLeft        = new Image()
-
-    public static CreeperRight      = new Image()
-    public static CreeperLeft       = new Image()
-
-    public static Torch             = new Image()
-
-    public static Aurox             = new Image()
-    public static Bricks            = new Image()
-    public static Portals           = new Image()
-    public static Beams             = new Image()
-
-    public static Title             = new Image()
-    public static Font              = new Image()
-    public static Cursor            = new Image()
-    public static CursorClosed      = new Image()
+    public static WalkerRight       = <HTMLImageElement>document.getElementById('walker-right')
+    public static WalkerLeft        = <HTMLImageElement>document.getElementById('walker-left')
+    public static CreeperRight      = <HTMLImageElement>document.getElementById('creeper-right')
+    public static CreeperLeft       = <HTMLImageElement>document.getElementById('creeper-left')
+    public static Torch             = <HTMLImageElement>document.getElementById('torch')
+    public static Aurox             = <HTMLImageElement>document.getElementById('aurox')
+    public static Bricks            = <HTMLImageElement>document.getElementById('bricks')
+    public static Beams             = <HTMLImageElement>document.getElementById('beams')
+    public static Title             = <HTMLImageElement>document.getElementById('title')
+    public static Font              = <HTMLImageElement>document.getElementById('font')
+    public static Cursor            = <HTMLImageElement>document.getElementById('cursor')
+    public static CursorClosed      = <HTMLImageElement>document.getElementById('cursor-closed')
 
     public static OffsetMap         = new Array(256).fill(-1)
     public static SoutheastMap      = new Array(256).fill(-1)
@@ -45,33 +40,6 @@ export default class Images {
     public static BlockTilesetMap   = new Array(Block.TypeCount)
 
     static {
-        Images.WallTemplate.src         = './res/images/wall_template.png'
-        Images.ClayTemplate.src         = './res/images/clay_template.png'
-        Images.CrateTemplate.src        = './res/images/crate_template.png'
-        Images.BoxTemplate.src          = './res/images/box_template.png'
-        Images.StrappingTemplate.src    = './res/images/strapping_template.png'
-        Images.MagnetTemplate.src       = './res/images/magnet_template.png'
-        Images.IceTemplate.src          = './res/images/ice_template.png'
-        Images.SelectionTemplate.src     = './res/images/selection_template.png'
-
-        Images.WalkerRight.src          = './res/images/walker_right.png'
-        Images.WalkerLeft.src           = './res/images/walker_left.png'
-
-        Images.CreeperRight.src         = './res/images/creeper_right.png'
-        Images.CreeperLeft.src          = './res/images/creeper_left.png'
-
-        Images.Aurox.src                = './res/images/aurox.png'
-        Images.Bricks.src               = './res/images/bricks.png'
-        Images.Portals.src              = './res/images/portals.png'
-        Images.Beams.src                = './res/images/beams.png'
-
-        Images.Torch.src                = './res/images/torch.png'
-
-        Images.Title.src                = './res/images/title.png'
-        Images.Font.src                 = './res/images/small_font.png'
-        Images.Cursor.src               = './res/images/cursor.png'
-        Images.CursorClosed.src         = './res/images/cursor_closed.png'
-
         Images.initializeMaps()
     }
 

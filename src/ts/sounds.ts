@@ -1,43 +1,43 @@
 export default class Sounds {
     static readonly Bell = new Audio('./res/sounds/long_bell.mp3')
-    static readonly Whooshes = [
-        new Audio('./res/sounds/whoosh_1.wav'),
-        new Audio('./res/sounds/whoosh_2.wav'),
-        new Audio('./res/sounds/whoosh_3.wav'),
-        new Audio('./res/sounds/whoosh_4.wav'),
-        new Audio('./res/sounds/whoosh_5.wav')
+    static readonly Whooshes: HTMLAudioElement[] = [
+        <HTMLAudioElement>document.getElementById('whoosh-1'),
+        <HTMLAudioElement>document.getElementById('whoosh-2'),
+        <HTMLAudioElement>document.getElementById('whoosh-3'),
+        <HTMLAudioElement>document.getElementById('whoosh-4'),
+        <HTMLAudioElement>document.getElementById('whoosh-5'),
     ]
     static readonly Vanishes = [
-        new Audio('./res/sounds/vanish_1.mp3'),
-        new Audio('./res/sounds/vanish_2.mp3')
+        <HTMLAudioElement>document.getElementById('vanish-1'),
+        <HTMLAudioElement>document.getElementById('vanish-2'),
     ]
     static readonly Booms = [
-        new Audio('./res/sounds/boom_1.wav'),
-        new Audio('./res/sounds/boom_2.wav'),
-        new Audio('./res/sounds/boom_3.wav'),
-        new Audio('./res/sounds/boom_4.wav'),
-        new Audio('./res/sounds/boom_5.wav')
+        <HTMLAudioElement>document.getElementById('boom-1'),
+        <HTMLAudioElement>document.getElementById('boom-2'),
+        <HTMLAudioElement>document.getElementById('boom-3'),
+        <HTMLAudioElement>document.getElementById('boom-4'),
+        <HTMLAudioElement>document.getElementById('boom-5'),
     ]
     static readonly Pops = [
-        new Audio('./res/sounds/pop_1.wav'),
-        new Audio('./res/sounds/pop_2.wav'),
-        new Audio('./res/sounds/pop_3.wav'),
-        new Audio('./res/sounds/pop_4.wav'),
-        new Audio('./res/sounds/pop_5.wav')
+        <HTMLAudioElement>document.getElementById('pop-1'),
+        <HTMLAudioElement>document.getElementById('pop-2'),
+        <HTMLAudioElement>document.getElementById('pop-3'),
+        <HTMLAudioElement>document.getElementById('pop-4'),
+        <HTMLAudioElement>document.getElementById('pop-5'),
     ]
     static readonly Splats = [
-        new Audio('./res/sounds/splat_1.wav'),
-        new Audio('./res/sounds/splat_2.wav'),
-        new Audio('./res/sounds/splat_3.wav')
+        <HTMLAudioElement>document.getElementById('splat-1'),
+        <HTMLAudioElement>document.getElementById('splat-2'),
+        <HTMLAudioElement>document.getElementById('splat-3'),
     ]
     static readonly Zaps = [
-        new Audio('./res/sounds/zap_1.wav'),
-        new Audio('./res/sounds/zap_2.wav'),
-        new Audio('./res/sounds/zap_3.wav')
+        <HTMLAudioElement>document.getElementById('zap-1'),
+        <HTMLAudioElement>document.getElementById('zap-2'),
+        <HTMLAudioElement>document.getElementById('zap-3'),
     ]
     static readonly Thumps = [
-        new Audio('./res/sounds/thump_1.wav'),
-        new Audio('./res/sounds/thump_2.wav')
+        <HTMLAudioElement>document.getElementById('thump-1'),
+        <HTMLAudioElement>document.getElementById('thump-2'),
     ]
     static playRandom(sounds: HTMLAudioElement[]) {
         const index = Math.floor(Math.random() * sounds.length)

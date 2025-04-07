@@ -174,10 +174,10 @@ export default class Game {
 
         if (!this.musicPlaying) {
             this.musicPlaying = true
-            const audio = new Audio('./res/music/ambience_2.mp3')
-            audio.volume = 0.5
-            audio.loop = true
-            audio.play()
+            const music = <HTMLAudioElement>document.getElementById('music')
+            music.volume = 0.5
+            music.loop = true
+            music.play()
         }
     }
 
