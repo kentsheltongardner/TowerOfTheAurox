@@ -1,5 +1,12 @@
 export default class Sounds {
     static readonly Bell = <HTMLAudioElement>document.getElementById('bell')
+    static readonly Splashes: HTMLAudioElement[] = [
+        <HTMLAudioElement>document.getElementById('splash-1'),
+        <HTMLAudioElement>document.getElementById('splash-2'),
+        <HTMLAudioElement>document.getElementById('splash-3'),
+        <HTMLAudioElement>document.getElementById('splash-4'),
+        <HTMLAudioElement>document.getElementById('splash-5'),
+    ]
     static readonly Whooshes: HTMLAudioElement[] = [
         <HTMLAudioElement>document.getElementById('whoosh-1'),
         <HTMLAudioElement>document.getElementById('whoosh-2'),
@@ -72,5 +79,8 @@ export default class Sounds {
     }
     static playZap() {
         Sounds.playRandom(Sounds.Zaps)
+    }
+    static playSplash() {
+        Sounds.playRandom(Sounds.Splashes)
     }
 }

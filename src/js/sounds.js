@@ -1,5 +1,12 @@
 export default class Sounds {
     static Bell = document.getElementById('bell');
+    static Splashes = [
+        document.getElementById('splash-1'),
+        document.getElementById('splash-2'),
+        document.getElementById('splash-3'),
+        document.getElementById('splash-4'),
+        document.getElementById('splash-5'),
+    ];
     static Whooshes = [
         document.getElementById('whoosh-1'),
         document.getElementById('whoosh-2'),
@@ -72,5 +79,8 @@ export default class Sounds {
     }
     static playZap() {
         Sounds.playRandom(Sounds.Zaps);
+    }
+    static playSplash() {
+        Sounds.playRandom(Sounds.Splashes);
     }
 }

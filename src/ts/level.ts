@@ -1549,6 +1549,8 @@ export default class Level {
                     const splash    = new Splash(x, y, vx, vy)
                     this.splashes.add(splash)
                 }
+
+                // Sounds.playSplash()
             }
         }
     }
