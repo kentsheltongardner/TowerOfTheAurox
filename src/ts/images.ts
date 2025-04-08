@@ -99,22 +99,28 @@ export default class Images {
         const height        = Block.Height
         const halfWidth     = width / 2
         const halfHeight    = height / 2
+        const frames        = template.height / height
         canvas.width        = width * Images.OffsetMap.length
-        canvas.height       = height
+        canvas.height       = template.height
+
 
         for (let i = 0; i < 256; i++) {
-            const offset = Images.OffsetMap[i]
-            if (offset === -1) continue
+            for (let j = 0; j < frames; j++) {
+                const offset = Images.OffsetMap[i]
+                if (offset === -1) continue
 
-            const srcXSE = Images.SoutheastMap[i] * width + halfWidth
-            const srcXSW = Images.SouthwestMap[i] * width
-            const srcXNW = Images.NorthwestMap[i] * width
-            const srcXNE = Images.NortheastMap[i] * width + halfWidth
+                const y = j * height
 
-            context.drawImage(template, srcXSE, halfHeight, halfWidth, halfHeight, offset * width + halfWidth,   halfHeight, halfWidth, halfHeight)
-            context.drawImage(template, srcXSW, halfHeight, halfWidth, halfHeight, offset * width,               halfHeight, halfWidth, halfHeight)
-            context.drawImage(template, srcXNW, 0,          halfWidth, halfHeight, offset * width,               0,          halfWidth, halfHeight)
-            context.drawImage(template, srcXNE, 0,          halfWidth, halfHeight, offset * width + halfWidth,   0,          halfWidth, halfHeight)
+                const srcXSE = Images.SoutheastMap[i] * width + halfWidth
+                const srcXSW = Images.SouthwestMap[i] * width
+                const srcXNW = Images.NorthwestMap[i] * width
+                const srcXNE = Images.NortheastMap[i] * width + halfWidth
+
+                context.drawImage(template, srcXSE, y + halfHeight, halfWidth, halfHeight, offset * width + halfWidth,   y + halfHeight,    halfWidth, halfHeight)
+                context.drawImage(template, srcXSW, y + halfHeight, halfWidth, halfHeight, offset * width,               y + halfHeight,    halfWidth, halfHeight)
+                context.drawImage(template, srcXNW, y,              halfWidth, halfHeight, offset * width,               y,                 halfWidth, halfHeight)
+                context.drawImage(template, srcXNE, y,              halfWidth, halfHeight, offset * width + halfWidth,   y,                 halfWidth, halfHeight)
+            }
         }
 
         const tileset = new Image()

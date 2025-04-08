@@ -1451,12 +1451,13 @@ export default class Level {
             context.drawImage(Images.StrappingTileset, Images.OffsetMap[block.softConnections] * Block.Width, 0, Block.Width, Block.Height, block.x, block.y + offsetY, Block.Width, Block.Height);
         }
     }
-    renderSelection(context, offsetY) {
+    renderSelection(context, offsetY, frame) {
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
+        const srcY = Block.Height * (Math.floor(frame / 4) % 4);
         for (const index of this.hoverGroup) {
             const block = this.blocks[index];
-            context.drawImage(Images.SelectionTileset, Images.OffsetMap[block.hardConnections] * Block.Width, 0, Block.Width, Block.Height, block.x, block.y + offsetY, Block.Width, Block.Height);
+            context.drawImage(Images.SelectionTileset, Images.OffsetMap[block.hardConnections] * Block.Width, srcY, Block.Width, Block.Height, block.x, block.y + offsetY, Block.Width, Block.Height);
         }
     }
     renderInfo(context, offsetY) {
@@ -1545,7 +1546,8 @@ export default class Level {
         this.renderSplatters(context, offsetY);
         this.renderDebris(context, offsetY);
         this.renderDroplets(context, offsetY, frame);
-        this.renderSelection(context, offsetY);
+        this.renderSelection(context, offsetY, frame);
+        console.log(frame);
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
         // xor, multiply, overlay, darken, soft-light, hue, color
