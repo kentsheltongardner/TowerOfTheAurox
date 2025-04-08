@@ -1,3 +1,4 @@
+import Beam from './beam.js';
 import Block from './block.js';
 import Color from './color.js';
 import Connection from './connection.js';
@@ -5,14 +6,15 @@ import Creeper from './creeper.js';
 import Debris from './debris.js';
 import Droplet from './droplet.js';
 import Images from './images.js';
-import Rect from './rect.js';
 import RNG from './rng.js';
 import Sounds from './sounds.js';
+import Spark from './spark.js';
 import Splash from './splash.js';
 import Splatter from './splatter.js';
 import Torch from './torch.js';
 import Walker from './walker.js';
 export default class Level {
+    static Tau = Math.PI * 2;
     static GridEmpty = 0xffff;
     static GridWidth = 640;
     static GridHeight = 360;
@@ -41,7 +43,8 @@ export default class Level {
     walkers = new Set();
     creepers = new Set();
     splatters = [];
-    debris = [];
+    debris = new Set();
+    sparks = new Set();
     indexGrid = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty);
     removalIndex = -1;
     deaths = 0;
@@ -326,7 +329,7 @@ export default class Level {
         }
         const debrisCount = Math.floor(Debris.CountMinimum + Math.random() * (Debris.CountMaximum - Debris.CountMinimum));
         for (let i = 0; i < debrisCount; i++) {
-            this.debris.push(new Debris(block));
+            this.debris.add(new Debris(block));
         }
     }
     hover(gridX, gridY) {
@@ -984,7 +987,8 @@ export default class Level {
                     mover.step = Math.ceil(mover.stepTotal * nextStep / nextStepTotal);
                 }
                 if (squish || (mover instanceof Walker && acceleration > 9)) {
-                    this.splatterMover(mover, mover.vy * 0.125);
+                    mover.vy = 0;
+                    this.splatterMover(mover);
                     this.kill(mover, moverSet);
                     Sounds.playSplat();
                 }
@@ -1087,11 +1091,13 @@ export default class Level {
             this.fireBeams();
             this.eat();
         }
+        this.createSparks();
         this.createDroplets();
         this.updateSplatters();
         this.updateDebris();
         this.updateDroplets();
         this.updateSplashes();
+        this.updateSparks();
     }
     complete() {
         return this.deaths === 0 && this.walkers.size === 0;
@@ -1119,7 +1125,7 @@ export default class Level {
             }
         }
     }
-    beamIntersects(x1, y1, w1, h1, x2, y2, w2, h2) {
+    rectangleIntersection(x1, y1, w1, h1, x2, y2, w2, h2) {
         return !(x1 > x2 + w2
             || y1 > y2 + h2
             || x2 > x1 + w1
@@ -1149,7 +1155,7 @@ export default class Level {
                         impactX = xw;
                     }
                 }
-                return new Rect(x, y, impactX - x, 0);
+                return new Beam(x, y, impactX, y);
             }
             case Connection.West: {
                 let impactX = 0;
@@ -1161,7 +1167,7 @@ export default class Level {
                         impactX = xe;
                     }
                 }
-                return new Rect(impactX, y, x - impactX, 0);
+                return new Beam(x, y, impactX, y);
             }
             case Connection.South: {
                 let impactY = Level.GridHeight - 1;
@@ -1173,7 +1179,7 @@ export default class Level {
                         impactY = yn;
                     }
                 }
-                return new Rect(x, y, 0, impactY - y);
+                return new Beam(x, y, x, impactY);
             }
             case Connection.North: {
                 let impactY = 0;
@@ -1185,14 +1191,18 @@ export default class Level {
                         impactY = ys;
                     }
                 }
-                return new Rect(x, impactY, 0, y - impactY);
+                return new Beam(x, y, x, impactY);
             }
         }
-        return new Rect(x, y, 0, 0);
+        return new Beam(x, y, x, y);
     }
     fireBeam(beam, mover, moverSet) {
-        if (this.beamIntersects(beam.x, beam.y, beam.w, beam.h, mover.x, mover.y, mover.width(), mover.height())) {
-            this.splatterMover(mover, mover.vy);
+        const x = Math.min(beam.x1, beam.x2);
+        const y = Math.min(beam.y1, beam.y2);
+        const w = Math.abs(beam.x2 - beam.x1);
+        const h = Math.abs(beam.y2 - beam.y1);
+        if (this.rectangleIntersection(x, y, w, h, mover.x, mover.y, mover.width(), mover.height())) {
+            this.splatterMover(mover);
             this.kill(mover, moverSet);
             Sounds.playZap();
         }
@@ -1212,7 +1222,7 @@ export default class Level {
         for (const creeper of this.creepers) {
             for (const walker of this.walkers) {
                 if (this.contact(creeper, walker)) {
-                    this.splatterMover(walker, walker.vy);
+                    this.splatterMover(walker);
                     this.kill(walker, this.walkers);
                     Sounds.playSplat();
                 }
@@ -1225,22 +1235,94 @@ export default class Level {
             || creeper.y + Creeper.Height <= walker.y
             || walker.y + Walker.Height <= creeper.y);
     }
-    splatterMover(mover, vyScalar) {
+    splatterMover(mover) {
         const count = Splatter.CountMinimum + Math.floor(Splatter.CountMaximum - Splatter.CountMinimum);
         const x = mover.x + mover.width() / 2;
         const y = mover.y + mover.height();
         for (let i = 0; i < count; i++) {
-            this.splatters.push(new Splatter(x, y, vyScalar));
+            this.splatters.push(new Splatter(x, y, mover.vy));
         }
+    }
+    signedSide(x, y, x1, y1, x2, y2) {
+        return (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+    }
+    // (x, y)   : Point in block
+    // (x1, y1) : Point outside block
+    // x2       : Vertical edge of block
+    // y2, y3   : Horizontal edges of block
+    verticalIntersection(x, y, x1, y1, x2, y2, y3) {
+        const side1 = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+        const side2 = (x - x1) * (y3 - y1) - (y - y1) * (x2 - x1);
+        // const side1 = (x - a) * (d - b) - (y - b) * (c - a)
+        // const side2 = (x - a) * (f - b) - (y - b) * (c - a)
+        // side1 * side2 = ((x - a) * (d - b) - (y - b) * (c - a)) * ((x - a) * (f - b) - (y - b) * (c - a))
+        // side1 * side2 = (r * (d - b) - s * t) * (r * (f - b) - s * t)
+        return side1 * side2 < 0;
     }
     updateDebris() {
         for (const debris of this.debris) {
+            if (debris.y > Level.GridHeight) {
+                this.debris.delete(debris);
+                continue;
+            }
             debris.vy += Debris.FallSpeed;
-            debris.x += debris.vx;
-            debris.y += debris.vy;
-            debris.frame++;
+            debris.vx *= 0.975;
+            debris.vy *= 0.975;
+            let x = debris.x + debris.vx;
+            let y = debris.y + debris.vy;
+            const blockIndex = this.getIndex(Math.floor(x), Math.floor(y));
+            if (blockIndex !== Level.GridEmpty) {
+                if (Math.random() < 0.4) {
+                    this.debris.delete(debris);
+                    continue;
+                }
+                const block = this.blocks[blockIndex];
+                let xSector = 0;
+                if (debris.x >= block.x + Block.Width) {
+                    xSector = 2;
+                }
+                else if (debris.x >= block.x) {
+                    xSector = 1;
+                }
+                let ySector = 0;
+                if (debris.y >= block.y + Block.Height) {
+                    ySector = 6;
+                }
+                else if (debris.y >= block.y) {
+                    ySector = 3;
+                }
+                const sector = xSector + ySector;
+                let horizontal = true;
+                switch (sector) {
+                    case 3:
+                    case 5:
+                        horizontal = false;
+                        break;
+                    case 0:
+                    case 6:
+                        if (this.verticalIntersection(x, y, debris.x, debris.y, block.x, block.y, block.y + Block.Height)) {
+                            horizontal = false;
+                        }
+                        break;
+                    case 2:
+                    case 8:
+                        if (this.verticalIntersection(x, y, debris.x, debris.y, block.x + Block.Width, block.y, block.y + Block.Height)) {
+                            horizontal = false;
+                        }
+                        break;
+                }
+                if (horizontal) {
+                    debris.vy += (1 + 0.3) * (block.vy - debris.vy);
+                }
+                else {
+                    debris.vx += (1 + 0.3) * -debris.vx;
+                }
+            }
+            else {
+                debris.x = x;
+                debris.y = y;
+            }
         }
-        this.debris = this.debris.filter(debris => debris.y < Level.GridHeight);
     }
     updateSplatters() {
         for (const splatter of this.splatters) {
@@ -1263,6 +1345,86 @@ export default class Level {
             }
         }
         this.splatters = this.splatters.filter(splatter => splatter.y < Level.GridHeight && !splatter.splattered);
+    }
+    createSparks() {
+        const beams = this.beams();
+        for (const beam of beams) {
+            const count = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < count; i++) {
+                const theta = Math.random() * Level.Tau;
+                const v = 2 + Math.random() * 2;
+                const vx = Math.cos(theta) * v;
+                const vy = Math.sin(theta) * v;
+                const spark = new Spark(beam.x2, beam.y2, vx, vy);
+                this.sparks.add(spark);
+            }
+        }
+    }
+    updateSparks() {
+        for (const spark of this.sparks) {
+            if (spark.y > Level.GridHeight) {
+                this.sparks.delete(spark);
+                continue;
+            }
+            spark.frame++;
+            if (spark.frame > spark.life) {
+                this.sparks.delete(spark);
+                continue;
+            }
+            spark.vy += Spark.FallSpeed;
+            spark.vx *= 0.9;
+            spark.vy *= 0.9;
+            let x = spark.x + spark.vx;
+            let y = spark.y + spark.vy;
+            const blockIndex = this.getIndex(Math.floor(x), Math.floor(y));
+            if (blockIndex !== Level.GridEmpty) {
+                const block = this.blocks[blockIndex];
+                let xSector = 0;
+                if (spark.x >= block.x + Block.Width) {
+                    xSector = 2;
+                }
+                else if (spark.x >= block.x) {
+                    xSector = 1;
+                }
+                let ySector = 0;
+                if (spark.y >= block.y + Block.Height) {
+                    ySector = 6;
+                }
+                else if (spark.y >= block.y) {
+                    ySector = 3;
+                }
+                const sector = xSector + ySector;
+                let horizontal = true;
+                switch (sector) {
+                    case 3:
+                    case 5:
+                        horizontal = false;
+                        break;
+                    case 0:
+                    case 6:
+                        if (this.verticalIntersection(x, y, spark.x, spark.y, block.x, block.y, block.y + Block.Height)) {
+                            horizontal = false;
+                        }
+                        break;
+                    case 2:
+                    case 8:
+                        if (this.verticalIntersection(x, y, spark.x, spark.y, block.x + Block.Width, block.y, block.y + Block.Height)) {
+                            horizontal = false;
+                        }
+                        break;
+                }
+                if (horizontal) {
+                    spark.vy += (1 + 0.5) * (block.vy - spark.vy);
+                }
+                else {
+                    spark.vx += (1 + 0.5) * -spark.vx;
+                }
+            }
+            else {
+                spark.x = x;
+                spark.y = y;
+            }
+        }
     }
     createDroplets() {
         if (Math.random() > 0.6)
@@ -1378,8 +1540,8 @@ export default class Level {
         context.strokeStyle = `rgba(255, 128, 0, ${beamIntensity})`;
         context.beginPath();
         for (const beam of this.beams()) {
-            context.moveTo(beam.x, beam.y + offsetY);
-            context.lineTo(beam.x + beam.w, beam.y + beam.h + offsetY);
+            context.moveTo(beam.x1, beam.y1 + offsetY);
+            context.lineTo(beam.x2, beam.y2 + offsetY);
         }
         context.stroke();
     }
@@ -1490,14 +1652,24 @@ export default class Level {
             context.fillRect(x, y + offsetY, 1, 1);
         }
     }
+    renderSparks(context, offsetY) {
+        context.globalCompositeOperation = 'source-over';
+        context.globalAlpha = 1;
+        for (const spark of this.sparks) {
+            const x = Math.floor(spark.x);
+            const y = Math.floor(spark.y);
+            const opacity = 1.0 - spark.frame / spark.life;
+            context.fillStyle = `rgba(255, 192, 0, ${opacity})`;
+            context.fillRect(x, y + offsetY, 1, 1);
+        }
+    }
     renderDebris(context, offsetY) {
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
+        context.fillStyle = '#fff3';
         for (const debris of this.debris) {
             const x = Math.floor(debris.x);
             const y = Math.floor(debris.y);
-            const opacity = 1.0 / debris.frame;
-            context.fillStyle = `${Level.DebrisRGBPrefix} ${opacity})`;
             context.fillRect(x, y + offsetY, 1, 1);
         }
     }
@@ -1541,13 +1713,13 @@ export default class Level {
         this.renderWalkers(context, offsetY, frame);
         this.renderCreepers(context, offsetY, frame);
         this.renderAltars(context, offsetY, frame);
+        this.renderDebris(context, offsetY);
+        this.renderSparks(context, offsetY);
         this.renderBlocks(context, offsetY);
         // this.renderInfo(context, offsetY)
         this.renderSplatters(context, offsetY);
-        this.renderDebris(context, offsetY);
         this.renderDroplets(context, offsetY, frame);
         this.renderSelection(context, offsetY, frame);
-        console.log(frame);
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
         // xor, multiply, overlay, darken, soft-light, hue, color

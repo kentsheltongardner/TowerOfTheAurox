@@ -97,7 +97,6 @@ export default class Game {
         window.addEventListener('keyup',        e => { this.keyUp(e) })
         window.addEventListener('contextmenu',  e => e.preventDefault())
 
-
         requestAnimationFrame(timestamp => this.loop(timestamp))
     }
 
@@ -105,7 +104,7 @@ export default class Game {
         this.mousePresent   = true
         const gamePoint     = this.gamePoint(x, y)
         this.mousePosition  = this.displayPoint(gamePoint.x, gamePoint.y)
-        this.levelCurr.hover(gamePoint.x, gamePoint.y)
+        this.levelCurr.hover(gamePoint.x + 3, gamePoint.y)
     }
 
     keyDown(e: KeyboardEvent) {

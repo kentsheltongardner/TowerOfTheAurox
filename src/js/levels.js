@@ -1,5 +1,4 @@
-// TODO: Custom mouse cursor indicating actions
-// Sparks at laser endpoints, energy pulses
+// TODO: Sparks at laser endpoints, energy pulses, lights in light canvas, gradient drawing?
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
 // Move an altar to make it accessible
@@ -540,7 +539,7 @@ export const testLevels = [
             '                                                               ',
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
             '                                                               ',
-            '. . . . . . . . . . . . . . . . A . . . . . . . . . . . . . . .',
+            '. . . . . . . . . . . . . A . . . . . . . . . . . . . . . . . .',
         ],
         walkerData: [
             [300, 200, 1]
@@ -789,7 +788,7 @@ export const testLevels = [
         typeGrid: [
             '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
             '                                -                       -      ',
-            '# . . . %=%=%=% %=% %=% . . . . ! . . . % . . . . . . . % . . #',
+            '# . . . %=%=%=% %=% %=% . . . . ! . . . . . . . . . . . % . . #',
             '=             =   =   =                                 -     =',
             '# . . . . . . %=% %=% %=% . . . . . . . . . . . $=$=$=$=$ . . #',
             '                                                               ',

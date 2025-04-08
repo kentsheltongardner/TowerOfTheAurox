@@ -11,13 +11,13 @@ export default class Splatter {
     public vy: number
     public splattered: boolean
 
-    constructor(x: number, y: number, vyScalar: number) {
+    constructor(x: number, y: number, vy: number) {
         this.x          = x
         this.y          = y
         const theta     = Math.PI + Math.random() * Math.PI
         const speed     = Splatter.SpeedMinimum + Math.random() * (Splatter.SpeedMaximum - Splatter.SpeedMinimum)
         this.vx         = Math.cos(theta) * speed
-        this.vy         = Math.sin(theta) * speed * vyScalar
+        this.vy         = Math.sin(theta) * speed + vy
         this.splattered = false
     }
 }

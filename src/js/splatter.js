@@ -9,13 +9,13 @@ export default class Splatter {
     vx;
     vy;
     splattered;
-    constructor(x, y, vyScalar) {
+    constructor(x, y, vy) {
         this.x = x;
         this.y = y;
         const theta = Math.PI + Math.random() * Math.PI;
         const speed = Splatter.SpeedMinimum + Math.random() * (Splatter.SpeedMaximum - Splatter.SpeedMinimum);
         this.vx = Math.cos(theta) * speed;
-        this.vy = Math.sin(theta) * speed * vyScalar;
+        this.vy = Math.sin(theta) * speed + vy;
         this.splattered = false;
     }
 }

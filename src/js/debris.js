@@ -9,7 +9,6 @@ export default class Debris {
     y;
     vx;
     vy;
-    frame;
     constructor(block) {
         this.x = block.x + Math.random() * Block.Width;
         this.y = block.y + Math.random() * Block.Height;
@@ -17,6 +16,5 @@ export default class Debris {
         const speed = Debris.SpeedMinimum + Math.random() * (Debris.SpeedMaximum - Debris.SpeedMinimum);
         this.vx = Math.cos(theta) * speed * 2.0;
         this.vy = Math.sin(theta) * speed;
-        this.frame = 0;
     }
 }

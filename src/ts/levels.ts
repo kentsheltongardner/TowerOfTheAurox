@@ -1,7 +1,6 @@
 import LevelData from './level_data.js'
 
-// TODO: Custom mouse cursor indicating actions
-// Sparks at laser endpoints, energy pulses
+// TODO: Sparks at laser endpoints, energy pulses, lights in light canvas, gradient drawing?
 
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
@@ -549,7 +548,7 @@ export const testLevels: LevelData[] = [
             '                                                               ',
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
             '                                                               ',
-            '. . . . . . . . . . . . . . . . A . . . . . . . . . . . . . . .',
+            '. . . . . . . . . . . . . A . . . . . . . . . . . . . . . . . .',
         ],
         walkerData: [
             [300, 200, 1]
@@ -798,7 +797,7 @@ export const testLevels: LevelData[] = [
         typeGrid: [
             '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
             '                                -                       -      ',
-            '# . . . %=%=%=% %=% %=% . . . . ! . . . % . . . . . . . % . . #',
+            '# . . . %=%=%=% %=% %=% . . . . ! . . . . . . . . . . . % . . #',
             '=             =   =   =                                 -     =',
             '# . . . . . . %=% %=% %=% . . . . . . . . . . . $=$=$=$=$ . . #',
             '                                                               ',

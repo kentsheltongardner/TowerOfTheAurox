@@ -11,7 +11,6 @@ export default class Debris {
     public y:       number
     public vx:      number
     public vy:      number
-    public frame:   number
 
     constructor(block: Block) {
         this.x          = block.x + Math.random() * Block.Width
@@ -20,6 +19,5 @@ export default class Debris {
         const speed     = Debris.SpeedMinimum + Math.random() * (Debris.SpeedMaximum - Debris.SpeedMinimum)
         this.vx         = Math.cos(theta) * speed * 2.0
         this.vy         = Math.sin(theta) * speed
-        this.frame      = 0
     }
 }
