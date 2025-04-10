@@ -245,47 +245,58 @@ export default class Game {
         this.displayCanvas.height = window.innerHeight;
     }
     render() {
+        // Initialize canvases
         const context = this.canvas.getContext('2d');
         const lightContext = this.lightCanvas.getContext('2d');
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         lightContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Create offsets
         const shakeIntensity = this.camera.shakeIntensity;
         const shakeY = Math.round((Math.random() * shakeIntensity * 2 - shakeIntensity) * 10);
         const scrollY = Math.round(this.smooth(this.scrollFrame / Game.ScrollFrames) * Level.GridHeight);
         const offsetY = shakeY + scrollY;
+        // Render levels
         this.levelNextNext.render(this.canvas, offsetY);
         this.levelNext.render(this.canvas, Level.GridHeight + offsetY);
         this.levelCurr.render(this.canvas, Level.GridHeight * 2 + offsetY);
         this.levelPrev.render(this.canvas, Level.GridHeight * 3 + offsetY);
+        // Prepare light canvas
         lightContext.globalCompositeOperation = 'source-over';
         lightContext.fillStyle = '#000000fd';
         lightContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Reveal lights
         this.levelNextNext.renderLight(this.lightCanvas, offsetY);
         this.levelNext.renderLight(this.lightCanvas, Level.GridHeight + offsetY);
         this.levelCurr.renderLight(this.lightCanvas, Level.GridHeight * 2 + offsetY);
         this.levelPrev.renderLight(this.lightCanvas, Level.GridHeight * 3 + offsetY);
         context.globalCompositeOperation = 'source-over';
         context.drawImage(this.lightCanvas, 0, 0);
+        // Add color styling
         context.globalCompositeOperation = 'soft-light';
-        context.fillStyle = 'rgba(255, 128, 64, 0.6)';
+        context.fillStyle = 'rgba(255, 96, 32, 0.6)';
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         context.globalCompositeOperation = 'source-over';
+        // Render buttons
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
         for (const button of this.buttons) {
             context.drawImage(Images.ButtonsMap[button.type], button.x, button.y);
         }
+        // Render text
         this.renderText(context, offsetY);
+        // Scale and render to screen
         const displayRect = this.displayRect();
         const screenY = Level.GridHeight * 2;
         this.displayContext.imageSmoothingEnabled = false;
         this.displayContext.clearRect(0, 0, this.displayCanvas.width, this.displayCanvas.height);
         this.displayContext.drawImage(this.canvas, 0, screenY, Level.GridWidth, Level.GridHeight, displayRect.x, displayRect.y, displayRect.w, displayRect.h);
+        // Render death screen
         this.overlayOpacity = this.levelCurr.deaths > 0 ?
             this.overlayOpacity + (0.25 - this.overlayOpacity) * 0.05 :
             this.overlayOpacity + (0 - this.overlayOpacity) * 0.05;
         this.displayContext.fillStyle = `rgba(255, 0, 0, ${this.overlayOpacity})`;
         this.displayContext.fillRect(displayRect.x, displayRect.y, displayRect.w, displayRect.h);
+        // Render title screen
         if (this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
             this.displayContext.globalAlpha = this.smooth(1.0 - this.titleFadeOutFrame / Game.TitleFadeoutFrames);
             // generate falling stars?
@@ -294,6 +305,7 @@ export default class Game {
             this.displayContext.drawImage(Images.Title, displayRect.x, displayRect.y, displayRect.w, displayRect.h);
             this.displayContext.globalAlpha = 1.0;
         }
+        // Render mouse
         this.renderMouse();
     }
     renderMouse() {
