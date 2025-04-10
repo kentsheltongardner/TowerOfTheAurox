@@ -7,9 +7,9 @@ import Camera       from './camera.js'
 import Sounds       from './sounds.js'
 import TextRenderer from './text.js'
 import Block from './block.js'
+import Button from './button.js'
 
 export default class Game {
-
     public static readonly Tau                      = Math.PI * 2
     public static readonly AmbientGradientRadius    = Math.hypot(Level.GridCenterX, Level.GridCenterY)
     public static readonly SplatterRGB              = '#9f040460'
@@ -26,37 +26,38 @@ export default class Game {
     public uiCanvas:            HTMLCanvasElement = document.createElement('canvas')
     public lightCanvas:         HTMLCanvasElement = document.createElement('canvas')
 
-
     public displayCanvas:       HTMLCanvasElement
     public displayContext:      CanvasRenderingContext2D
-    public levelIndex:          number
     public levelCount:          number
     public levelPrev:           Level
     public levelCurr:           Level
     public levelNext:           Level
     public levelNextNext:       Level
     public levelData:           LevelData[]
-    public musicPlaying:        boolean
-    public lastTimestamp:       number
-    public frame:               number
-    public titleFadeOutFrame:   number
-    public scrollFrame:         number
-    public tapPoint:            Point
-    public tapped:              boolean
-    public camera:              Camera
-    public overlayOpacity:      number
-    public skip:                boolean
-    public mousePosition:       Point
-    public gamePosition:        Point
-    public mousePressed:        boolean
-    public mousePresent:        boolean
+
+    public levelIndex:          number      = 1
+    public musicPlaying:        boolean     = false
+    public lastTimestamp:       number      = 0
+    public titleFadeOutFrame:   number      = 0
+    public scrollFrame:         number      = 0
+    public tapPoint:            Point       = new Point(0, 0)
+    public tapped:              boolean     = false
+    public camera:              Camera      = new Camera()
+    public overlayOpacity:      number      = 0
+    public skip:                boolean     = false
+    public mousePosition:       Point       = new Point(0, 0)
+    public gamePosition:        Point       = new Point(0, 0)
+    public mousePressed:        boolean     = false
+    public mousePresent:        boolean     = false
+    public buttons:             Button[]    = []
+
+
 
     // Numeric scroll system based on direction of movement (up or down)
 
     constructor(levelData: LevelData[], displayCanvas: HTMLCanvasElement) {
         this.camera             = new Camera()
         this.levelData          = levelData
-        this.levelIndex         = 1
         this.levelCount         = this.levelData.length
         this.levelPrev          = new Level(this.levelData[this.levelIndex - 1], this.camera)
         this.levelCurr          = new Level(this.levelData[this.levelIndex], this.camera)
@@ -74,31 +75,27 @@ export default class Game {
         this.displayCanvas      = displayCanvas
         this.displayContext     = this.displayCanvas.getContext('2d')!
 
-        this.musicPlaying       = false
-        this.lastTimestamp      = 0
-        this.frame              = 0
-        this.scrollFrame        = 0
-        this.titleFadeOutFrame  = 0
-        this.tapPoint           = new Point(0, 0)
-        this.tapped             = false
-        this.overlayOpacity     = 0
-        this.skip               = false
-        this.mousePosition      = new Point(0, 0)
-        this.gamePosition       = new Point(0, 0)
-        this.mousePressed       = false
-        this.mousePresent       = false
-
         this.resize()
-        window.addEventListener('resize',       ()  => { this.resize() })
-        this.displayCanvas.addEventListener('mousedown',    e   => { this.tap(e.offsetX, e.offsetY) })
-        this.displayCanvas.addEventListener('mouseup',      ()  => { this.mousePressed = false })
-        this.displayCanvas.addEventListener('mouseenter',   ()  => { this.mousePresent = true })
-        this.displayCanvas.addEventListener('mouseleave',   ()  => { this.mousePresent = false })
-        this.displayCanvas.addEventListener('mousemove',    e   => { this.mouseMove(e.offsetX, e.offsetY) })
+        window.addEventListener('resize',       ()  => this.resize())
+        window.addEventListener('mousedown',    e   => this.tap(e.offsetX, e.offsetY))
+        window.addEventListener('mouseup',      ()  => this.mousePressed = false)
+        window.addEventListener('mouseenter',   ()  => this.mousePresent = true)
+        window.addEventListener('mouseleave',   ()  => this.mousePresent = false)
+        window.addEventListener('mousemove',    e   => this.mouseMove(e.offsetX, e.offsetY))
+        window.addEventListener('keydown',      e   => this.keyDown(e))
+        window.addEventListener('keyup',        e   => this.keyUp(e))
+        window.addEventListener('contextmenu',  e   => e.preventDefault())
 
-        window.addEventListener('keydown',      e => { this.keyDown(e) })
-        window.addEventListener('keyup',        e => { this.keyUp(e) })
-        window.addEventListener('contextmenu',  e => e.preventDefault())
+
+        const buttonsWidth      = Button.Width * Button.Count + Button.Gap * (Button.Count - 1)
+        const buttonIncrement   = Button.Width + Button.Gap
+        let x                   = Math.floor((Level.GridWidth - buttonsWidth) / 2)
+        const y                 = Level.GridHeight * 3 - Button.Y - Button.Height
+
+        for (let type = 0; type < Button.Count; type++) {
+            this.buttons.push(new Button(type, x, y))
+            x += buttonIncrement
+        }
 
         requestAnimationFrame(timestamp => this.loop(timestamp))
     }
@@ -192,15 +189,12 @@ export default class Game {
             this.titleFadeOutFrame++
         }
 
-        if (this.frame % 1 === 0) {
-            this.levelCurr.update(this.frame)
-        }
+        this.levelCurr.update()
 
         if (this.levelCurr.complete() && this.levelIndex < this.levelCount - 2) {
             Sounds.playBell()
             this.scrollFrame = 1
         }
-        this.frame++
     }
     loop(timestamp: number) {
         if (timestamp - this.lastTimestamp >= Game.FrameTimeMilliseconds) {
@@ -236,7 +230,7 @@ export default class Game {
             }
             
 
-            this.render(this.frame)
+            this.render()
         }
         requestAnimationFrame(timestamp => this.loop(timestamp))
     }
@@ -296,7 +290,7 @@ export default class Game {
 
 
 
-    render(frame: number) {
+    render() {
         const context       = this.canvas.getContext('2d')!
         const lightContext  = this.lightCanvas.getContext('2d')!
         context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -307,19 +301,19 @@ export default class Game {
         const scrollY           = Math.round(this.smooth(this.scrollFrame / Game.ScrollFrames) * Level.GridHeight)
         const offsetY           = shakeY + scrollY
         
-        this.levelNextNext.render(this.canvas, offsetY, 0)
-        this.levelNext.render(this.canvas, Level.GridHeight + offsetY, 0)
-        this.levelCurr.render(this.canvas, Level.GridHeight * 2 + offsetY, frame)
-        this.levelPrev.render(this.canvas, Level.GridHeight * 3 + offsetY, 0)
+        this.levelNextNext.render(this.canvas, offsetY)
+        this.levelNext.render(this.canvas, Level.GridHeight + offsetY)
+        this.levelCurr.render(this.canvas, Level.GridHeight * 2 + offsetY)
+        this.levelPrev.render(this.canvas, Level.GridHeight * 3 + offsetY)
 
         lightContext.globalCompositeOperation = 'source-over'
         lightContext.fillStyle = '#000000fd'
         lightContext.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
-        this.levelNextNext.renderLight(this.lightCanvas, offsetY, frame)
-        this.levelNext.renderLight(this.lightCanvas, Level.GridHeight + offsetY, frame)
-        this.levelCurr.renderLight(this.lightCanvas, Level.GridHeight * 2 + offsetY, frame)
-        this.levelPrev.renderLight(this.lightCanvas, Level.GridHeight * 3 + offsetY, frame)
+        this.levelNextNext.renderLight(this.lightCanvas, offsetY)
+        this.levelNext.renderLight(this.lightCanvas, Level.GridHeight + offsetY)
+        this.levelCurr.renderLight(this.lightCanvas, Level.GridHeight * 2 + offsetY)
+        this.levelPrev.renderLight(this.lightCanvas, Level.GridHeight * 3 + offsetY)
 
         context.globalCompositeOperation = 'source-over'
         context.drawImage(this.lightCanvas, 0, 0)
@@ -328,6 +322,14 @@ export default class Game {
         context.fillStyle = 'rgba(255, 128, 64, 0.6)'
         context.fillRect(0, 0, this.canvas.width, this.canvas.height)
         context.globalCompositeOperation = 'source-over'
+
+
+        context.globalCompositeOperation = 'source-over'
+        context.globalAlpha = 1
+        for (const button of this.buttons) {
+            context.drawImage(Images.ButtonsMap[button.type], button.x, button.y)
+        }
+
 
         this.renderText(context, offsetY)
         const displayRect       = this.displayRect()
@@ -346,8 +348,6 @@ export default class Game {
             displayRect.w, 
             displayRect.h
         )
-
-
 
         this.overlayOpacity = this.levelCurr.deaths > 0 ? 
             this.overlayOpacity + (0.25 - this.overlayOpacity) * 0.05 :

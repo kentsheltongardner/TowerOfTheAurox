@@ -1,4 +1,5 @@
 import Block from './block.js'
+import Button from './button.js'
 import Decoration from './decoration.js'
 
 export default class Images {
@@ -33,8 +34,6 @@ export default class Images {
     public static Cursor            = <HTMLImageElement>document.getElementById('cursor')
     public static CursorClosed      = <HTMLImageElement>document.getElementById('cursor-closed')
 
-    public static BannerAurox       = <HTMLImageElement>document.getElementById('banner-aurox')
-
     public static OffsetMap         = new Array(256).fill(-1)
     public static SoutheastMap      = new Array(256).fill(-1)
     public static SouthwestMap      = new Array(256).fill(-1)
@@ -43,11 +42,19 @@ export default class Images {
     public static BlockTilesetMap   = new Array(Block.TypeCount)
 
     public static DecorationsMap    = new Array(Decoration.Count)
+    public static ButtonsMap        = new Array(Button.Count)
 
     static {
         Images.initializeMaps()
         Images.DecorationsMap[Decoration.BannerAurox]       = <HTMLImageElement>document.getElementById('banner-aurox')
         Images.DecorationsMap[Decoration.BannerAuroxLong]   = <HTMLImageElement>document.getElementById('banner-aurox-long')
+
+        Images.ButtonsMap[Button.Previous]  = <HTMLImageElement>document.getElementById('button-previous')
+        Images.ButtonsMap[Button.Reset]     = <HTMLImageElement>document.getElementById('button-reset')
+        Images.ButtonsMap[Button.Undo]      = <HTMLImageElement>document.getElementById('button-undo')
+        Images.ButtonsMap[Button.Pause]     = <HTMLImageElement>document.getElementById('button-pause')
+        Images.ButtonsMap[Button.Fast]      = <HTMLImageElement>document.getElementById('button-fast')
+        Images.ButtonsMap[Button.Next]      = <HTMLImageElement>document.getElementById('button-next')
     }
 
     static createTilesetImages() {

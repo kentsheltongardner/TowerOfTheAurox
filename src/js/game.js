@@ -6,6 +6,7 @@ import Camera from './camera.js';
 import Sounds from './sounds.js';
 import TextRenderer from './text.js';
 import Block from './block.js';
+import Button from './button.js';
 export default class Game {
     static Tau = Math.PI * 2;
     static AmbientGradientRadius = Math.hypot(Level.GridCenterX, Level.GridCenterY);
@@ -23,32 +24,31 @@ export default class Game {
     lightCanvas = document.createElement('canvas');
     displayCanvas;
     displayContext;
-    levelIndex;
     levelCount;
     levelPrev;
     levelCurr;
     levelNext;
     levelNextNext;
     levelData;
-    musicPlaying;
-    lastTimestamp;
-    frame;
-    titleFadeOutFrame;
-    scrollFrame;
-    tapPoint;
-    tapped;
-    camera;
-    overlayOpacity;
-    skip;
-    mousePosition;
-    gamePosition;
-    mousePressed;
-    mousePresent;
+    levelIndex = 1;
+    musicPlaying = false;
+    lastTimestamp = 0;
+    titleFadeOutFrame = 0;
+    scrollFrame = 0;
+    tapPoint = new Point(0, 0);
+    tapped = false;
+    camera = new Camera();
+    overlayOpacity = 0;
+    skip = false;
+    mousePosition = new Point(0, 0);
+    gamePosition = new Point(0, 0);
+    mousePressed = false;
+    mousePresent = false;
+    buttons = [];
     // Numeric scroll system based on direction of movement (up or down)
     constructor(levelData, displayCanvas) {
         this.camera = new Camera();
         this.levelData = levelData;
-        this.levelIndex = 1;
         this.levelCount = this.levelData.length;
         this.levelPrev = new Level(this.levelData[this.levelIndex - 1], this.camera);
         this.levelCurr = new Level(this.levelData[this.levelIndex], this.camera);
@@ -62,29 +62,24 @@ export default class Game {
         this.lightCanvas.height = Level.GridHeight * 4;
         this.displayCanvas = displayCanvas;
         this.displayContext = this.displayCanvas.getContext('2d');
-        this.musicPlaying = false;
-        this.lastTimestamp = 0;
-        this.frame = 0;
-        this.scrollFrame = 0;
-        this.titleFadeOutFrame = 0;
-        this.tapPoint = new Point(0, 0);
-        this.tapped = false;
-        this.overlayOpacity = 0;
-        this.skip = false;
-        this.mousePosition = new Point(0, 0);
-        this.gamePosition = new Point(0, 0);
-        this.mousePressed = false;
-        this.mousePresent = false;
         this.resize();
-        window.addEventListener('resize', () => { this.resize(); });
-        this.displayCanvas.addEventListener('mousedown', e => { this.tap(e.offsetX, e.offsetY); });
-        this.displayCanvas.addEventListener('mouseup', () => { this.mousePressed = false; });
-        this.displayCanvas.addEventListener('mouseenter', () => { this.mousePresent = true; });
-        this.displayCanvas.addEventListener('mouseleave', () => { this.mousePresent = false; });
-        this.displayCanvas.addEventListener('mousemove', e => { this.mouseMove(e.offsetX, e.offsetY); });
-        window.addEventListener('keydown', e => { this.keyDown(e); });
-        window.addEventListener('keyup', e => { this.keyUp(e); });
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('mousedown', e => this.tap(e.offsetX, e.offsetY));
+        window.addEventListener('mouseup', () => this.mousePressed = false);
+        window.addEventListener('mouseenter', () => this.mousePresent = true);
+        window.addEventListener('mouseleave', () => this.mousePresent = false);
+        window.addEventListener('mousemove', e => this.mouseMove(e.offsetX, e.offsetY));
+        window.addEventListener('keydown', e => this.keyDown(e));
+        window.addEventListener('keyup', e => this.keyUp(e));
         window.addEventListener('contextmenu', e => e.preventDefault());
+        const buttonsWidth = Button.Width * Button.Count + Button.Gap * (Button.Count - 1);
+        const buttonIncrement = Button.Width + Button.Gap;
+        let x = Math.floor((Level.GridWidth - buttonsWidth) / 2);
+        const y = Level.GridHeight * 3 - Button.Y - Button.Height;
+        for (let type = 0; type < Button.Count; type++) {
+            this.buttons.push(new Button(type, x, y));
+            x += buttonIncrement;
+        }
         requestAnimationFrame(timestamp => this.loop(timestamp));
     }
     mouseMove(x, y) {
@@ -167,14 +162,11 @@ export default class Game {
             && this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
             this.titleFadeOutFrame++;
         }
-        if (this.frame % 1 === 0) {
-            this.levelCurr.update(this.frame);
-        }
+        this.levelCurr.update();
         if (this.levelCurr.complete() && this.levelIndex < this.levelCount - 2) {
             Sounds.playBell();
             this.scrollFrame = 1;
         }
-        this.frame++;
     }
     loop(timestamp) {
         if (timestamp - this.lastTimestamp >= Game.FrameTimeMilliseconds) {
@@ -209,7 +201,7 @@ export default class Game {
                     }
                 }
             }
-            this.render(this.frame);
+            this.render();
         }
         requestAnimationFrame(timestamp => this.loop(timestamp));
     }
@@ -252,7 +244,7 @@ export default class Game {
         this.displayCanvas.width = window.innerWidth;
         this.displayCanvas.height = window.innerHeight;
     }
-    render(frame) {
+    render() {
         const context = this.canvas.getContext('2d');
         const lightContext = this.lightCanvas.getContext('2d');
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -261,23 +253,28 @@ export default class Game {
         const shakeY = Math.round((Math.random() * shakeIntensity * 2 - shakeIntensity) * 10);
         const scrollY = Math.round(this.smooth(this.scrollFrame / Game.ScrollFrames) * Level.GridHeight);
         const offsetY = shakeY + scrollY;
-        this.levelNextNext.render(this.canvas, offsetY, 0);
-        this.levelNext.render(this.canvas, Level.GridHeight + offsetY, 0);
-        this.levelCurr.render(this.canvas, Level.GridHeight * 2 + offsetY, frame);
-        this.levelPrev.render(this.canvas, Level.GridHeight * 3 + offsetY, 0);
+        this.levelNextNext.render(this.canvas, offsetY);
+        this.levelNext.render(this.canvas, Level.GridHeight + offsetY);
+        this.levelCurr.render(this.canvas, Level.GridHeight * 2 + offsetY);
+        this.levelPrev.render(this.canvas, Level.GridHeight * 3 + offsetY);
         lightContext.globalCompositeOperation = 'source-over';
         lightContext.fillStyle = '#000000fd';
         lightContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.levelNextNext.renderLight(this.lightCanvas, offsetY, frame);
-        this.levelNext.renderLight(this.lightCanvas, Level.GridHeight + offsetY, frame);
-        this.levelCurr.renderLight(this.lightCanvas, Level.GridHeight * 2 + offsetY, frame);
-        this.levelPrev.renderLight(this.lightCanvas, Level.GridHeight * 3 + offsetY, frame);
+        this.levelNextNext.renderLight(this.lightCanvas, offsetY);
+        this.levelNext.renderLight(this.lightCanvas, Level.GridHeight + offsetY);
+        this.levelCurr.renderLight(this.lightCanvas, Level.GridHeight * 2 + offsetY);
+        this.levelPrev.renderLight(this.lightCanvas, Level.GridHeight * 3 + offsetY);
         context.globalCompositeOperation = 'source-over';
         context.drawImage(this.lightCanvas, 0, 0);
         context.globalCompositeOperation = 'soft-light';
         context.fillStyle = 'rgba(255, 128, 64, 0.6)';
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         context.globalCompositeOperation = 'source-over';
+        context.globalCompositeOperation = 'source-over';
+        context.globalAlpha = 1;
+        for (const button of this.buttons) {
+            context.drawImage(Images.ButtonsMap[button.type], button.x, button.y);
+        }
         this.renderText(context, offsetY);
         const displayRect = this.displayRect();
         const screenY = Level.GridHeight * 2;

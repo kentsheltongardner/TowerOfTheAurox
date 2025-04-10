@@ -1,4 +1,5 @@
 import Block from './block.js';
+import Button from './button.js';
 import Decoration from './decoration.js';
 export default class Images {
     static WallTemplate = document.getElementById('wall-template');
@@ -29,7 +30,6 @@ export default class Images {
     static Font = document.getElementById('font');
     static Cursor = document.getElementById('cursor');
     static CursorClosed = document.getElementById('cursor-closed');
-    static BannerAurox = document.getElementById('banner-aurox');
     static OffsetMap = new Array(256).fill(-1);
     static SoutheastMap = new Array(256).fill(-1);
     static SouthwestMap = new Array(256).fill(-1);
@@ -37,10 +37,17 @@ export default class Images {
     static NortheastMap = new Array(256).fill(-1);
     static BlockTilesetMap = new Array(Block.TypeCount);
     static DecorationsMap = new Array(Decoration.Count);
+    static ButtonsMap = new Array(Button.Count);
     static {
         Images.initializeMaps();
         Images.DecorationsMap[Decoration.BannerAurox] = document.getElementById('banner-aurox');
         Images.DecorationsMap[Decoration.BannerAuroxLong] = document.getElementById('banner-aurox-long');
+        Images.ButtonsMap[Button.Previous] = document.getElementById('button-previous');
+        Images.ButtonsMap[Button.Reset] = document.getElementById('button-reset');
+        Images.ButtonsMap[Button.Undo] = document.getElementById('button-undo');
+        Images.ButtonsMap[Button.Pause] = document.getElementById('button-pause');
+        Images.ButtonsMap[Button.Fast] = document.getElementById('button-fast');
+        Images.ButtonsMap[Button.Next] = document.getElementById('button-next');
     }
     static createTilesetImages() {
         Images.WallTileset = Images.tilesetImage(Images.WallTemplate);

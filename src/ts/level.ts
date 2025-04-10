@@ -61,6 +61,7 @@ export default class Level {
     public splashes:            Set<Splash>         = new Set<Splash>()
     public droplets:            Set<Droplet>        = new Set<Droplet>()
     public decorations:         Decoration[]        = []
+    public frame:               number              = 0
 
     // public canvas:              HTMLCanvasElement   = document.createElement('canvas')
     // public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
@@ -673,7 +674,7 @@ export default class Level {
 // #     #  #        #     #  #     #     #     #        
 //  #####   #        ######   #     #     #     #######  
 
-    update(frame: number) {
+    update() {
 
 //    #      #####    #####   #######  #        #######  ######      #     #######  #######  
 //   # #    #     #  #     #  #        #        #        #     #    # #       #     #        
@@ -1173,7 +1174,7 @@ export default class Level {
             }
         }
 
-        if (frame % 2 === 0) {
+        if (this.frame % 2 === 0) {
             this.performGrouping()
             this.groundMovers()
 
@@ -1266,6 +1267,8 @@ export default class Level {
         this.updateDroplets()
         this.updateSplashes()
         this.updateSparks()
+
+        this.frame++
     }
 
 
@@ -1816,13 +1819,13 @@ export default class Level {
             }
         }
     }
-    renderTorches(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderTorches(context: CanvasRenderingContext2D, offsetY: number) {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
-        const rng                           = new RNG(frame)
+        const rng                           = new RNG(this.frame)
         
         for (const torch of this.torches) {
-            const offsetX = Math.floor((frame + torch.frame) / 2) % 5 * Block.Width
+            const offsetX = Math.floor((this.frame + torch.frame) / 2) % 5 * Block.Width
             context.drawImage(
                 Images.Torch, 
                 offsetX, 0, Block.Width, Block.Height, 
@@ -1844,10 +1847,10 @@ export default class Level {
         }
     }
 
-    renderBeams(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderBeams(context: CanvasRenderingContext2D, offsetY: number) {
         const renderBeam = (beam: Beam, particleCount: number) => {
             for (let i = 0; i < particleCount; i++) {
-                const stretch   = (rng.nextInt() + (7 + rng.nextInt() % 5) * frame) % 40
+                const stretch   = (rng.nextInt() + (7 + rng.nextInt() % 5) * this.frame) % 40
                 // const variance  = rng.nextInt() % 2
 
                 switch (beam.direction) {
@@ -1901,7 +1904,7 @@ export default class Level {
 
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
-        context.strokeStyle                 = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smooth(frame * 0.05)})`
+        context.strokeStyle                 = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smooth(this.frame * 0.05)})`
         context.beginPath()
         for (const beam of this.beams()) {
             context.moveTo(beam.x1, beam.y1 + offsetY)
@@ -1935,11 +1938,11 @@ export default class Level {
         // }
     }
 
-    renderWalkers(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderWalkers(context: CanvasRenderingContext2D, offsetY: number) {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
         for (const walker of this.walkers) {
-            const offsetX       = (Math.floor(frame / 3) + walker.frameOffset) % Walker.Frames
+            const offsetX       = (Math.floor(this.frame / 3) + walker.frameOffset) % Walker.Frames
             const spriteSheet   = walker.walkDirection === 1 ? Images.WalkerRight : Images.WalkerLeft
             context.drawImage(
                 spriteSheet, 
@@ -1954,11 +1957,11 @@ export default class Level {
         }
     }
 
-    renderCreepers(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderCreepers(context: CanvasRenderingContext2D, offsetY: number) {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
         for (const creeper of this.creepers) {
-            const offsetX       = (Math.floor(frame / 3) + creeper.frameOffset) % Creeper.Frames
+            const offsetX       = (Math.floor(this.frame / 3) + creeper.frameOffset) % Creeper.Frames
             const spriteSheet   = creeper.walkDirection === 1 ? Images.CreeperRight : Images.CreeperLeft
             context.drawImage(
                 spriteSheet, 
@@ -1973,7 +1976,7 @@ export default class Level {
         }
     }
 
-    renderAltars(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderAltars(context: CanvasRenderingContext2D, offsetY: number) {
         const rng                           = new RNG()
         const height                        = Block.Height / 2
         context.globalCompositeOperation    = 'source-over'
@@ -1986,7 +1989,7 @@ export default class Level {
                 const rand              = rng.nextInt()
                 const h                 = Math.floor(height * rng.nextFloat() * 1.5)
                 const x                 = block.x + 1 + rand % (Block.Width - 2)
-                const position          = (rng.nextInt() + Math.floor(frame / 2)) % h / h
+                const position          = (rng.nextInt() + Math.floor(this.frame / 2)) % h / h
                 const scaledPosition    = position * position
                 const y                 = block.y - 1 - scaledPosition * h + offsetY
                 if (block.warp) {
@@ -2056,10 +2059,10 @@ export default class Level {
         }
     }
 
-    renderSelection(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderSelection(context: CanvasRenderingContext2D, offsetY: number) {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
-        const srcY = Block.Height * (Math.floor(frame / 4) % 4)
+        const srcY = Block.Height * (Math.floor(this.frame / 4) % 4)
         for (const index of this.hoverGroup) {
             const block = this.blocks[index]
             context.drawImage(
@@ -2130,11 +2133,11 @@ export default class Level {
         }
     }
 
-    renderDroplets(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+    renderDroplets(context: CanvasRenderingContext2D, offsetY: number) {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
         context.fillStyle                   = '#248'
-        const rng                           = new RNG(frame)
+        const rng                           = new RNG(this.frame)
         
         for (const droplet of this.droplets) {
             const x             = Math.floor(droplet.x)
@@ -2172,22 +2175,22 @@ export default class Level {
     }
 
 
-    render(canvas: HTMLCanvasElement, offsetY: number, frame: number) {
+    render(canvas: HTMLCanvasElement, offsetY: number) {
         const context = canvas.getContext('2d')!
 
         this.renderBricks(context, offsetY)
         this.renderDecorations(context, offsetY)
-        this.renderBeams(context, offsetY, frame)
-        this.renderWalkers(context, offsetY, frame)
-        this.renderCreepers(context, offsetY, frame)
-        this.renderAltars(context, offsetY, frame)
+        this.renderBeams(context, offsetY)
+        this.renderWalkers(context, offsetY)
+        this.renderCreepers(context, offsetY)
+        this.renderAltars(context, offsetY)
         this.renderDebris(context, offsetY)
         this.renderSparks(context, offsetY)
         this.renderBlocks(context, offsetY)
         // this.renderInfo(context, offsetY)
         this.renderSplatters(context, offsetY)
-        this.renderDroplets(context, offsetY, frame)
-        this.renderSelection(context, offsetY, frame)
+        this.renderDroplets(context, offsetY)
+        this.renderSelection(context, offsetY)
 
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha = 1
@@ -2222,10 +2225,10 @@ export default class Level {
     //     }
     // }
 
-    renderLight(lightCanvas: HTMLCanvasElement, offsetY: number, frame: number) {
+    renderLight(lightCanvas: HTMLCanvasElement, offsetY: number) {
         const lightContext                      = lightCanvas.getContext('2d')!
         lightContext.globalCompositeOperation   = 'destination-out'
-        const rng                               = new RNG(frame)
+        const rng                               = new RNG(this.frame)
 
         for (const torch of this.torches) {
             const radius = 160 + rng.nextFloat() * 3
@@ -2240,6 +2243,6 @@ export default class Level {
             lightContext.fillRect(cx - radius, cy - radius, diameter, diameter)
         }
 
-        this.renderTorches(lightContext, offsetY, frame)
+        this.renderTorches(lightContext, offsetY)
     }
 }
