@@ -5,6 +5,7 @@ import Images from './images.js';
 import Camera from './camera.js';
 import Sounds from './sounds.js';
 import TextRenderer from './text.js';
+import Block from './block.js';
 export default class Game {
     static Tau = Math.PI * 2;
     static AmbientGradientRadius = Math.hypot(Level.GridCenterX, Level.GridCenterY);
@@ -152,7 +153,7 @@ export default class Game {
         }
         this.tapped = true;
         this.tapPoint = this.gamePoint(x, y);
-        console.log(this.tapPoint.x, this.tapPoint.y);
+        console.log(this.tapPoint.x, this.tapPoint.y, Math.floor(this.tapPoint.x / Block.Width), Math.floor(this.tapPoint.y / Block.Height));
         if (!this.musicPlaying) {
             this.musicPlaying = true;
             const music = document.getElementById('music');
