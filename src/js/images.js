@@ -1,4 +1,5 @@
 import Block from './block.js';
+import Decoration from './decoration.js';
 export default class Images {
     static WallTemplate = document.getElementById('wall-template');
     static ClayTemplate = document.getElementById('clay-template');
@@ -28,14 +29,17 @@ export default class Images {
     static Font = document.getElementById('font');
     static Cursor = document.getElementById('cursor');
     static CursorClosed = document.getElementById('cursor-closed');
+    static BannerAurox = document.getElementById('banner-aurox');
     static OffsetMap = new Array(256).fill(-1);
     static SoutheastMap = new Array(256).fill(-1);
     static SouthwestMap = new Array(256).fill(-1);
     static NorthwestMap = new Array(256).fill(-1);
     static NortheastMap = new Array(256).fill(-1);
     static BlockTilesetMap = new Array(Block.TypeCount);
+    static DecorationsMap = new Array(Decoration.Count);
     static {
         Images.initializeMaps();
+        Images.DecorationsMap[Decoration.BannerAurox] = document.getElementById('banner-aurox');
     }
     static createTilesetImages() {
         Images.WallTileset = Images.tilesetImage(Images.WallTemplate);

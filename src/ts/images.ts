@@ -1,4 +1,5 @@
 import Block from './block.js'
+import Decoration from './decoration.js'
 
 export default class Images {
     public static WallTemplate: HTMLImageElement        = <HTMLImageElement>document.getElementById('wall-template')
@@ -32,6 +33,8 @@ export default class Images {
     public static Cursor            = <HTMLImageElement>document.getElementById('cursor')
     public static CursorClosed      = <HTMLImageElement>document.getElementById('cursor-closed')
 
+    public static BannerAurox       = <HTMLImageElement>document.getElementById('banner-aurox')
+
     public static OffsetMap         = new Array(256).fill(-1)
     public static SoutheastMap      = new Array(256).fill(-1)
     public static SouthwestMap      = new Array(256).fill(-1)
@@ -39,8 +42,11 @@ export default class Images {
     public static NortheastMap      = new Array(256).fill(-1)
     public static BlockTilesetMap   = new Array(Block.TypeCount)
 
+    public static DecorationsMap    = new Array(Decoration.Count)
+
     static {
         Images.initializeMaps()
+        Images.DecorationsMap[Decoration.BannerAurox] = <HTMLImageElement>document.getElementById('banner-aurox')
     }
 
     static createTilesetImages() {
@@ -89,6 +95,8 @@ export default class Images {
 
             index++
         }
+
+
     }
 
     // Assumes a template with even dimensions

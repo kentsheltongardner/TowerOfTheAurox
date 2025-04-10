@@ -5,6 +5,7 @@ import Color        from './color.js'
 import Connection   from './connection.js'
 import Creeper      from './creeper.js'
 import Debris       from './debris.js'
+import Decoration from './decoration.js'
 import Droplet      from './droplet.js'
 import Images       from './images.js'
 import LevelData    from './level_data.js'
@@ -59,6 +60,7 @@ export default class Level {
     public message:             string              = ''
     public splashes:            Set<Splash>         = new Set<Splash>()
     public droplets:            Set<Droplet>        = new Set<Droplet>()
+    public decorations:         Decoration[]        = []
 
     // public canvas:              HTMLCanvasElement   = document.createElement('canvas')
     // public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
@@ -235,8 +237,13 @@ export default class Level {
         }
 
         // Add torches
-        for (const torch of this.levelData.torches) {
+        for (const torch of this.levelData.torchData) {
             this.torches.push(new Torch(torch[0], torch[1]))
+        }
+
+        // Add decorations
+        for (const decoration of this.levelData.decorationData) {
+            this.decorations.push(new Decoration(decoration[0], decoration[1], decoration[2]))
         }
     }
     setIndices(x: number, y: number, w: number, h: number, index: number) {
@@ -1378,7 +1385,7 @@ export default class Level {
                         impactX = xw
                     }
                 }
-                return new Beam(x, y, impactX, y)
+                return new Beam(x, y, impactX, y, direction)
             }
             case Connection.West: {
                 let impactX = 0
@@ -1390,7 +1397,7 @@ export default class Level {
                         impactX = xe
                     }
                 }
-                return new Beam(x, y, impactX, y)
+                return new Beam(x, y, impactX, y, direction)
             }
             case Connection.South: {
                 let impactY = Level.GridHeight - 1
@@ -1402,7 +1409,7 @@ export default class Level {
                         impactY = yn
                     }
                 }
-                return new Beam(x, y, x, impactY)
+                return new Beam(x, y, x, impactY, direction)
             }
             case Connection.North: {
                 let impactY = 0
@@ -1414,10 +1421,10 @@ export default class Level {
                         impactY = ys
                     }
                 }
-                return new Beam(x, y, x, impactY)
+                return new Beam(x, y, x, impactY, direction)
             }
         }
-        return new Beam(x, y, x, y)
+        return new Beam(x, y, x, y, direction)
     }
 
     fireBeam(beam: Beam, mover: Mover, moverSet: Set<Mover>) {
@@ -1592,10 +1599,10 @@ export default class Level {
         const beams = this.beams()
 
         for (const beam of beams) {
-            const count = 1 + Math.floor(Math.random() * 2)
+            const count = 1// + Math.floor(Math.random() * 2)
             for (let i = 0; i < count; i++) {
                 const theta = Math.random() * Level.Tau
-                const v     = 2 + Math.random() * 2
+                const v     = 2 + Math.random()
                 const vx    = Math.cos(theta) * v
                 const vy    = Math.sin(theta) * v
                 const spark = new Spark(beam.x2, beam.y2, vx, vy)
@@ -1836,16 +1843,94 @@ export default class Level {
     }
 
     renderBeams(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
+        const renderBeam = (beam: Beam, particleCount: number) => {
+            for (let i = 0; i < particleCount; i++) {
+                const stretch   = (rng.nextInt() + (7 + rng.nextInt() % 5) * frame) % 40
+                // const variance  = rng.nextInt() % 2
+
+                switch (beam.direction) {
+                    case Connection.East: {
+                        let x = beam.x1 + stretch
+                        let y = beam.y1
+                        while (x <= beam.x2) {
+                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
+                            x += 40
+                        }
+                        break
+                    }
+                    case Connection.South: {
+                        let x = beam.x1
+                        let y = beam.y1 + stretch
+                        while (y <= beam.y2) {
+                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
+                            y += 40
+                        }
+                        break
+                    }
+                    case Connection.West: {
+                        let x = beam.x1 - stretch
+                        let y = beam.y1
+                        while (x >= beam.x2) {
+                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
+                            x -= 40
+                        }
+                        break
+                    }
+                    case Connection.North: {
+                        let x = beam.x1
+                        let y = beam.y1 - stretch
+                        while (y >= beam.y2) {
+                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
+                            y -= 40
+                        }
+                        break
+                    }
+                }
+            }
+        }
+
+        const rng = new RNG()
+
+
+
+        // Desired behavior
+        // equally spaced sparkles along the beam that accelerate
+        // Fixed set of sparkles per beam, of some length, repeated along length
+
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
-        const beamIntensity = 0.5 + 0.5 * this.smooth(frame * 0.075)
-        context.strokeStyle = `rgba(255, 128, 0, ${beamIntensity})`
+        context.strokeStyle                 = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smooth(frame * 0.05)})`
         context.beginPath()
         for (const beam of this.beams()) {
             context.moveTo(beam.x1, beam.y1 + offsetY)
             context.lineTo(beam.x2, beam.y2 + offsetY)
         }
         context.stroke()
+
+        for (const beam of this.beams()) {
+            const radius    = 7 + Math.random() * 2
+            const diameter  = radius * 2
+            const cx        = beam.x2
+            const cy        = beam.y2 + offsetY
+            const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
+            gradient.addColorStop(0, '#fc0')
+            gradient.addColorStop(0.25, '#fc06')
+            gradient.addColorStop(1, '#fc00')
+            context.fillStyle = gradient
+            context.fillRect(cx - radius, cy - radius, diameter, diameter)
+        }
+
+
+
+        // context.fillStyle = `rgba(255, 255, 0, ${0.25 + 0.25 * this.smooth(frame * 0.05)})`
+        // for (const beam of this.beams()) {
+        //     renderBeam(beam, 20)
+        // }
+
+        // context.fillStyle = `rgba(255, 255, 0, ${0.5 + 0.5 * this.smooth(frame * 0.05)})`
+        // for (const beam of this.beams()) {
+        //     renderBeam(beam, 10)
+        // }
     }
 
     renderWalkers(context: CanvasRenderingContext2D, offsetY: number, frame: number) {
@@ -2078,11 +2163,18 @@ export default class Level {
         }
     }
 
+    renderDecorations(context: CanvasRenderingContext2D, offsetY: number) {
+        for (const decoration of this.decorations) {
+            context.drawImage(Images.DecorationsMap[decoration.type], decoration.x * Block.Width, decoration.y * Block.Height + offsetY)
+        }
+    }
+
 
     render(canvas: HTMLCanvasElement, offsetY: number, frame: number) {
         const context = canvas.getContext('2d')!
 
         this.renderBricks(context, offsetY)
+        this.renderDecorations(context, offsetY)
         this.renderBeams(context, offsetY, frame)
         this.renderWalkers(context, offsetY, frame)
         this.renderCreepers(context, offsetY, frame)

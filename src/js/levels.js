@@ -1,3 +1,4 @@
+import Decoration from './decoration.js';
 // TODO: Sparks at laser endpoints, energy pulses, lights in light canvas, gradient drawing?
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
@@ -182,8 +183,9 @@ export const testLevels = [
         ],
         walkerData: [],
         creeperData: [],
-        torches: [],
+        torchData: [],
         messages: [],
+        decorationData: [],
     },
     // {
     //     typeGrid: [
@@ -243,16 +245,16 @@ export const testLevels = [
     //         [360, 230, -1]
     //     ],
     //     creeperData: [],
-    //     torches: [],
+    //     torchData: [],
     //     messages: [],
     // },
     {
         typeGrid: [
             '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
             '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
             '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '# . . . . . . . . . . . #=#=# . . #=#=# . . . . . . . . . . . #',
             '                                                               ',
             '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
             '=                                                             =',
@@ -260,7 +262,7 @@ export const testLevels = [
             '                                                               ',
             '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
             '=                                                             =',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
             '                                                               ',
             '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
             '=                         =         =                         =',
@@ -301,7 +303,12 @@ export const testLevels = [
             [290, 230, 1]
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2]
+        ],
         messages: [
             ["Press 'r' to reset a level",
                 12, 8],
@@ -311,6 +318,10 @@ export const testLevels = [
                 11, 10],
             ["Press 'n' to advance to the next level",
                 20, 10],
+        ],
+        decorationData: [
+            [Decoration.BannerAurox, 12, 4],
+            [Decoration.BannerAurox, 19, 4],
         ],
     },
     {
@@ -329,7 +340,7 @@ export const testLevels = [
             '=                                                             =',
             '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
             '                                                               ',
-            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
             '=                                                             =',
             '# . . . . . . . . . . . . # . . . . # . . . . . . . . . . . . #',
             '                          =         =                          ',
@@ -368,8 +379,12 @@ export const testLevels = [
             [290, 290, 1]
         ],
         creeperData: [],
-        torches: [[13, 7], [18, 7]],
+        torchData: [
+            [13, 7],
+            [18, 7]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -427,8 +442,12 @@ export const testLevels = [
             [312, 260, -1],
         ],
         creeperData: [],
-        torches: [[12, 8], [19, 8]],
+        torchData: [
+            [12, 8],
+            [19, 8]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -487,8 +506,14 @@ export const testLevels = [
             [352, 200, 1],
         ],
         creeperData: [],
-        torches: [[10, 8], [21, 8], [10, 4], [21, 4]],
+        torchData: [
+            [10, 8],
+            [21, 8],
+            [10, 4],
+            [21, 4]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -545,8 +570,12 @@ export const testLevels = [
             [300, 200, 1]
         ],
         creeperData: [],
-        torches: [[11, 8], [20, 8]],
+        torchData: [
+            [11, 8],
+            [20, 8]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -604,8 +633,14 @@ export const testLevels = [
             [328, 320, 1]
         ],
         creeperData: [],
-        torches: [[11, 8], [20, 8], [11, 4], [20, 4]],
+        torchData: [
+            [11, 8],
+            [20, 8],
+            [11, 4],
+            [20, 4]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -662,8 +697,14 @@ export const testLevels = [
             [290, 290, 1]
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -722,8 +763,14 @@ export const testLevels = [
         creeperData: [
             [310, 324, -1]
         ],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2]
+        ],
         messages: [],
+        decorationData: [],
     },
     // {
     //     typeGrid: [
@@ -853,8 +900,16 @@ export const testLevels = [
             [488, 89, 1],
             [521, 143, 1],
         ],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2], [6, 2], [25, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+            [6, 2],
+            [25, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -917,8 +972,14 @@ export const testLevels = [
             [480, 324, -1],
             [520, 324, -1],
         ],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2]
+        ],
         messages: [],
+        decorationData: [],
     },
     // {
     //     typeGrid: [
@@ -1035,8 +1096,14 @@ export const testLevels = [
         creeperData: [
             [280, 54, 1]
         ],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1093,8 +1160,14 @@ export const testLevels = [
             [200, 320, 1]
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2]
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1151,8 +1224,14 @@ export const testLevels = [
             [330, 200, 1]
         ],
         creeperData: [],
-        torches: [[9, 7], [22, 7], [9, 4], [22, 4]],
+        torchData: [
+            [9, 7],
+            [22, 7],
+            [9, 4],
+            [22, 4],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1209,8 +1288,14 @@ export const testLevels = [
             [284, 200, 1]
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1276,8 +1361,14 @@ export const testLevels = [
             [230, 294, 1],
             [410, 294, 1],
         ],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     // {
     //     typeGrid: [
@@ -1334,7 +1425,7 @@ export const testLevels = [
     //         [240, 320, 1]
     //     ],
     //     creeperData: [],
-    //     torches: [],
+    //     torchData: [],
     //     messages: [],
     // },
     // {
@@ -1392,7 +1483,7 @@ export const testLevels = [
     //         [240, 320, 1]
     //     ],
     //     creeperData: [],
-    //     torches: [],
+    //     torchData: [],
     //     messages: [],
     // },
     // {
@@ -1450,7 +1541,7 @@ export const testLevels = [
     //         [240, 320, 1]
     //     ],
     //     creeperData: [],
-    //     torches: [],
+    //     torchData: [],
     //     messages: [],
     // },
     // {
@@ -1508,7 +1599,7 @@ export const testLevels = [
     //         [240, 320, 1]
     //     ],
     //     creeperData: [],
-    //     torches: [],
+    //     torchData: [],
     //     messages: [],
     // },
     // {
@@ -1566,7 +1657,7 @@ export const testLevels = [
     //         [120, 320, 1]
     //     ],
     //     creeperData: [],
-    //     torches: [],
+    //     torchData: [],
     //     messages: [],
     // },
     {
@@ -1633,8 +1724,14 @@ export const testLevels = [
             [365, 324, 1],
             [397, 324, -1],
         ],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1703,8 +1800,14 @@ export const testLevels = [
             [550, 276, -1],
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1773,8 +1876,14 @@ export const testLevels = [
             [550, 276, -1],
         ],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
     },
     {
         typeGrid: [
@@ -1829,7 +1938,75 @@ export const testLevels = [
         ],
         walkerData: [],
         creeperData: [],
-        torches: [[13, 6], [18, 6], [13, 2], [18, 2]],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
         messages: [],
+        decorationData: [],
+    },
+    {
+        typeGrid: [
+            '#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#',
+            '                                                               ',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '=                                                             =',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '                                                               ',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '=                                                             =',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '                                                               ',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '=                                                             =',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '                                                               ',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '=                                                             =',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '                                                               ',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '=                                                             =',
+            '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
+            '                                                               ',
+            '#=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=#',
+        ],
+        attributeGrid: [
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+            '                                                               ',
+            '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
+        ],
+        walkerData: [],
+        creeperData: [],
+        torchData: [
+            [13, 6],
+            [18, 6],
+            [13, 2],
+            [18, 2],
+        ],
+        messages: [],
+        decorationData: [],
     },
 ];

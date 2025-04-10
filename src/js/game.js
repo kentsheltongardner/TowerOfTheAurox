@@ -40,6 +40,7 @@ export default class Game {
     overlayOpacity;
     skip;
     mousePosition;
+    gamePosition;
     mousePressed;
     mousePresent;
     // Numeric scroll system based on direction of movement (up or down)
@@ -70,6 +71,7 @@ export default class Game {
         this.overlayOpacity = 0;
         this.skip = false;
         this.mousePosition = new Point(0, 0);
+        this.gamePosition = new Point(0, 0);
         this.mousePressed = false;
         this.mousePresent = false;
         this.resize();
@@ -86,9 +88,9 @@ export default class Game {
     }
     mouseMove(x, y) {
         this.mousePresent = true;
-        const gamePoint = this.gamePoint(x, y);
-        this.mousePosition = this.displayPoint(gamePoint.x, gamePoint.y);
-        this.levelCurr.hover(gamePoint.x + 3, gamePoint.y);
+        this.gamePosition = this.gamePoint(x, y);
+        this.mousePosition = this.displayPoint(this.gamePosition.x, this.gamePosition.y);
+        this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y);
     }
     keyDown(e) {
         switch (e.code) {
@@ -96,6 +98,7 @@ export default class Game {
                 this.levelCurr = new Level(this.levelData[this.levelIndex], this.camera);
                 this.scrollFrame = 0;
                 this.overlayOpacity = 0;
+                this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y);
                 break;
             }
             case 'KeyN': {
@@ -108,6 +111,7 @@ export default class Game {
                 this.levelNextNext = new Level(this.levelData[this.levelIndex + 2], this.camera);
                 this.scrollFrame = 0;
                 this.overlayOpacity = 0;
+                this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y);
                 break;
             }
             case 'KeyP': {
@@ -120,6 +124,7 @@ export default class Game {
                 this.levelNextNext = new Level(this.levelData[this.levelIndex + 2], this.camera);
                 this.scrollFrame = 0;
                 this.overlayOpacity = 0;
+                this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y);
                 break;
             }
             case 'KeyF': {
@@ -182,6 +187,7 @@ export default class Game {
                     this.levelNext = new Level(this.levelData[this.levelIndex + 1], this.camera);
                     this.levelNextNext = new Level(this.levelData[this.levelIndex + 2], this.camera);
                     this.scrollFrame = 0;
+                    this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y);
                 }
             }
             else {

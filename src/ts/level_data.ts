@@ -3,6 +3,7 @@ export default interface LevelData {
     attributeGrid:  string[]
     walkerData:     [number, number, number][]
     creeperData:    [number, number, number][]
-    torches:        [number, number][]
+    torchData:      [number, number][]
     messages:       [string, number, number][]
+    decorationData: [number, number, number][]
 }
