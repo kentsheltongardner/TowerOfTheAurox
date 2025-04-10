@@ -1,5 +1,6 @@
 export default class Decoration {
-    static readonly BannerAurox = 0
+    static readonly BannerAurox     = 0
+    static readonly BannerAuroxLong = 1
 
     static readonly Count = 1
 

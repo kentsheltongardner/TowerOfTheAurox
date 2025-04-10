@@ -46,7 +46,8 @@ export default class Images {
 
     static {
         Images.initializeMaps()
-        Images.DecorationsMap[Decoration.BannerAurox] = <HTMLImageElement>document.getElementById('banner-aurox')
+        Images.DecorationsMap[Decoration.BannerAurox]       = <HTMLImageElement>document.getElementById('banner-aurox')
+        Images.DecorationsMap[Decoration.BannerAuroxLong]   = <HTMLImageElement>document.getElementById('banner-aurox-long')
     }
 
     static createTilesetImages() {

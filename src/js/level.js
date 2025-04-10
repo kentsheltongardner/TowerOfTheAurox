@@ -346,6 +346,8 @@ export default class Level {
         if (index === Level.GridEmpty)
             return;
         const block = this.blocks[index];
+        if (block.invisible)
+            return;
         if (block.message !== '') {
             this.hoverGroup.add(index);
             return;
@@ -1819,7 +1821,7 @@ export default class Level {
         lightContext.globalCompositeOperation = 'destination-out';
         const rng = new RNG(frame);
         for (const torch of this.torches) {
-            const radius = 196 + rng.nextFloat() * 3;
+            const radius = 160 + rng.nextFloat() * 3;
             const diameter = radius * 2;
             const cx = torch.x + Block.Width / 2 + rng.nextFloat() * 2 - 1;
             const cy = torch.y + Block.Height / 2 + rng.nextFloat() * 2 - 1 + offsetY;

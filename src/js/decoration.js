@@ -1,5 +1,6 @@
 export default class Decoration {
     static BannerAurox = 0;
+    static BannerAuroxLong = 1;
     static Count = 1;
     type;
     x;

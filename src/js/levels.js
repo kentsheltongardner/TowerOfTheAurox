@@ -1,5 +1,6 @@
 import Decoration from './decoration.js';
-// TODO: Sparks at laser endpoints, energy pulses, lights in light canvas, gradient drawing?
+// TODO:    Sparks at laser endpoints, energy pulses, lights in light canvas, gradient drawing?
+//          Cloud, fog, mist effects?
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
 // Move an altar to make it accessible
@@ -320,6 +321,8 @@ export const testLevels = [
         decorationData: [
             [Decoration.BannerAurox, 12, 4],
             [Decoration.BannerAurox, 19, 4],
+            [Decoration.BannerAuroxLong, 10, 4],
+            [Decoration.BannerAuroxLong, 21, 4],
         ],
     },
     {
@@ -782,13 +785,13 @@ export const testLevels = [
             '=                                                             =',
             '# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #',
             '                                                               ',
-            '# . . . . . . . . . . . #=#=#=#=#=#=# . . . . . . . . . . . . #',
+            '# . . . . . . . . . . . #=#=#=#=#=#=#=# . . . . . . . . . . . #',
             '=                               -                             =',
-            '# . . . . . . . . . . . # . . %-% . # . . . . . . . . . . . . #',
-            '                        =           =                          ',
-            '# . . . . . . . . . . . # . . . . . # . . . . . . . . . . . . #',
-            '=                       =           =                         =',
-            '# . . . . . . . . . . . # . % . . . # . . . . . . . . . . . . #',
+            '# . . . . . . . . . . # # . . %-% . . # # . . . . . . . . . . #',
+            '                      = =             = =                      ',
+            '# . . . . . . . . . # # # . . . . . . # # # . . . . . . . . . #',
+            '=                   = = =             = = =                   =',
+            '# . . . . . . . . # # # # . % . . . . # # # # . . . . . . . . #',
             '                                                               ',
             '#=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=# #=#=#=#',
         ],
@@ -815,7 +818,7 @@ export const testLevels = [
             '                                                               ',
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
             '                                                               ',
-            '. . . . . . . . . . . . . . . . . A . . . . . . . . . . . . . .',
+            '. . . . . . . . . . . . . . . . . . A . . . . . . . . . . . . .',
         ],
         walkerData: [
             [270, 320, 1]
@@ -824,10 +827,8 @@ export const testLevels = [
             [310, 324, -1]
         ],
         torchData: [
-            [13, 6],
-            [18, 6],
-            [13, 2],
-            [18, 2]
+            [12, 7],
+            [19, 7],
         ],
         messages: [],
         decorationData: [],
@@ -1210,11 +1211,11 @@ export const testLevels = [
             '                                                               ',
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
             '                                                               ',
-            '. . . . . . . . . . . . . . . . . P . . . . . . . . . . . . . .',
+            '. . . . . . . . . . . . . . . . . B . . . . . . . . . . . . . .',
             '                                                               ',
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
             '                                                               ',
-            '. . . . . . . . . . . . . . P . . . . . A . . . . . . . . . . .',
+            '. . . . . . . . . . . . . . B . . . . . A . . . . . . . . . . .',
         ],
         walkerData: [
             [200, 320, 1]

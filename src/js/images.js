@@ -40,6 +40,7 @@ export default class Images {
     static {
         Images.initializeMaps();
         Images.DecorationsMap[Decoration.BannerAurox] = document.getElementById('banner-aurox');
+        Images.DecorationsMap[Decoration.BannerAuroxLong] = document.getElementById('banner-aurox-long');
     }
     static createTilesetImages() {
         Images.WallTileset = Images.tilesetImage(Images.WallTemplate);
