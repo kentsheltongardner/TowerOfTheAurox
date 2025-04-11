@@ -363,14 +363,14 @@ export default class Game {
         context.globalCompositeOperation = 'source-over';
         // Render buttons
         context.globalCompositeOperation = 'source-over';
-        context.globalAlpha = 1;
+        context.globalAlpha = 0.5;
         for (const button of this.buttons) {
             context.drawImage(Images.ButtonsMap[button.type], button.x, button.y + Level.GridHeight * 2);
         }
         // Render tooltips
         if (this.hoverButton !== null) {
             context.globalCompositeOperation = 'source-over';
-            context.globalAlpha = 1;
+            context.globalAlpha = 0.5;
             const renderedText = TextRenderer.paragraphCanvas(Button.HoverTextMap[this.hoverButton.type], Images.Font, Level.GridWidth);
             const w = renderedText.width;
             const h = renderedText.height;
