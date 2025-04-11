@@ -14,6 +14,68 @@ import Splash from './splash.js';
 import Splatter from './splatter.js';
 import Torch from './torch.js';
 import Walker from './walker.js';
+class UndoData {
+    level;
+    deaths;
+    frame;
+    walkers = new Set();
+    creepers = new Set();
+    splatters = new Set();
+    debris = new Set();
+    sparks = new Set();
+    splashes = new Set();
+    droplets = new Set();
+    blocks;
+    constructor(level) {
+        this.level = level;
+        this.frame = level.frame;
+        this.deaths = level.deaths;
+        for (const walker of level.walkers) {
+            this.walkers.add(walker.clone());
+        }
+        for (const creeper of level.creepers) {
+            this.creepers.add(creeper.clone());
+        }
+        for (const splatter of level.splatters) {
+            this.splatters.add(splatter.clone());
+        }
+        for (const debris of level.debris) {
+            this.debris.add(debris.clone());
+        }
+        for (const spark of level.sparks) {
+            this.sparks.add(spark.clone());
+        }
+        for (const splash of level.splashes) {
+            this.splashes.add(splash.clone());
+        }
+        for (const droplet of level.droplets) {
+            this.droplets.add(droplet.clone());
+        }
+        this.blocks = new Array(level.blocks.length);
+        for (let i = 0; i < level.blocks.length; i++) {
+            this.blocks[i] = level.blocks[i].clone();
+        }
+    }
+    undo() {
+        this.level.blocks = this.blocks;
+        this.level.walkers = this.walkers;
+        this.level.creepers = this.creepers;
+        this.level.splatters = this.splatters;
+        this.level.debris = this.debris;
+        this.level.sparks = this.sparks;
+        this.level.splashes = this.splashes;
+        this.level.droplets = this.droplets;
+        this.level.deaths = this.deaths;
+        this.level.frame = this.frame;
+        for (let i = 0; i < Level.GridWidth * Level.GridHeight; i++) {
+            this.level.indexGrid[i] = Level.GridEmpty;
+        }
+        for (let i = 0; i < this.level.blocks.length; i++) {
+            const block = this.level.blocks[i];
+            this.level.setIndices(block.x, block.y, Block.Width, Block.Height, i);
+        }
+    }
+}
 export default class Level {
     static Tau = Math.PI * 2;
     static GridEmpty = 0xffff;
@@ -32,7 +94,8 @@ export default class Level {
     static ShakeMultiplier = 0.0005;
     levelData;
     camera;
-    blocks = [];
+    torches = [];
+    decorations = [];
     groups = []; // What blocks are in each group?
     groupIndex = []; // Which group does a block belong to? (indexed)
     groupContactsAbove = [];
@@ -40,23 +103,19 @@ export default class Level {
     groupFixedUp = [];
     groupFixedDown = [];
     hoverGroup = new Set(); // What blocks are in the hover group?
-    torches = [];
+    message = '';
+    blocks = [];
     walkers = new Set();
     creepers = new Set();
-    splatters = [];
+    splatters = new Set();
     debris = new Set();
     sparks = new Set();
-    indexGrid = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty);
-    removalIndex = -1;
-    deaths = 0;
-    teleport = false;
-    message = '';
     splashes = new Set();
     droplets = new Set();
-    decorations = [];
+    indexGrid = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty);
+    deaths = 0;
     frame = 0;
-    // public canvas:              HTMLCanvasElement   = document.createElement('canvas')
-    // public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
+    undoStack = [];
     // #         #####      #     ######   
     // #        #     #    # #    #     #  
     // #        #     #   #   #   #     #  
@@ -67,10 +126,6 @@ export default class Level {
     constructor(levelData, camera) {
         this.levelData = levelData;
         this.camera = camera;
-        // this.canvas.width           = Level.GridWidth
-        // this.lightCanvas.width      = Level.GridWidth
-        // this.canvas.height          = Level.GridHeight
-        // this.lightCanvas.height     = Level.GridHeight
         this.load();
     }
     load() {
@@ -233,6 +288,14 @@ export default class Level {
     getIndex(x, y) {
         return this.indexGrid[y * Level.GridWidth + x];
     }
+    pushUndoData() {
+        this.undoStack.push(new UndoData(this));
+    }
+    popUndoData() {
+        if (this.undoStack.length === 0)
+            return;
+        this.undoStack.pop().undo();
+    }
     // ######   #######  #     #   #####   #     #  #######  
     // #     #  #        ##   ##  #     #  #     #  #        
     // #     #  #        # # # #  #     #  #     #  #        
@@ -257,6 +320,7 @@ export default class Level {
         }
         if (!Block.TypeIsDestructible[block.type])
             return;
+        this.pushUndoData();
         this.remove(index);
         this.buildBlockGroups();
         this.hoverGroup.clear();
@@ -336,7 +400,13 @@ export default class Level {
         }
         const debrisCount = Math.floor(Debris.CountMinimum + Math.random() * (Debris.CountMaximum - Debris.CountMinimum));
         for (let i = 0; i < debrisCount; i++) {
-            this.debris.add(new Debris(block));
+            const x = block.x + Math.random() * Block.Width;
+            const y = block.y + Math.random() * Block.Height;
+            const theta = Math.random() * Math.PI * 2;
+            const speed = Debris.SpeedMinimum + Math.random() * (Debris.SpeedMaximum - Debris.SpeedMinimum);
+            const vx = Math.cos(theta) * speed * 2.0;
+            const vy = Math.sin(theta) * speed;
+            this.debris.add(new Debris(x, y, vx, vy));
         }
     }
     hover(gridX, gridY) {
@@ -1250,7 +1320,7 @@ export default class Level {
         const x = mover.x + mover.width() / 2;
         const y = mover.y + mover.height();
         for (let i = 0; i < count; i++) {
-            this.splatters.push(new Splatter(x, y, mover.vy));
+            this.splatters.add(new Splatter(x, y, mover.vy));
         }
     }
     signedSide(x, y, x1, y1, x2, y2) {
@@ -1341,20 +1411,22 @@ export default class Level {
             splatter.y += splatter.vy;
             const x = Math.floor(splatter.x);
             const y = Math.floor(splatter.y);
-            if (x < 0 || y < 0 || x >= Level.GridWidth || y > Level.GridHeight)
+            if (x < 0 || y < 0 || x >= Level.GridWidth || y > Level.GridHeight) {
+                this.splatters.delete(splatter);
                 continue;
+            }
             const index = this.getIndex(x, y);
             if (index !== Level.GridEmpty && Math.random() > 0.5) {
-                splatter.splattered = true;
                 const block = this.blocks[index];
                 const blockX = x - block.x;
                 const blockY = y - block.y;
                 splatter.x = blockX;
                 splatter.y = blockY;
                 block.splatters.push(splatter);
+                this.splatters.delete(splatter);
             }
         }
-        this.splatters = this.splatters.filter(splatter => splatter.y < Level.GridHeight && !splatter.splattered);
+        // this.splatters = this.splatters.filter(splatter => splatter.y < Level.GridHeight && !splatter.splattered)
     }
     createSparks() {
         const beams = this.beams();
@@ -1493,7 +1565,6 @@ export default class Level {
             splash.vy += 0.3;
             splash.y += splash.vy;
             splash.x += splash.vx;
-            splash.frames++;
             const x = Math.floor(splash.x);
             const y = Math.floor(splash.y);
             if (splash.y >= Level.GridHeight || this.getIndex(x, y) !== Level.GridEmpty) {
@@ -1524,7 +1595,7 @@ export default class Level {
     renderTorches(context, offsetY) {
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
-        const rng = new RNG(this.frame);
+        const rng = new RNG(this.frame * this.frame);
         for (const torch of this.torches) {
             const offsetX = Math.floor((this.frame + torch.frame) / 2) % 5 * Block.Width;
             context.drawImage(Images.Torch, offsetX, 0, Block.Width, Block.Height, torch.x, torch.y + offsetY, Block.Width, Block.Height);
@@ -1544,54 +1615,7 @@ export default class Level {
         }
     }
     renderBeams(context, offsetY) {
-        const renderBeam = (beam, particleCount) => {
-            for (let i = 0; i < particleCount; i++) {
-                const stretch = (rng.nextInt() + (7 + rng.nextInt() % 5) * this.frame) % 40;
-                // const variance  = rng.nextInt() % 2
-                switch (beam.direction) {
-                    case Connection.East: {
-                        let x = beam.x1 + stretch;
-                        let y = beam.y1;
-                        while (x <= beam.x2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1);
-                            x += 40;
-                        }
-                        break;
-                    }
-                    case Connection.South: {
-                        let x = beam.x1;
-                        let y = beam.y1 + stretch;
-                        while (y <= beam.y2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1);
-                            y += 40;
-                        }
-                        break;
-                    }
-                    case Connection.West: {
-                        let x = beam.x1 - stretch;
-                        let y = beam.y1;
-                        while (x >= beam.x2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1);
-                            x -= 40;
-                        }
-                        break;
-                    }
-                    case Connection.North: {
-                        let x = beam.x1;
-                        let y = beam.y1 - stretch;
-                        while (y >= beam.y2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1);
-                            y -= 40;
-                        }
-                        break;
-                    }
-                }
-            }
-        };
-        const rng = new RNG();
-        // Desired behavior
-        // equally spaced sparkles along the beam that accelerate
-        // Fixed set of sparkles per beam, of some length, repeated along length
+        const rng = new RNG(this.frame * this.frame);
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
         context.strokeStyle = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smooth(this.frame * 0.05)})`;
@@ -1602,7 +1626,7 @@ export default class Level {
         }
         context.stroke();
         for (const beam of this.beams()) {
-            const radius = 7 + Math.random() * 2;
+            const radius = 7 + rng.nextFloat() * 2;
             const diameter = radius * 2;
             const cx = beam.x2;
             const cy = beam.y2 + offsetY;
@@ -1754,7 +1778,7 @@ export default class Level {
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
         context.fillStyle = '#248';
-        const rng = new RNG(this.frame);
+        const rng = new RNG();
         for (const droplet of this.droplets) {
             const x = Math.floor(droplet.x);
             const y = Math.floor(droplet.y);
@@ -1821,7 +1845,7 @@ export default class Level {
     renderLight(lightCanvas, offsetY) {
         const lightContext = lightCanvas.getContext('2d');
         lightContext.globalCompositeOperation = 'destination-out';
-        const rng = new RNG(this.frame);
+        const rng = new RNG(this.frame * this.frame);
         for (const torch of this.torches) {
             const radius = 160 + rng.nextFloat() * 3;
             const diameter = radius * 2;

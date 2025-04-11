@@ -1,7 +1,7 @@
 export default class RNG {
-    static A = 75;
-    static C = 74;
-    static M = 65521;
+    static A = 57797;
+    static C = 49151;
+    static M = 65536;
     seed;
     constructor(seed = 0) {
         this.seed = seed % RNG.M;
@@ -12,5 +12,14 @@ export default class RNG {
     }
     nextFloat() {
         return this.nextInt() / RNG.M;
+    }
+    static cycleLength() {
+        length = 1;
+        const rng = new RNG();
+        while (rng.nextInt() !== 0) {
+            console.log(rng.seed);
+            length++;
+        }
+        return length;
     }
 }

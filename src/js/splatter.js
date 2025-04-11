@@ -18,4 +18,15 @@ export default class Splatter {
         this.vy = Math.sin(theta) * speed + vy;
         this.splattered = false;
     }
+    clone() {
+        const clone = Object.create(Splatter.prototype);
+        Object.assign(clone, {
+            x: this.x,
+            y: this.y,
+            vx: this.vx,
+            vy: this.vy,
+            splattered: this.splattered,
+        });
+        return clone;
+    }
 }

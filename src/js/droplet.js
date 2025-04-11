@@ -6,4 +6,13 @@ export default class Droplet {
         this.x = x;
         this.y = y;
     }
+    clone() {
+        const clone = Object.create(Droplet.prototype);
+        Object.assign(clone, {
+            x: this.x,
+            y: this.y,
+            vy: this.vy,
+        });
+        return clone;
+    }
 }

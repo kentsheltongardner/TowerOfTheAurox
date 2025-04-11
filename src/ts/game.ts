@@ -44,7 +44,7 @@ export default class Game {
     public tapped:              boolean         = false
     public camera:              Camera          = new Camera()
     public overlayOpacity:      number          = 0
-    public fastPressed:         boolean         = false
+    public speedPressed:        boolean         = false
     public paused:              boolean         = false
     public mousePosition:       Point           = new Point(0, 0)
     public gamePosition:        Point           = new Point(0, 0)
@@ -171,7 +171,7 @@ export default class Game {
         })
     }
     fast() {
-        if (this.fastPressed) return true
+        if (this.speedPressed) return true
 
         const fastButton = this.buttons[Button.Fast]
         return this.mousePressed && fastButton.contains(this.gamePosition.x, this.gamePosition.y)
@@ -195,22 +195,25 @@ export default class Game {
             case 'KeyP':
                 this.pause()
             break
-            case 'KeyF':
-                this.fastPressed = true
-            break
             case 'KeyS':
+                this.speedPressed = true
+            break
+            case 'KeyF':
                 this.toggleFullscreen()
             break
             case 'KeyM':
                 this.toggleMute()
+            break
+            case 'KeyU':
+                this.levelCurr.popUndoData()
             break
         }
     }
 
     keyUp(e: KeyboardEvent) {
         switch (e.code) {
-            case 'KeyF': {
-                this.fastPressed = false
+            case 'KeyS': {
+                this.speedPressed = false
                 break
             }
         }
@@ -294,8 +297,10 @@ export default class Game {
                             case Button.Mute:
                                 this.toggleMute()
                             break
+                            case Button.Undo:
+                                this.levelCurr.popUndoData()
+                            break
                         }
-                        
                         buttonTapped = true
                         break
                     }
@@ -317,7 +322,6 @@ export default class Game {
                 }
             }
             
-
             this.render()
         }
         requestAnimationFrame(timestamp => this.loop(timestamp))

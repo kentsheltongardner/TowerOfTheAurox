@@ -5,11 +5,11 @@ export default class Splatter {
     public static CountMaximum  = 90
     public static FallSpeed     = 0.4
 
-    public x: number
-    public y: number
-    public vx: number
-    public vy: number
-    public splattered: boolean
+    public x:           number
+    public y:           number
+    public vx:          number
+    public vy:          number
+    public splattered:  boolean
 
     constructor(x: number, y: number, vy: number) {
         this.x          = x
@@ -19,5 +19,17 @@ export default class Splatter {
         this.vx         = Math.cos(theta) * speed
         this.vy         = Math.sin(theta) * speed + vy
         this.splattered = false
+    }
+
+    clone(): Splatter {
+        const clone = Object.create(Splatter.prototype) as Splatter
+        Object.assign(clone, {
+            x:          this.x,
+            y:          this.y,
+            vx:         this.vx,
+            vy:         this.vy,
+            splattered: this.splattered,
+        })
+        return clone
     }
 }

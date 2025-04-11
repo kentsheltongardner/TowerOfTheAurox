@@ -54,8 +54,6 @@ export default class Block extends Faller {
     altar = false;
     warp = false;
     splatters = [];
-    primed = false;
-    activated = false;
     message = '';
     constructor(x, y, type) {
         super(x, y);
@@ -81,5 +79,28 @@ export default class Block extends Faller {
                 break;
             }
         }
+    }
+    clone() {
+        const clone = Object.create(Block.prototype);
+        const splatters = new Array(this.splatters.length);
+        for (let i = 0; i < this.splatters.length; i++) {
+            splatters[i] = this.splatters[i].clone();
+        }
+        Object.assign(clone, {
+            x: this.x,
+            y: this.y,
+            vy: this.vy,
+            type: this.type,
+            hardConnections: this.hardConnections,
+            softConnections: this.softConnections,
+            direction: this.direction,
+            color: this.color,
+            invisible: this.invisible,
+            altar: this.altar,
+            warp: this.warp,
+            message: this.message,
+            splatters: splatters,
+        });
+        return clone;
     }
 }

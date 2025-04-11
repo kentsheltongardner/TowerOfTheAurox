@@ -3,7 +3,6 @@ export default class Splash {
     y:  number
     vx: number
     vy: number
-    frames = 0
     constructor(x: number, y: number, vx: number, vy: number) {
         this.x  = x
         this.y  = y
@@ -14,5 +13,9 @@ export default class Splash {
         this.vy += 0.75
         this.x  += this.vx
         this.y  += this.vy
+    }
+
+    clone(): Splash {
+        return new Splash(this.x, this.y, this.vx, this.vy)
     }
 }

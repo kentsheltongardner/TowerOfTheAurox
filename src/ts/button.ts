@@ -20,9 +20,9 @@ export default class Button {
         '[R]eset level',
         '[U]ndo move',
         '[P]ause game',
-        '[F]ast forward',
+        '[S]peed up',
         '[N]ext level',
-        'Toggle full[S]creen',
+        'Toggle [F]ullscreen',
         '[M]ute/unmute',
     ]
 

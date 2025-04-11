@@ -62,8 +62,6 @@ export default class Block extends Faller {
     public altar:           boolean     = false
     public warp:            boolean     = false
     public splatters:       Splatter[]  = []
-    public primed:          boolean     = false
-    public activated:       boolean     = false
     public message:         string      = ''
 
     constructor(x: number, y: number, type: number) {
@@ -91,5 +89,31 @@ export default class Block extends Faller {
                 break
             }
         }
+    }
+
+    clone(): Block {
+        const clone = Object.create(Block.prototype) as Block
+
+        const splatters = new Array<Splatter>(this.splatters.length)
+        for (let i = 0; i < this.splatters.length; i++) {
+            splatters[i] = this.splatters[i].clone()
+        }
+
+        Object.assign(clone, {
+            x:                  this.x,
+            y:                  this.y,
+            vy:                 this.vy,
+            type:               this.type,
+            hardConnections:    this.hardConnections,
+            softConnections:    this.softConnections,
+            direction:          this.direction,
+            color:              this.color,
+            invisible:          this.invisible,
+            altar:              this.altar,
+            warp:               this.warp,
+            message:            this.message,
+            splatters:          splatters,
+        })
+        return clone
     }
 }

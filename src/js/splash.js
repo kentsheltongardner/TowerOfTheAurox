@@ -3,7 +3,6 @@ export default class Splash {
     y;
     vx;
     vy;
-    frames = 0;
     constructor(x, y, vx, vy) {
         this.x = x;
         this.y = y;
@@ -14,5 +13,8 @@ export default class Splash {
         this.vy += 0.75;
         this.x += this.vx;
         this.y += this.vy;
+    }
+    clone() {
+        return new Splash(this.x, this.y, this.vx, this.vy);
     }
 }

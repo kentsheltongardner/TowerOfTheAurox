@@ -20,4 +20,21 @@ export default class Creeper extends Mover {
     height() {
         return Creeper.Height
     }
+
+    clone(): Creeper {
+        const clone = Object.create(Creeper.prototype) as Creeper
+        Object.assign(clone, {
+            x:              this.x,
+            y:              this.y,
+            vx:             this.vx,
+            vy:             this.vy,
+            walkDirection:  this.walkDirection,
+            frameOffset:    this.frameOffset,
+            grounded:       this.grounded,
+            step:           this.step,
+            stepTotal:      this.stepTotal,
+            fallDirection:  this.fallDirection,
+        })
+        return clone
+    }
 }

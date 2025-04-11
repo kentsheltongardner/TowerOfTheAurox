@@ -1,5 +1,3 @@
-import Block from './block.js'
-
 export default class Debris {
     public static SpeedMinimum  = 0.25
     public static SpeedMaximum  = 5
@@ -12,12 +10,14 @@ export default class Debris {
     public vx:      number
     public vy:      number
 
-    constructor(block: Block) {
-        this.x          = block.x + Math.random() * Block.Width
-        this.y          = block.y + Math.random() * Block.Height
-        const theta     = Math.random() * Math.PI * 2
-        const speed     = Debris.SpeedMinimum + Math.random() * (Debris.SpeedMaximum - Debris.SpeedMinimum)
-        this.vx         = Math.cos(theta) * speed * 2.0
-        this.vy         = Math.sin(theta) * speed
+    constructor(x: number, y: number, vx: number, vy: number) {
+        this.x  = x
+        this.y  = y
+        this.vx = vx
+        this.vy = vy
+    }
+
+    clone() {
+        return new Debris(this.x, this.y, this.vx, this.vy)
     }
 }

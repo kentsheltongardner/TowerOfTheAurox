@@ -10,7 +10,6 @@ import Droplet      from './droplet.js'
 import Images       from './images.js'
 import LevelData    from './level_data.js'
 import Mover        from './mover.js'
-import Rect         from './rect.js'
 import RNG          from './rng.js'
 import Sounds       from './sounds.js'
 import Spark        from './spark.js'
@@ -18,6 +17,78 @@ import Splash       from './splash.js'
 import Splatter     from './splatter.js'
 import Torch        from './torch.js'
 import Walker       from './walker.js'
+
+class UndoData {
+
+    public level:       Level
+
+    public deaths:      number
+    public frame:       number
+
+    public walkers:     Set<Walker>     = new Set()
+    public creepers:    Set<Creeper>    = new Set()
+    public splatters:   Set<Splatter>   = new Set()
+    public debris:      Set<Debris>     = new Set()
+    public sparks:      Set<Spark>      = new Set()
+    public splashes:    Set<Splash>     = new Set()
+    public droplets:    Set<Droplet>    = new Set()
+
+    public blocks:      Block[]
+
+    constructor(level: Level) {
+        this.level      = level
+
+        this.frame      = level.frame
+        this.deaths     = level.deaths
+
+        for (const walker of level.walkers) {
+            this.walkers.add(walker.clone())
+        }
+        for (const creeper of level.creepers) {
+            this.creepers.add(creeper.clone())
+        }
+        for (const splatter of level.splatters) {
+            this.splatters.add(splatter.clone())
+        }
+        for (const debris of level.debris) {
+            this.debris.add(debris.clone())
+        }
+        for (const spark of level.sparks) {
+            this.sparks.add(spark.clone())
+        }
+        for (const splash of level.splashes) {
+            this.splashes.add(splash.clone())
+        }
+        for (const droplet of level.droplets) {
+            this.droplets.add(droplet.clone())
+        }
+        this.blocks = new Array<Block>(level.blocks.length)
+        for (let i = 0; i < level.blocks.length; i++) {
+            this.blocks[i] = level.blocks[i].clone()
+        }
+    }
+
+    undo() {
+        this.level.blocks       = this.blocks
+        this.level.walkers      = this.walkers
+        this.level.creepers     = this.creepers
+        this.level.splatters    = this.splatters
+        this.level.debris       = this.debris
+        this.level.sparks       = this.sparks
+        this.level.splashes     = this.splashes
+        this.level.droplets     = this.droplets
+        this.level.deaths       = this.deaths
+        this.level.frame        = this.frame
+
+        for (let i = 0; i < Level.GridWidth * Level.GridHeight; i++) {
+            this.level.indexGrid[i] = Level.GridEmpty
+        }
+        for (let i = 0; i < this.level.blocks.length; i++) {
+            const block = this.level.blocks[i]
+            this.level.setIndices(block.x, block.y, Block.Width, Block.Height, i)
+        }
+    }
+}
 
 export default class Level {
     static readonly Tau                     = Math.PI * 2
@@ -39,7 +110,9 @@ export default class Level {
     public levelData:           LevelData
     public camera:              Camera
 
-    public blocks:              Block[]             = []
+    public torches:             Torch[]             = []
+    public decorations:         Decoration[]        = []
+
     public groups:              number[][]          = []    // What blocks are in each group?
     public groupIndex:          number[]            = []    // Which group does a block belong to? (indexed)
     public groupContactsAbove:  number[][]          = []
@@ -47,24 +120,21 @@ export default class Level {
     public groupFixedUp:        boolean[]           = []
     public groupFixedDown:      boolean[]           = []
     public hoverGroup:          Set<number>         = new Set()    // What blocks are in the hover group?
-    public torches:             Torch[]             = []
+    public message:             string              = ''
+
+    public blocks:              Block[]             = []
     public walkers:             Set<Walker>         = new Set()
     public creepers:            Set<Creeper>        = new Set()
-    public splatters:           Splatter[]          = []
+    public splatters:           Set<Splatter>       = new Set()
     public debris:              Set<Debris>         = new Set()
     public sparks:              Set<Spark>          = new Set()
+    public splashes:            Set<Splash>         = new Set()
+    public droplets:            Set<Droplet>        = new Set()
     public indexGrid:           Uint16Array         = new Uint16Array(Level.GridWidth * Level.GridWidth).fill(Level.GridEmpty)
-    public removalIndex:        number              = -1
     public deaths:              number              = 0
-    public teleport:            boolean             = false
-    public message:             string              = ''
-    public splashes:            Set<Splash>         = new Set<Splash>()
-    public droplets:            Set<Droplet>        = new Set<Droplet>()
-    public decorations:         Decoration[]        = []
     public frame:               number              = 0
 
-    // public canvas:              HTMLCanvasElement   = document.createElement('canvas')
-    // public lightCanvas:         HTMLCanvasElement   = document.createElement('canvas')
+    public undoStack:           UndoData[]          = []
 
 // #         #####      #     ######   
 // #        #     #    # #    #     #  
@@ -77,10 +147,6 @@ export default class Level {
     constructor(levelData: LevelData, camera: Camera) {
         this.levelData              = levelData
         this.camera                 = camera
-        // this.canvas.width           = Level.GridWidth
-        // this.lightCanvas.width      = Level.GridWidth
-        // this.canvas.height          = Level.GridHeight
-        // this.lightCanvas.height     = Level.GridHeight
         this.load()
     }
     load() {
@@ -260,6 +326,16 @@ export default class Level {
 
 
 
+    pushUndoData() {
+        this.undoStack.push(new UndoData(this))
+    }
+    popUndoData() {
+        if (this.undoStack.length === 0) return
+
+        this.undoStack.pop()!.undo()
+    }
+
+
 
 
 
@@ -294,6 +370,7 @@ export default class Level {
 
         if (!Block.TypeIsDestructible[block.type]) return
 
+        this.pushUndoData()
         this.remove(index)
         this.buildBlockGroups()
         this.hoverGroup.clear()
@@ -384,7 +461,14 @@ export default class Level {
 
         const debrisCount = Math.floor(Debris.CountMinimum + Math.random() * (Debris.CountMaximum - Debris.CountMinimum))
         for (let i = 0; i < debrisCount; i++) {
-            this.debris.add(new Debris(block))
+            const x     = block.x + Math.random() * Block.Width
+            const y     = block.y + Math.random() * Block.Height
+            const theta = Math.random() * Math.PI * 2
+            const speed = Debris.SpeedMinimum + Math.random() * (Debris.SpeedMaximum - Debris.SpeedMinimum)
+            const vx    = Math.cos(theta) * speed * 2.0
+            const vy    = Math.sin(theta) * speed
+
+            this.debris.add(new Debris(x, y, vx, vy))
         }
     }
 
@@ -1481,7 +1565,7 @@ export default class Level {
         const x     = mover.x + mover.width() / 2
         const y     = mover.y + mover.height()
         for (let i = 0; i < count; i++) {
-            this.splatters.push(new Splatter(x, y, mover.vy))
+            this.splatters.add(new Splatter(x, y, mover.vy))
         }
     }
     signedSide(x: number, y: number, x1: number, y1: number, x2: number, y2: number) {
@@ -1582,21 +1666,24 @@ export default class Level {
             const x     = Math.floor(splatter.x)
             const y     = Math.floor(splatter.y)
 
-            if (x < 0 || y < 0 || x >= Level.GridWidth || y > Level.GridHeight) continue
+            if (x < 0 || y < 0 || x >= Level.GridWidth || y > Level.GridHeight) {
+                this.splatters.delete(splatter)
+                continue
+            }
 
             const index = this.getIndex(x, y)
             if (index !== Level.GridEmpty && Math.random() > 0.5) {
-
-                splatter.splattered = true
                 const block         = this.blocks[index]
                 const blockX        = x - block.x
                 const blockY        = y - block.y
                 splatter.x          = blockX
                 splatter.y          = blockY
                 block.splatters.push(splatter)
+                this.splatters.delete(splatter)
             }
         }
-        this.splatters = this.splatters.filter(splatter => splatter.y < Level.GridHeight && !splatter.splattered)
+
+        // this.splatters = this.splatters.filter(splatter => splatter.y < Level.GridHeight && !splatter.splattered)
     }
 
 
@@ -1749,7 +1836,6 @@ export default class Level {
             splash.vy   += 0.3
             splash.y    += splash.vy
             splash.x    += splash.vx
-            splash.frames++
             const x = Math.floor(splash.x)
             const y = Math.floor(splash.y)
             if (splash.y >= Level.GridHeight || this.getIndex(x, y) !== Level.GridEmpty) {
@@ -1822,7 +1908,7 @@ export default class Level {
     renderTorches(context: CanvasRenderingContext2D, offsetY: number) {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
-        const rng                           = new RNG(this.frame)
+        const rng                           = new RNG(this.frame * this.frame)
         
         for (const torch of this.torches) {
             const offsetX = Math.floor((this.frame + torch.frame) / 2) % 5 * Block.Width
@@ -1848,60 +1934,7 @@ export default class Level {
     }
 
     renderBeams(context: CanvasRenderingContext2D, offsetY: number) {
-        const renderBeam = (beam: Beam, particleCount: number) => {
-            for (let i = 0; i < particleCount; i++) {
-                const stretch   = (rng.nextInt() + (7 + rng.nextInt() % 5) * this.frame) % 40
-                // const variance  = rng.nextInt() % 2
-
-                switch (beam.direction) {
-                    case Connection.East: {
-                        let x = beam.x1 + stretch
-                        let y = beam.y1
-                        while (x <= beam.x2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
-                            x += 40
-                        }
-                        break
-                    }
-                    case Connection.South: {
-                        let x = beam.x1
-                        let y = beam.y1 + stretch
-                        while (y <= beam.y2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
-                            y += 40
-                        }
-                        break
-                    }
-                    case Connection.West: {
-                        let x = beam.x1 - stretch
-                        let y = beam.y1
-                        while (x >= beam.x2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
-                            x -= 40
-                        }
-                        break
-                    }
-                    case Connection.North: {
-                        let x = beam.x1
-                        let y = beam.y1 - stretch
-                        while (y >= beam.y2) {
-                            context.fillRect(x + rng.nextInt() % 3 - 1, y + offsetY + rng.nextInt() % 3 - 1, 1, 1)
-                            y -= 40
-                        }
-                        break
-                    }
-                }
-            }
-        }
-
-        const rng = new RNG()
-
-
-
-        // Desired behavior
-        // equally spaced sparkles along the beam that accelerate
-        // Fixed set of sparkles per beam, of some length, repeated along length
-
+        const rng                           = new RNG(this.frame * this.frame)
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
         context.strokeStyle                 = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smooth(this.frame * 0.05)})`
@@ -1913,7 +1946,7 @@ export default class Level {
         context.stroke()
 
         for (const beam of this.beams()) {
-            const radius    = 7 + Math.random() * 2
+            const radius    = 7 + rng.nextFloat() * 2
             const diameter  = radius * 2
             const cx        = beam.x2
             const cy        = beam.y2 + offsetY
@@ -2137,7 +2170,7 @@ export default class Level {
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
         context.fillStyle                   = '#248'
-        const rng                           = new RNG(this.frame)
+        const rng                           = new RNG()
         
         for (const droplet of this.droplets) {
             const x             = Math.floor(droplet.x)
@@ -2228,7 +2261,7 @@ export default class Level {
     renderLight(lightCanvas: HTMLCanvasElement, offsetY: number) {
         const lightContext                      = lightCanvas.getContext('2d')!
         lightContext.globalCompositeOperation   = 'destination-out'
-        const rng                               = new RNG(this.frame)
+        const rng                               = new RNG(this.frame * this.frame)
 
         for (const torch of this.torches) {
             const radius = 160 + rng.nextFloat() * 3

@@ -39,7 +39,7 @@ export default class Game {
     tapped = false;
     camera = new Camera();
     overlayOpacity = 0;
-    fastPressed = false;
+    speedPressed = false;
     paused = false;
     mousePosition = new Point(0, 0);
     gamePosition = new Point(0, 0);
@@ -152,7 +152,7 @@ export default class Game {
         });
     }
     fast() {
-        if (this.fastPressed)
+        if (this.speedPressed)
             return true;
         const fastButton = this.buttons[Button.Fast];
         return this.mousePressed && fastButton.contains(this.gamePosition.x, this.gamePosition.y);
@@ -174,21 +174,24 @@ export default class Game {
             case 'KeyP':
                 this.pause();
                 break;
-            case 'KeyF':
-                this.fastPressed = true;
-                break;
             case 'KeyS':
+                this.speedPressed = true;
+                break;
+            case 'KeyF':
                 this.toggleFullscreen();
                 break;
             case 'KeyM':
                 this.toggleMute();
                 break;
+            case 'KeyU':
+                this.levelCurr.popUndoData();
+                break;
         }
     }
     keyUp(e) {
         switch (e.code) {
-            case 'KeyF': {
-                this.fastPressed = false;
+            case 'KeyS': {
+                this.speedPressed = false;
                 break;
             }
         }
@@ -263,6 +266,9 @@ export default class Game {
                                 break;
                             case Button.Mute:
                                 this.toggleMute();
+                                break;
+                            case Button.Undo:
+                                this.levelCurr.popUndoData();
                                 break;
                         }
                         buttonTapped = true;
