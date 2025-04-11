@@ -307,7 +307,6 @@ export default class Level {
     tap(gridX, gridY) {
         if (this.message !== '') {
             this.message = '';
-            return;
         }
         if (gridX < 0 || gridY < 0 || gridX >= Level.GridWidth || gridY >= Level.GridHeight)
             return;
@@ -1831,17 +1830,6 @@ export default class Level {
         context.globalAlpha = 1;
         // xor, multiply, overlay, darken, soft-light, hue, color
     }
-    // renderText(canvas: HTMLCanvasElement, offsetY: number) {
-    //     const context = canvas.getContext('2d')!
-    //     if (this.message !== '') {
-    //         const renderedText = TextRenderer.paragraphCanvas(this.message, Images.Font, 360)
-    //         const w = renderedText.width
-    //         const h = renderedText.height
-    //         const x = Math.floor((Level.GridWidth - w) / 2)
-    //         const y = Math.floor((Level.GridHeight - h) / 2)
-    //         context.drawImage(renderedText, x, y + offsetY)
-    //     }
-    // }
     renderLight(lightCanvas, offsetY) {
         const lightContext = lightCanvas.getContext('2d');
         lightContext.globalCompositeOperation = 'destination-out';

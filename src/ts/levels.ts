@@ -322,14 +322,10 @@ export const testLevels: LevelData[] = [
             [18, 6], 
         ],
         messages: [
-            ["Press 'r' to reset a level", 
-                12, 8], 
-            ["Press 'f' to go fast", 
-                19, 8], 
-            ["Press 'p' to return to the previous level", 
-                11, 10], 
-            ["Press 'n' to advance to the next level", 
-                20, 10], 
+            ["Behold the aurochs!", 12, 8], 
+            ["Marvel at his splendor!", 19, 8], 
+            ["Beware the horns that gore the mighty!", 11, 10], 
+            ["Beware the hooves that crush the weak!", 20, 10], 
         ],
         decorationData: [
             [Decoration.BannerAurox, 12, 4],
@@ -1421,7 +1417,7 @@ export const testLevels: LevelData[] = [
             '                                                               ',
             '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .',
             '                                                               ',
-            '. . . . . . . . . . . . . . . A . . . . . . . . . . . . . . . .',
+            '. . . . . . . . . . . . . . . A A . . . . . . . . . . . . . . .',
         ],
         walkerData: [
             [310, 170, 1]

@@ -390,13 +390,6 @@ export default class Game {
                     x = Math.floor((Level.GridWidth - w) / 2);
                     break;
             }
-            // const x             = Math.floor((Level.GridWidth - w) / 2)
-            // let x               = Math.floor(this.hoverButton.x + (Button.Width - w) / 2)
-            // if (x < Button.Padding) {
-            //     x = Button.Padding
-            // } else if (x + w > Level.GridWidth - Button.Padding) {
-            //     x = Level.GridWidth - Button.Padding - w
-            // }
             context.drawImage(renderedText, x, y + Level.GridHeight * 2);
         }
         // Render text
