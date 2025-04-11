@@ -122,7 +122,6 @@ export default class Game {
     resetLevel() {
         this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
         this.scrollFrame    = 0
-        this.overlayOpacity = 0
         this.paused         = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
     }
@@ -135,7 +134,6 @@ export default class Game {
         this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
         this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
         this.scrollFrame    = 0
-        this.overlayOpacity = 0
         this.paused         = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
     }
@@ -148,7 +146,6 @@ export default class Game {
         this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
         this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
         this.scrollFrame    = 0
-        this.overlayOpacity = 0
         this.paused         = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
     }
