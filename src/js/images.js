@@ -48,6 +48,8 @@ export default class Images {
         Images.ButtonsMap[Button.Pause] = document.getElementById('button-pause');
         Images.ButtonsMap[Button.Fast] = document.getElementById('button-fast');
         Images.ButtonsMap[Button.Next] = document.getElementById('button-next');
+        Images.ButtonsMap[Button.Fullscreen] = document.getElementById('button-fullscreen');
+        Images.ButtonsMap[Button.Mute] = document.getElementById('button-mute');
     }
     static createTilesetImages() {
         Images.WallTileset = Images.tilesetImage(Images.WallTemplate);

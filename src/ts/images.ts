@@ -49,12 +49,14 @@ export default class Images {
         Images.DecorationsMap[Decoration.BannerAurox]       = <HTMLImageElement>document.getElementById('banner-aurox')
         Images.DecorationsMap[Decoration.BannerAuroxLong]   = <HTMLImageElement>document.getElementById('banner-aurox-long')
 
-        Images.ButtonsMap[Button.Previous]  = <HTMLImageElement>document.getElementById('button-previous')
-        Images.ButtonsMap[Button.Reset]     = <HTMLImageElement>document.getElementById('button-reset')
-        Images.ButtonsMap[Button.Undo]      = <HTMLImageElement>document.getElementById('button-undo')
-        Images.ButtonsMap[Button.Pause]     = <HTMLImageElement>document.getElementById('button-pause')
-        Images.ButtonsMap[Button.Fast]      = <HTMLImageElement>document.getElementById('button-fast')
-        Images.ButtonsMap[Button.Next]      = <HTMLImageElement>document.getElementById('button-next')
+        Images.ButtonsMap[Button.Previous]      = <HTMLImageElement>document.getElementById('button-previous')
+        Images.ButtonsMap[Button.Reset]         = <HTMLImageElement>document.getElementById('button-reset')
+        Images.ButtonsMap[Button.Undo]          = <HTMLImageElement>document.getElementById('button-undo')
+        Images.ButtonsMap[Button.Pause]         = <HTMLImageElement>document.getElementById('button-pause')
+        Images.ButtonsMap[Button.Fast]          = <HTMLImageElement>document.getElementById('button-fast')
+        Images.ButtonsMap[Button.Next]          = <HTMLImageElement>document.getElementById('button-next')
+        Images.ButtonsMap[Button.Fullscreen]    = <HTMLImageElement>document.getElementById('button-fullscreen')
+        Images.ButtonsMap[Button.Mute]          = <HTMLImageElement>document.getElementById('button-mute')
     }
 
     static createTilesetImages() {

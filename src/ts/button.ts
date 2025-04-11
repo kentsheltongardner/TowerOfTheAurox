@@ -2,7 +2,7 @@ export default class Button {
     public static readonly Width        = 15
     public static readonly Height       = 15
     public static readonly Gap          = 3
-    public static readonly Y            = 3
+    public static readonly Padding      = 8
 
     public static readonly Previous     = 0
     public static readonly Reset        = 1
@@ -10,16 +10,20 @@ export default class Button {
     public static readonly Pause        = 3
     public static readonly Fast         = 4
     public static readonly Next         = 5
+    public static readonly Fullscreen   = 6
+    public static readonly Mute         = 7
 
-    public static readonly Count        = 6
+    public static readonly Count        = 8
 
     public static readonly HoverTextMap = [
-        'Pre[v]ious',
-        '[R]eset',
-        '[U]ndo',
-        '[P]ause',
-        '[F]ast',
-        '[N]ext',
+        'Pre[V]ious level',
+        '[R]eset level',
+        '[U]ndo move',
+        '[P]ause game',
+        '[F]ast forward',
+        '[N]ext level',
+        'Toggle full[S]creen',
+        '[M]ute/unmute',
     ]
 
     public type:        number
@@ -30,5 +34,9 @@ export default class Button {
         this.type       = type
         this.x          = x
         this.y          = y
+    }
+
+    contains(x: number, y: number) {
+        return x >= this.x && y >= this.y && x < this.x + Button.Width && y < this.y + Button.Height
     }
 }

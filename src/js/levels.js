@@ -2,6 +2,9 @@ import Decoration from './decoration.js';
 // TODO:    Sparks at laser endpoints, energy pulses, lights in light canvas, gradient drawing?
 //          Cloud, fog, mist effects?
 //          Cellular automata effects
+//          Obelisks
+//          Save/restore
+//          Move buttons
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
 // Move an altar to make it accessible

@@ -35,22 +35,24 @@ export default class Game {
     public levelNextNext:       Level
     public levelData:           LevelData[]
 
-    public levelIndex:          number      = 1
-    public musicPlaying:        boolean     = false
-    public lastTimestamp:       number      = 0
-    public titleFadeOutFrame:   number      = 0
-    public scrollFrame:         number      = 0
-    public tapPoint:            Point       = new Point(0, 0)
-    public tapped:              boolean     = false
-    public camera:              Camera      = new Camera()
-    public overlayOpacity:      number      = 0
-    public skip:                boolean     = false
-    public mousePosition:       Point       = new Point(0, 0)
-    public gamePosition:        Point       = new Point(0, 0)
-    public mousePressed:        boolean     = false
-    public mousePresent:        boolean     = false
-    public buttons:             Button[]    = []
-
+    public levelIndex:          number          = 1
+    public musicPlaying:        boolean         = false
+    public lastTimestamp:       number          = 0
+    public titleFadeOutFrame:   number          = 0
+    public scrollFrame:         number          = 0
+    public tapPoint:            Point           = new Point(0, 0)
+    public tapped:              boolean         = false
+    public camera:              Camera          = new Camera()
+    public overlayOpacity:      number          = 0
+    public fastPressed:         boolean         = false
+    public paused:              boolean         = false
+    public mousePosition:       Point           = new Point(0, 0)
+    public gamePosition:        Point           = new Point(0, 0)
+    public mousePressed:        boolean         = false
+    public mousePresent:        boolean         = false
+    public buttons:             Button[]        = []
+    public muted:               boolean         = false
+    public hoverButton:         Button | null   = null
 
 
     // Numeric scroll system based on direction of movement (up or down)
@@ -86,16 +88,17 @@ export default class Game {
         window.addEventListener('keyup',        e   => this.keyUp(e))
         window.addEventListener('contextmenu',  e   => e.preventDefault())
 
-
-        const buttonsWidth      = Button.Width * Button.Count + Button.Gap * (Button.Count - 1)
+        const buttonsWidth      = Button.Width * Button.Fullscreen + Button.Gap * (Button.Fullscreen - 1)
         const buttonIncrement   = Button.Width + Button.Gap
         let x                   = Math.floor((Level.GridWidth - buttonsWidth) / 2)
-        const y                 = Level.GridHeight * 3 - Button.Y - Button.Height
+        const y                 = Level.GridHeight - Button.Padding - Button.Height
 
-        for (let type = 0; type < Button.Count; type++) {
+        for (let type = 0; type < Button.Fullscreen; type++) {
             this.buttons.push(new Button(type, x, y))
             x += buttonIncrement
         }
+        this.buttons.push(new Button(Button.Mute, Button.Padding, y))
+        this.buttons.push(new Button(Button.Fullscreen, Level.GridWidth - Button.Padding - Button.Width, y))
 
         requestAnimationFrame(timestamp => this.loop(timestamp))
     }
@@ -104,55 +107,110 @@ export default class Game {
         this.mousePresent   = true
         this.gamePosition   = this.gamePoint(x, y)
         this.mousePosition  = this.displayPoint(this.gamePosition.x, this.gamePosition.y)
-        this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y)
+        this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
+
+        this.hoverButton = null
+        for (const button of this.buttons) {
+            if (button.contains(this.gamePosition.x, this.gamePosition.y)) {
+                this.hoverButton = button
+                break
+            }
+        }
     }
+
+
+    resetLevel() {
+        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
+        this.scrollFrame    = 0
+        this.overlayOpacity = 0
+        this.paused         = false
+        this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
+    }
+    nextLevel() {
+        if (this.levelIndex >= this.levelCount - 3) return
+
+        this.levelIndex++
+        this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
+        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
+        this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
+        this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
+        this.scrollFrame    = 0
+        this.overlayOpacity = 0
+        this.paused         = false
+        this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
+    }
+    previousLevel() {
+        if (this.levelIndex <= 1) return
+
+        this.levelIndex--
+        this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
+        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
+        this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
+        this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
+        this.scrollFrame    = 0
+        this.overlayOpacity = 0
+        this.paused         = false
+        this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
+    }
+    toggleFullscreen() {
+        const body = document.body
+      
+        if (!document.fullscreenElement) {
+            if (body.requestFullscreen) {
+                body.requestFullscreen()
+            }
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen()
+        }
+    }
+    toggleMute() {
+        this.muted = !this.muted
+        const audioElements = document.querySelectorAll<HTMLAudioElement>('audio')
+        audioElements.forEach(audio => {
+            audio.muted = this.muted
+        })
+    }
+    fast() {
+        if (this.fastPressed) return true
+
+        const fastButton = this.buttons[Button.Fast]
+        return this.mousePressed && fastButton.contains(this.gamePosition.x, this.gamePosition.y)
+    }
+    pause() {
+        this.paused = !this.paused
+    }
+
 
     keyDown(e: KeyboardEvent) {
         switch (e.code) {
-            case 'KeyR': {
-                this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
-                this.scrollFrame    = 0
-                this.overlayOpacity = 0
-                this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y)
-                break
-            }
-            case 'KeyN': {
-                if (this.levelIndex >= this.levelCount - 2) break
-
-                this.levelIndex++
-                this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
-                this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
-                this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
-                this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
-                this.scrollFrame    = 0
-                this.overlayOpacity = 0
-                this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y)
-                break
-            }
-            case 'KeyP': {
-                if (this.levelIndex <= 1) break
-
-                this.levelIndex--
-                this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
-                this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
-                this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
-                this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
-                this.scrollFrame    = 0
-                this.overlayOpacity = 0
-                this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y)
-                break
-            }
-            case 'KeyF': {
-                this.skip = true
-                break
-            }
+            case 'KeyR':
+                this.resetLevel()
+            break
+            case 'KeyN':
+                this.nextLevel()
+            break
+            case 'KeyV':
+                this.previousLevel()
+            break
+            case 'KeyP':
+                this.pause()
+            break
+            case 'KeyF':
+                this.fastPressed = true
+            break
+            case 'KeyS':
+                this.toggleFullscreen()
+            break
+            case 'KeyM':
+                this.toggleMute()
+            break
         }
     }
 
     keyUp(e: KeyboardEvent) {
         switch (e.code) {
             case 'KeyF': {
-                this.skip = false
+                this.fastPressed = false
                 break
             }
         }
@@ -209,15 +267,45 @@ export default class Game {
                     this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
                     this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
                     this.scrollFrame    = 0
-                    this.levelCurr.hover(this.gamePosition.x + 3, this.gamePosition.y)
+                    this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
                 }
             } else {
                 if (this.tapped) {
-                    this.levelCurr.tap(this.tapPoint.x, this.tapPoint.y)
+                    let buttonTapped = false
+                    for (const button of this.buttons) {
+                        if (!button.contains(this.gamePosition.x, this.gamePosition.y)) continue
+                        
+                        switch (button.type) {
+                            case Button.Reset:
+                                this.resetLevel()
+                            break
+                            case Button.Next:
+                                this.nextLevel()
+                            break
+                            case Button.Previous:
+                                this.previousLevel()
+                            break
+                            case Button.Pause:
+                                this.pause()
+                            break
+                            case Button.Fullscreen:
+                                this.toggleFullscreen()
+                            break
+                            case Button.Mute:
+                                this.toggleMute()
+                            break
+                        }
+                        
+                        buttonTapped = true
+                        break
+                    }
+                    if (!buttonTapped && !this.paused) {
+                        this.levelCurr.tap(this.tapPoint.x, this.tapPoint.y)
+                    }
                     this.tapped = false
                 }
-                if (this.levelCurr.message === '') {
-                    if (this.skip) {
+                if (!this.paused) {
+                    if (this.fast()) {
                         for (let i = 0; i < Game.FrameSkipCount; i++) {
                             this.update()
                             this.camera.update()
@@ -264,7 +352,7 @@ export default class Game {
     gamePoint(displayX: number, displayY: number) {
         const scalar    = this.displayScalar()
         const rect      = this.displayRect()
-        const x         = Math.floor((displayX - rect.x) / scalar)
+        const x         = Math.floor((displayX - rect.x) / scalar) + 3 // Adjustment for cursor
         const y         = Math.floor((displayY - rect.y) / scalar)
         
         return new Point(x, y)
@@ -332,8 +420,43 @@ export default class Game {
         context.globalCompositeOperation = 'source-over'
         context.globalAlpha = 1
         for (const button of this.buttons) {
-            context.drawImage(Images.ButtonsMap[button.type], button.x, button.y)
+            context.drawImage(Images.ButtonsMap[button.type], button.x, button.y + Level.GridHeight * 2)
         }
+
+        // Render tooltips
+        if (this.hoverButton !== null) {
+            context.globalCompositeOperation = 'source-over'
+            context.globalAlpha = 1
+            const renderedText  = TextRenderer.paragraphCanvas(Button.HoverTextMap[this.hoverButton.type], Images.Font, Level.GridWidth)
+            const w             = renderedText.width
+            const h             = renderedText.height
+            const y             = this.hoverButton.y - 4 - h
+            let x               = 0
+
+            switch (this.hoverButton.type) {
+                case Button.Mute:
+                    x = Button.Padding
+                break
+                case Button.Fullscreen:
+                    x = Level.GridWidth - Button.Padding - w
+                break
+                default:
+                    x = Math.floor((Level.GridWidth - w) / 2)
+                break
+            }
+
+            // const x             = Math.floor((Level.GridWidth - w) / 2)
+
+            // let x               = Math.floor(this.hoverButton.x + (Button.Width - w) / 2)
+            // if (x < Button.Padding) {
+            //     x = Button.Padding
+            // } else if (x + w > Level.GridWidth - Button.Padding) {
+            //     x = Level.GridWidth - Button.Padding - w
+            // }
+
+            context.drawImage(renderedText, x, y + Level.GridHeight * 2)
+        }
+
 
         // Render text
         this.renderText(context, offsetY)
