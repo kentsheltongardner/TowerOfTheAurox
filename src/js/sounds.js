@@ -77,7 +77,7 @@ export default class Sounds {
         Sounds.playSingle(Sounds.Bell, 0.25);
     }
     static playWhoosh() {
-        Sounds.playRandom(Sounds.Whooshes);
+        Sounds.playRandom(Sounds.Whooshes, 0.5);
     }
     static playZap() {
         Sounds.playRandom(Sounds.Zaps, 0.25);
