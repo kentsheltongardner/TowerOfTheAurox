@@ -14,7 +14,7 @@ export default class Game {
     static DebrisRGBPrefix = 'rgba(115, 65, 32, ';
     static TargetFPS = 60;
     static FrameTimeMilliseconds = 1000 / Game.TargetFPS;
-    static ScrollTimeMilliseconds = 1000;
+    static ScrollTimeMilliseconds = 1500;
     static ScrollFrames = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds);
     static FrameSkipCount = 8;
     static TitleFadeoutMilliseconds = 500;
@@ -103,7 +103,6 @@ export default class Game {
     resetLevel() {
         this.levelCurr = new Level(this.levelData[this.levelIndex], this.camera);
         this.scrollFrame = 0;
-        this.paused = false;
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y);
     }
     nextLevel() {
@@ -154,7 +153,7 @@ export default class Game {
         const fastButton = this.buttons[Button.Fast];
         return this.mousePressed && fastButton.contains(this.gamePosition.x, this.gamePosition.y);
     }
-    pause() {
+    togglePause() {
         this.paused = !this.paused;
     }
     keyDown(e) {
@@ -169,7 +168,7 @@ export default class Game {
                 this.previousLevel();
                 break;
             case 'KeyP':
-                this.pause();
+                this.togglePause();
                 break;
             case 'KeyS':
                 this.speedPressed = true;
@@ -207,8 +206,12 @@ export default class Game {
         console.log(this.tapPoint.x, this.tapPoint.y, Math.floor(this.tapPoint.x / Block.Width), Math.floor(this.tapPoint.y / Block.Height));
         if (!this.musicPlaying) {
             this.musicPlaying = true;
+            const ambience = document.getElementById('ambience');
+            ambience.volume = 0.5;
+            ambience.loop = true;
+            ambience.play();
             const music = document.getElementById('music');
-            music.volume = 0.5;
+            music.volume = 1;
             music.loop = true;
             music.play();
         }
@@ -256,7 +259,7 @@ export default class Game {
                                 this.previousLevel();
                                 break;
                             case Button.Pause:
-                                this.pause();
+                                this.togglePause();
                                 break;
                             case Button.Fullscreen:
                                 this.toggleFullscreen();
@@ -271,6 +274,7 @@ export default class Game {
                         buttonTapped = true;
                         break;
                     }
+                    // Might be worth allowing clicks during pause
                     if (!buttonTapped && !this.paused) {
                         this.levelCurr.tap(this.tapPoint.x, this.tapPoint.y);
                     }
@@ -317,7 +321,7 @@ export default class Game {
     gamePoint(displayX, displayY) {
         const scalar = this.displayScalar();
         const rect = this.displayRect();
-        const x = Math.floor((displayX - rect.x) / scalar) + 3; // Adjustment for cursor
+        const x = Math.floor((displayX - rect.x) / scalar);
         const y = Math.floor((displayY - rect.y) / scalar);
         return new Point(x, y);
     }
@@ -422,7 +426,8 @@ export default class Game {
         if (this.mousePresent) {
             const displayScalar = this.displayScalar();
             const image = this.mousePressed ? Images.CursorClosed : Images.Cursor;
-            this.displayContext.drawImage(image, Math.floor(this.mousePosition.x), Math.floor(this.mousePosition.y), Images.Cursor.width * displayScalar, Images.Cursor.height * displayScalar);
+            this.displayContext.drawImage(image, Math.floor(this.mousePosition.x - 3 * displayScalar), // Adjustment for cursor image
+            Math.floor(this.mousePosition.y), Images.Cursor.width * displayScalar, Images.Cursor.height * displayScalar);
         }
     }
     renderText(context, offsetY) {

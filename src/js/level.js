@@ -1807,6 +1807,8 @@ export default class Level {
         }
     }
     renderDecorations(context, offsetY) {
+        context.globalCompositeOperation = 'source-over';
+        context.globalAlpha = 1;
         for (const decoration of this.decorations) {
             context.drawImage(Images.DecorationsMap[decoration.type], decoration.x * Block.Width, decoration.y * Block.Height + offsetY);
         }
@@ -1826,9 +1828,6 @@ export default class Level {
         this.renderSplatters(context, offsetY);
         this.renderDroplets(context, offsetY);
         this.renderSelection(context, offsetY);
-        context.globalCompositeOperation = 'source-over';
-        context.globalAlpha = 1;
-        // xor, multiply, overlay, darken, soft-light, hue, color
     }
     renderLight(lightCanvas, offsetY) {
         const lightContext = lightCanvas.getContext('2d');

@@ -1,11 +1,11 @@
-import Beam from './beam.js'
+import Beam         from './beam.js'
 import Block        from './block.js'
 import Camera       from './camera.js'
 import Color        from './color.js'
 import Connection   from './connection.js'
 import Creeper      from './creeper.js'
 import Debris       from './debris.js'
-import Decoration from './decoration.js'
+import Decoration   from './decoration.js'
 import Droplet      from './droplet.js'
 import Images       from './images.js'
 import LevelData    from './level_data.js'
@@ -19,12 +19,9 @@ import Torch        from './torch.js'
 import Walker       from './walker.js'
 
 class UndoData {
-
     public level:       Level
-
     public deaths:      number
     public frame:       number
-
     public walkers:     Set<Walker>     = new Set()
     public creepers:    Set<Creeper>    = new Set()
     public splatters:   Set<Splatter>   = new Set()
@@ -32,7 +29,6 @@ class UndoData {
     public sparks:      Set<Spark>      = new Set()
     public splashes:    Set<Splash>     = new Set()
     public droplets:    Set<Droplet>    = new Set()
-
     public blocks:      Block[]
 
     constructor(level: Level) {
@@ -2201,6 +2197,8 @@ export default class Level {
     }
 
     renderDecorations(context: CanvasRenderingContext2D, offsetY: number) {
+        context.globalCompositeOperation    = 'source-over'
+        context.globalAlpha                 = 1
         for (const decoration of this.decorations) {
             context.drawImage(Images.DecorationsMap[decoration.type], decoration.x * Block.Width, decoration.y * Block.Height + offsetY)
         }
@@ -2223,26 +2221,6 @@ export default class Level {
         this.renderSplatters(context, offsetY)
         this.renderDroplets(context, offsetY)
         this.renderSelection(context, offsetY)
-
-        context.globalCompositeOperation    = 'source-over'
-        context.globalAlpha = 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // xor, multiply, overlay, darken, soft-light, hue, color
-
-
-
     }
 
     renderLight(lightCanvas: HTMLCanvasElement, offsetY: number) {

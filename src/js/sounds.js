@@ -46,14 +46,16 @@ export default class Sounds {
         document.getElementById('thump-1'),
         document.getElementById('thump-2'),
     ];
-    static playRandom(sounds) {
+    static playRandom(sounds, volume = 1) {
         const index = Math.floor(Math.random() * sounds.length);
         const sound = sounds[index];
         sound.currentTime = 0;
+        sound.volume = volume;
         sound.play();
     }
-    static playSingle(sound) {
+    static playSingle(sound, volume = 1) {
         sound.currentTime = 0;
+        sound.volume = volume;
         sound.play();
     }
     static playBoom() {
@@ -66,19 +68,19 @@ export default class Sounds {
         Sounds.playRandom(Sounds.Thumps);
     }
     static playVanish() {
-        Sounds.playRandom(Sounds.Vanishes);
+        Sounds.playRandom(Sounds.Vanishes, 0.125);
     }
     static playSplat() {
-        Sounds.playRandom(Sounds.Splats);
+        Sounds.playRandom(Sounds.Splats, 0.25);
     }
     static playBell() {
-        Sounds.playSingle(Sounds.Bell);
+        Sounds.playSingle(Sounds.Bell, 0.25);
     }
     static playWhoosh() {
         Sounds.playRandom(Sounds.Whooshes);
     }
     static playZap() {
-        Sounds.playRandom(Sounds.Zaps);
+        Sounds.playRandom(Sounds.Zaps, 0.25);
     }
     static playSplash() {
         Sounds.playRandom(Sounds.Splashes);
