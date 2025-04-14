@@ -16,7 +16,7 @@ export default class Game {
     public static readonly DebrisRGBPrefix          = 'rgba(115, 65, 32, '
     public static readonly TargetFPS                = 60
     public static readonly FrameTimeMilliseconds    = 1000 / Game.TargetFPS
-    public static readonly ScrollTimeMilliseconds   = 1500
+    public static readonly ScrollTimeMilliseconds   = 750
     public static readonly ScrollFrames             = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds)
     public static readonly FrameSkipCount           = 8
     public static readonly TitleFadeoutMilliseconds = 500
@@ -315,15 +315,13 @@ export default class Game {
                     if (this.fast()) {
                         for (let i = 0; i < Game.FrameSkipCount; i++) {
                             this.update()
-                            this.camera.update()
                         }
                     } else {
                         this.update()
-                        this.camera.update()
                     }
                 }
             }
-            
+            this.camera.update()
             this.render()
         }
         requestAnimationFrame(timestamp => this.loop(timestamp))

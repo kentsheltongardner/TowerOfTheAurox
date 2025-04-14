@@ -1,4 +1,5 @@
 import Mover from './mover.js'
+import RNG from './rng.js'
 
 export default class Creeper extends Mover {
     static readonly Frames  = 6
@@ -10,7 +11,7 @@ export default class Creeper extends Mover {
 
     constructor(x: number, y: number, direction: number) {
         super(x, y, direction)
-        this.frameOffset    = Math.floor(Math.random() * Creeper.Frames)
+        this.frameOffset    = ((new RNG()).nextInt() + x + y) % Creeper.Frames
         this.killed         = false
     }
 

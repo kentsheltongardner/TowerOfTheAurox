@@ -3,8 +3,8 @@ import Decoration from './decoration.js';
 //          Cloud, fog, mist effects?
 //          Cellular automata effects
 //          Obelisks
-//          Save/restore
-//          Move buttons
+//          Toggle buttons - mute, fullscreen, pause
+//          Transition for next/previous?
 // Destroy a block to pass to an altar
 // Destroy a block to descend to an altar
 // Move an altar to make it accessible
@@ -1886,13 +1886,13 @@ export const testLevels = [
             '=             -             -------                           =',
             '# . . . . . . %=% . . . . . %-%-%-% . . #=# . . . . . . . . . #',
             '=             -                         ===                   =',
-            '# . . . . . %=% . . . . . . . . . . . . #=# . . . *=*=*=* . . #',
+            '# . . . . . %=% @=@=@=@ . . . . . . . . #=# . . . *=*=*=* . . #',
             '=             -                         ===                   =',
-            '# . . . . . . %=% . . . . . . . . . . . #=# . . . . . . . . . #',
+            '# . . . . . . %=% . . . @=@=@=@=@ . . . #=# . . . . . . . . . #',
             '=             -                                               =',
             '# . . . . . %=% . . . . . . . $=$ . . . %=% . . . . . . . . . #',
             '=             -               ===       - -                   =',
-            '# . . . . . . %=% . . $ . . $=$=$ . . . %=% . . . . . $ . . . #',
+            '# . . . . . . %=% . . $ @=@ $=$=$ . . . %=% . . . . . $ . . . #',
             '                                                               ',
             '#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#',
         ],
@@ -1926,7 +1926,7 @@ export const testLevels = [
             [48, 320, 1],
             [130, 70, 1],
             [130, 132, 1],
-            [310, 240, 1],
+            [310, 230, 1],
             [230, 50, -1],
             [240, 50, 1],
             [250, 50, -1],
@@ -1934,7 +1934,7 @@ export const testLevels = [
             [270, 50, 1],
             [280, 50, 1],
             [290, 50, -1],
-            [550, 276, -1],
+            [550, 260, -1],
         ],
         creeperData: [],
         torchData: [

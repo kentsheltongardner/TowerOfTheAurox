@@ -1,4 +1,5 @@
 import Mover from './mover.js'
+import RNG from './rng.js'
 
 export default class Walker extends Mover {
     static readonly Frames  = 8
@@ -9,7 +10,7 @@ export default class Walker extends Mover {
 
     constructor(x: number, y: number, direction: number) {
         super(x, y, direction)
-        this.frameOffset = Math.floor(Math.random() * Walker.Frames)
+        this.frameOffset = ((new RNG()).nextInt() + x + y) % Walker.Frames
     }
 
     width() {

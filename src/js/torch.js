@@ -1,4 +1,5 @@
 import Block from './block.js';
+import RNG from './rng.js';
 export default class Torch {
     x;
     y;
@@ -6,6 +7,6 @@ export default class Torch {
     constructor(x, y) {
         this.x = x * Block.Width;
         this.y = y * Block.Height;
-        this.frame = Math.floor(Math.random() * 5);
+        this.frame = ((new RNG()).nextInt() + x + y) % 5;
     }
 }
