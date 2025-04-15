@@ -1,4 +1,5 @@
 export default interface LevelData {
+    title:          string,
     typeGrid:       string[]
     attributeGrid:  string[]
     walkerData:     [number, number, number][]

@@ -19,7 +19,7 @@ export default class Game {
     public static readonly ScrollTimeMilliseconds   = 750
     public static readonly ScrollFrames             = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds)
     public static readonly FrameSkipCount           = 8
-    public static readonly TitleFadeoutMilliseconds = 500
+    public static readonly TitleFadeoutMilliseconds = 1500
     public static readonly TitleFadeoutFrames       = Math.floor(Game.TitleFadeoutMilliseconds / Game.FrameTimeMilliseconds)
 
     public canvas:              HTMLCanvasElement = document.createElement('canvas')
@@ -424,7 +424,17 @@ export default class Game {
         context.globalCompositeOperation = 'source-over'
         context.globalAlpha = 0.5
         for (const button of this.buttons) {
-            context.drawImage(Images.ButtonsMap[button.type], button.x, button.y + Level.GridHeight * 2)
+            context.drawImage(
+                Images.ButtonsMap[button.type], 
+                0, 
+                0,
+                Button.Width,
+                Button.Height,
+                button.x, 
+                button.y + Level.GridHeight * 2,
+                Button.Width,
+                Button.Height
+            )
         }
 
         // Render tooltips
@@ -483,7 +493,7 @@ export default class Game {
         if (this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
             this.displayContext.globalAlpha = this.smooth(1.0 - this.titleFadeOutFrame / Game.TitleFadeoutFrames)
             // generate falling stars?
-            this.displayContext.fillStyle = 'rgba(0, 0, 0, 0.75)'
+            this.displayContext.fillStyle = 'black'
             this.displayContext.fillRect(displayRect.x, displayRect.y, displayRect.w, displayRect.h)
             this.displayContext.drawImage(Images.Title, displayRect.x, displayRect.y, displayRect.w, displayRect.h)
             this.displayContext.globalAlpha = 1.0

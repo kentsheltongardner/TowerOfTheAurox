@@ -277,6 +277,7 @@ export default class Level {
         for (const decoration of this.levelData.decorationData) {
             this.decorations.push(new Decoration(decoration[0], decoration[1], decoration[2]));
         }
+        this.message = this.levelData.title;
     }
     setIndices(x, y, w, h, index) {
         for (let i = x; i < x + w; i++) {
@@ -1831,6 +1832,11 @@ export default class Level {
     }
     renderLight(lightCanvas, offsetY) {
         const lightContext = lightCanvas.getContext('2d');
+        // const overlayCanvas                     = document.createElement('canvas')
+        // overlayCanvas.width                     = Level.GridWidth
+        // overlayCanvas.height                    = Level.GridHeight
+        // const overlayContext                    = overlayCanvas.getContext('2d')!
+        // overlayContext.globalCompositeOperation = 'multiply'
         lightContext.globalCompositeOperation = 'destination-out';
         const rng = new RNG(this.frame * this.frame);
         for (const torch of this.torches) {
