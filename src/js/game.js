@@ -222,7 +222,7 @@ export default class Game {
             this.titleFadeOutFrame++;
         }
         this.levelCurr.update();
-        if (this.levelCurr.complete() && this.levelIndex < this.levelCount - 2) {
+        if (this.levelCurr.complete() && this.levelIndex < this.levelCount - 3) {
             Sounds.playBell();
             this.scrollFrame = 1;
         }
