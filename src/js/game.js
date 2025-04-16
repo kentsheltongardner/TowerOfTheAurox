@@ -7,11 +7,14 @@ import Sounds from './sounds.js';
 import TextRenderer from './text.js';
 import Block from './block.js';
 import Button from './button.js';
+import Message from './message.js';
+// I only ever need to render the before and after levels, IF the transition happens during motion
+// Destination level
+// Destination level must be greater than zero and less than levels.length - 1
+// Movement toward destination level resets at each press, and then the movement speed gets recalculated?
+// Movement is designed to slide into the appropriate spot based on the 
+// 
 export default class Game {
-    static Tau = Math.PI * 2;
-    static AmbientGradientRadius = Math.hypot(Level.GridCenterX, Level.GridCenterY);
-    static SplatterRGB = '#9f040460';
-    static DebrisRGBPrefix = 'rgba(115, 65, 32, ';
     static TargetFPS = 60;
     static FrameTimeMilliseconds = 1000 / Game.TargetFPS;
     static ScrollTimeMilliseconds = 750;
@@ -45,7 +48,7 @@ export default class Game {
     gamePosition = new Point(0, 0);
     mousePressed = false;
     mousePresent = false;
-    buttons = [];
+    buttons = new Array(Button.Count);
     muted = false;
     hoverButton = null;
     // Numeric scroll system based on direction of movement (up or down)
@@ -80,11 +83,11 @@ export default class Game {
         let x = Math.floor((Level.GridWidth - buttonsWidth) / 2);
         const y = Level.GridHeight - Button.Padding - Button.Height;
         for (let type = 0; type < Button.Fullscreen; type++) {
-            this.buttons.push(new Button(type, x, y));
+            this.buttons[type] = new Button(type, x, y);
             x += buttonIncrement;
         }
-        this.buttons.push(new Button(Button.Mute, Button.Padding, y));
-        this.buttons.push(new Button(Button.Fullscreen, Level.GridWidth - Button.Padding - Button.Width, y));
+        this.buttons[Button.Fullscreen] = new Button(Button.Fullscreen, Level.GridWidth - Button.Padding - Button.Width, y);
+        this.buttons[Button.Mute] = new Button(Button.Mute, Button.Padding, y);
         requestAnimationFrame(timestamp => this.loop(timestamp));
     }
     mouseMove(x, y) {
@@ -104,6 +107,7 @@ export default class Game {
         this.levelCurr = new Level(this.levelData[this.levelIndex], this.camera);
         this.scrollFrame = 0;
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y);
+        this.levelCurr.message.state = Message.StateGone;
     }
     nextLevel() {
         if (this.levelIndex >= this.levelCount - 3)
@@ -116,6 +120,7 @@ export default class Game {
         this.scrollFrame = 0;
         this.paused = false;
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y);
+        this.levelCurr.message.state = Message.StatePresent;
     }
     previousLevel() {
         if (this.levelIndex <= 1)
@@ -128,6 +133,7 @@ export default class Game {
         this.scrollFrame = 0;
         this.paused = false;
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y);
+        this.levelCurr.message.state = Message.StatePresent;
     }
     toggleFullscreen() {
         const body = document.body;
@@ -169,15 +175,18 @@ export default class Game {
                 break;
             case 'KeyP':
                 this.togglePause();
+                this.buttons[Button.Pause].tap();
                 break;
             case 'KeyS':
                 this.speedPressed = true;
                 break;
             case 'KeyF':
                 this.toggleFullscreen();
+                this.buttons[Button.Fullscreen].tap();
                 break;
             case 'KeyM':
                 this.toggleMute();
+                this.buttons[Button.Mute].tap();
                 break;
             case 'KeyU':
                 this.levelCurr.popUndoData();
@@ -272,6 +281,7 @@ export default class Game {
                                 break;
                         }
                         buttonTapped = true;
+                        button.tap();
                         break;
                     }
                     // Might be worth allowing clicks during pause
@@ -371,7 +381,11 @@ export default class Game {
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 0.5;
         for (const button of this.buttons) {
-            context.drawImage(Images.ButtonsMap[button.type], 0, 0, Button.Width, Button.Height, button.x, button.y + Level.GridHeight * 2, Button.Width, Button.Height);
+            let srcY = 0;
+            if (Button.ToggleMap[button.type] && button.pressed) {
+                srcY = Button.Height;
+            }
+            context.drawImage(Images.ButtonsMap[button.type], 0, srcY, Button.Width, Button.Height, button.x, button.y + Level.GridHeight * 2, Button.Width, Button.Height);
         }
         // Render tooltips
         if (this.hoverButton !== null) {
@@ -431,11 +445,23 @@ export default class Game {
     }
     renderText(context, offsetY) {
         const message = this.levelCurr.message;
-        if (message === '')
-            return;
+        switch (message.state) {
+            case Message.StateFadeIn:
+                context.globalAlpha = this.smooth(message.frame / Message.FadeInFrames);
+                break;
+            case Message.StatePresent:
+                context.globalAlpha = 1;
+                break;
+            case Message.StateFadeOut:
+                context.globalAlpha = this.smooth(1 - message.frame / Message.FadeOutFrames);
+                break;
+            case Message.StateGone:
+                return;
+        }
         context.globalCompositeOperation = 'source-over';
-        context.globalAlpha = 1;
-        const renderedText = TextRenderer.paragraphCanvas(message, Images.Font, 360);
+        context.fillStyle = '#0008';
+        context.fillRect(0, 0, Level.GridWidth, Level.GridHeight + Level.GridHeight * 2 + offsetY);
+        const renderedText = TextRenderer.paragraphCanvas(message.text, Images.Font, 360);
         const w = renderedText.width;
         const h = renderedText.height;
         const x = Math.floor((Level.GridWidth - w) / 2);
@@ -444,7 +470,8 @@ export default class Game {
     }
     // Render 
     smooth(x) {
-        const sin = Math.sin(Math.PI * x / 2);
-        return sin * sin;
+        // const sin = Math.sin(Math.PI * x / 2)
+        // return sin * sin
+        return x * (3 * x - 2 * x * x);
     }
 }

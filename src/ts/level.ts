@@ -9,6 +9,7 @@ import Decoration   from './decoration.js'
 import Droplet      from './droplet.js'
 import Images       from './images.js'
 import LevelData    from './level_data.js'
+import Message from './message.js'
 import Mover        from './mover.js'
 import RNG          from './rng.js'
 import Sounds       from './sounds.js'
@@ -116,7 +117,7 @@ export default class Level {
     public groupFixedUp:        boolean[]           = []
     public groupFixedDown:      boolean[]           = []
     public hoverGroup:          Set<number>         = new Set()    // What blocks are in the hover group?
-    public message:             string              = ''
+    public message:             Message
 
     public blocks:              Block[]             = []
     public walkers:             Set<Walker>         = new Set()
@@ -143,6 +144,7 @@ export default class Level {
     constructor(levelData: LevelData, camera: Camera) {
         this.levelData              = levelData
         this.camera                 = camera
+        this.message                = new Message(this.levelData.title)
         this.load()
     }
     load() {
@@ -308,8 +310,6 @@ export default class Level {
         for (const decoration of this.levelData.decorationData) {
             this.decorations.push(new Decoration(decoration[0], decoration[1], decoration[2]))
         }
-
-        this.message = this.levelData.title
     }
     setIndices(x: number, y: number, w: number, h: number, index: number) {
         for (let i = x; i < x + w; i++) {
@@ -351,8 +351,8 @@ export default class Level {
     // show 
 
     tap(gridX: number, gridY: number) {
-        if (this.message !== '') {
-            this.message = ''
+        if (this.message.state === Message.StatePresent) {
+            this.message.tap()
         }
 
         if (gridX < 0 || gridY < 0 || gridX >= Level.GridWidth || gridY >= Level.GridHeight) return
@@ -361,8 +361,8 @@ export default class Level {
         if (index === Level.GridEmpty) return
 
         const block = this.blocks[index]
-        if (block.message !== '') {
-            this.message = block.message
+        if (block.message !== '' && this.message.state === Message.StateGone) {
+            this.message = new Message(block.message)
         }
 
         if (!Block.TypeIsDestructible[block.type]) return
@@ -756,6 +756,9 @@ export default class Level {
 //  #####   #        ######   #     #     #     #######  
 
     update() {
+
+        this.message.update()
+        if (this.message.state !== Message.StateGone) return
 
 //    #      #####    #####   #######  #        #######  ######      #     #######  #######  
 //   # #    #     #  #     #  #        #        #        #     #    # #       #     #        
@@ -1873,6 +1876,9 @@ export default class Level {
     public static readonly SplatterRGB              = '#9f040460'
     public static readonly DebrisRGBPrefix          = 'rgba(115, 65, 32, '
     smooth(x: number) {
+        return x * (3 * x - 2 * x * x)
+    }
+    smoothSine(x: number) {
         const sin = Math.sin(Math.PI * x / 2)
         return sin * sin
     }
@@ -1934,7 +1940,7 @@ export default class Level {
         const rng                           = new RNG(this.frame * this.frame)
         context.globalCompositeOperation    = 'source-over'
         context.globalAlpha                 = 1
-        context.strokeStyle                 = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smooth(this.frame * 0.05)})`
+        context.strokeStyle                 = `rgba(255, 192, 0, ${0.5 + 0.5 * this.smoothSine(this.frame * 0.05)})`
         context.beginPath()
         for (const beam of this.beams()) {
             context.moveTo(beam.x1, beam.y1 + offsetY)

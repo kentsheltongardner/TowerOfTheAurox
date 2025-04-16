@@ -26,9 +26,21 @@ export default class Button {
         '[M]ute/unmute',
     ]
 
+    public static readonly ToggleMap = [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+    ]
+
     public type:        number
     public x:           number
     public y:           number
+    public pressed:     boolean = false
 
     constructor(type: number, x: number, y: number) {
         this.type       = type
@@ -38,5 +50,9 @@ export default class Button {
 
     contains(x: number, y: number) {
         return x >= this.x && y >= this.y && x < this.x + Button.Width && y < this.y + Button.Height
+    }
+
+    tap() {
+        this.pressed = !this.pressed
     }
 }

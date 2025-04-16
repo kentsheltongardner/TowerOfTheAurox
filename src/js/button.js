@@ -22,9 +22,20 @@ export default class Button {
         'Toggle [F]ullscreen',
         '[M]ute/unmute',
     ];
+    static ToggleMap = [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+    ];
     type;
     x;
     y;
+    pressed = false;
     constructor(type, x, y) {
         this.type = type;
         this.x = x;
@@ -32,5 +43,8 @@ export default class Button {
     }
     contains(x, y) {
         return x >= this.x && y >= this.y && x < this.x + Button.Width && y < this.y + Button.Height;
+    }
+    tap() {
+        this.pressed = !this.pressed;
     }
 }
