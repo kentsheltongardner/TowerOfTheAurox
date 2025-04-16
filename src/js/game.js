@@ -20,7 +20,7 @@ export default class Game {
     static ScrollTimeMilliseconds = 750;
     static ScrollFrames = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds);
     static FrameSkipCount = 8;
-    static TitleFadeoutMilliseconds = 1500;
+    static TitleFadeoutMilliseconds = 750;
     static TitleFadeoutFrames = Math.floor(Game.TitleFadeoutMilliseconds / Game.FrameTimeMilliseconds);
     canvas = document.createElement('canvas');
     uiCanvas = document.createElement('canvas');

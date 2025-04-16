@@ -24,7 +24,7 @@ export default class Game {
     public static readonly ScrollTimeMilliseconds   = 750
     public static readonly ScrollFrames             = Math.floor(Game.ScrollTimeMilliseconds / Game.FrameTimeMilliseconds)
     public static readonly FrameSkipCount           = 8
-    public static readonly TitleFadeoutMilliseconds = 1500
+    public static readonly TitleFadeoutMilliseconds = 750
     public static readonly TitleFadeoutFrames       = Math.floor(Game.TitleFadeoutMilliseconds / Game.FrameTimeMilliseconds)
 
     public canvas:              HTMLCanvasElement = document.createElement('canvas')
