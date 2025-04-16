@@ -124,10 +124,10 @@ export default class Level {
     // #        #     #  #     #  #     #  
     // #        #     #  #     #  #     #  
     // #######   #####   #     #  ######   
-    constructor(levelData, camera) {
+    constructor(levelData, camera, levelNumber) {
         this.levelData = levelData;
         this.camera = camera;
-        this.message = new Message(this.levelData.title);
+        this.message = new Message(levelNumber + '. ' + this.levelData.title);
         this.load();
     }
     load() {

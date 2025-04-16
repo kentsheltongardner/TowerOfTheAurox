@@ -66,10 +66,10 @@ export default class Game {
         this.camera             = new Camera()
         this.levelData          = levelData
         this.levelCount         = this.levelData.length
-        this.levelPrev          = new Level(this.levelData[this.levelIndex - 1], this.camera)
-        this.levelCurr          = new Level(this.levelData[this.levelIndex], this.camera)
-        this.levelNext          = new Level(this.levelData[this.levelIndex + 1], this.camera)
-        this.levelNextNext      = new Level(this.levelData[this.levelIndex + 2], this.camera)
+        this.levelPrev          = new Level(this.levelData[this.levelIndex - 1], this.camera, this.levelIndex - 1)
+        this.levelCurr          = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
+        this.levelNext          = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
+        this.levelNextNext      = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
 
         this.canvas.width       = Level.GridWidth
         this.uiCanvas.width     = Level.GridWidth
@@ -125,7 +125,7 @@ export default class Game {
 
 
     resetLevel() {
-        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
+        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
         this.scrollFrame    = 0
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
         this.levelCurr.message.state = Message.StateGone
@@ -134,10 +134,10 @@ export default class Game {
         if (this.levelIndex >= this.levelCount - 3) return
 
         this.levelIndex++
-        this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
-        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
-        this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
-        this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
+        this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera, this.levelIndex - 1)
+        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
+        this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
+        this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
         this.scrollFrame    = 0
         this.paused         = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
@@ -147,10 +147,10 @@ export default class Game {
         if (this.levelIndex <= 1) return
 
         this.levelIndex--
-        this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera)
-        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
-        this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
-        this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
+        this.levelPrev      = new Level(this.levelData[this.levelIndex - 1], this.camera, this.levelIndex - 1)
+        this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
+        this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
+        this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
         this.scrollFrame    = 0
         this.paused         = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
@@ -278,9 +278,10 @@ export default class Game {
                 if (this.scrollFrame === Game.ScrollFrames) {
                     this.levelIndex++
                     this.levelPrev      = this.levelCurr
-                    this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera)
-                    this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera)
-                    this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera)
+                    this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
+                    this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
+                    this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
+
                     this.scrollFrame    = 0
                     this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
                 }
