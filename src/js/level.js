@@ -310,6 +310,8 @@ export default class Level {
         if (this.message.state === Message.StatePresent) {
             this.message.tap();
         }
+        if (this.message.state !== Message.StateGone)
+            return;
         if (gridX < 0 || gridY < 0 || gridX >= Level.GridWidth || gridY >= Level.GridHeight)
             return;
         const index = this.getIndex(gridX, gridY);
