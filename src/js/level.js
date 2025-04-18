@@ -756,7 +756,7 @@ export default class Level {
             for (const creeper of this.creepers) {
                 updateStepVariables(creeper.step, creeper.stepTotal, creeper.fallDirection);
             }
-            if (nextStep > nextStepTotal)
+            if (nextStep >= nextStepTotal)
                 break;
             // #     #   #####   #     #  #######  ######    #####   
             // ##   ##  #     #  #     #  #        #     #  #     #  
@@ -1071,7 +1071,7 @@ export default class Level {
                 else {
                     mover.step = Math.ceil(mover.stepTotal * nextStep / nextStepTotal);
                 }
-                if (squish || (mover instanceof Walker && acceleration > 9)) {
+                if (squish || (mover instanceof Walker && acceleration > 9.75)) {
                     mover.vy = 0;
                     this.splatterMover(mover);
                     this.kill(mover, moverSet);

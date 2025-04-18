@@ -7,7 +7,7 @@ export default class Button {
     static Reset = 1;
     static Undo = 2;
     static Pause = 3;
-    static Fast = 4;
+    static Speed = 4;
     static Next = 5;
     static Fullscreen = 6;
     static Mute = 7;
@@ -16,7 +16,7 @@ export default class Button {
         'Pre[V]ious level',
         '[R]eset level',
         '[U]ndo move',
-        '[P]ause game',
+        '[P]ause/unpause game',
         '[S]peed up',
         '[N]ext level',
         'Toggle [F]ullscreen',

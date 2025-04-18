@@ -53,7 +53,7 @@ export default class Images {
         Images.ButtonsMap[Button.Reset]         = <HTMLImageElement>document.getElementById('button-reset')
         Images.ButtonsMap[Button.Undo]          = <HTMLImageElement>document.getElementById('button-undo')
         Images.ButtonsMap[Button.Pause]         = <HTMLImageElement>document.getElementById('button-pause')
-        Images.ButtonsMap[Button.Fast]          = <HTMLImageElement>document.getElementById('button-fast')
+        Images.ButtonsMap[Button.Speed]         = <HTMLImageElement>document.getElementById('button-fast')
         Images.ButtonsMap[Button.Next]          = <HTMLImageElement>document.getElementById('button-next')
         Images.ButtonsMap[Button.Fullscreen]    = <HTMLImageElement>document.getElementById('button-fullscreen')
         Images.ButtonsMap[Button.Mute]          = <HTMLImageElement>document.getElementById('button-mute')

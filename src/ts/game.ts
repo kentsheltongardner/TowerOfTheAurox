@@ -45,12 +45,9 @@ export default class Game {
     public lastTimestamp:       number          = 0
     public titleFadeOutFrame:   number          = 0
     public scrollFrame:         number          = 0
-    public tapPoint:            Point           = new Point(0, 0)
-    public tapped:              boolean         = false
     public camera:              Camera          = new Camera()
     public overlayOpacity:      number          = 0
     public speedPressed:        boolean         = false
-    public paused:              boolean         = false
     public mousePosition:       Point           = new Point(0, 0)
     public gamePosition:        Point           = new Point(0, 0)
     public mousePressed:        boolean         = false
@@ -58,7 +55,6 @@ export default class Game {
     public buttons:             Button[]        = new Array(Button.Count)
     public muted:               boolean         = false
     public hoverButton:         Button | null   = null
-
 
     // Numeric scroll system based on direction of movement (up or down)
 
@@ -125,6 +121,7 @@ export default class Game {
 
 
     resetLevel() {
+        
         this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
         this.scrollFrame    = 0
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
@@ -139,7 +136,7 @@ export default class Game {
         this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
         this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
         this.scrollFrame    = 0
-        this.paused         = false
+        this.buttons[Button.Pause].pressed = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
         this.levelCurr.message.state = Message.StatePresent
     }
@@ -152,7 +149,7 @@ export default class Game {
         this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
         this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
         this.scrollFrame    = 0
-        this.paused         = false
+        this.buttons[Button.Pause].pressed = false
         this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
         this.levelCurr.message.state = Message.StatePresent
     }
@@ -174,47 +171,71 @@ export default class Game {
             audio.muted = this.muted
         })
     }
-    fast() {
+    speed() {
         if (this.speedPressed) return true
 
-        const fastButton = this.buttons[Button.Fast]
+        const fastButton = this.buttons[Button.Speed]
         return this.mousePressed && fastButton.contains(this.gamePosition.x, this.gamePosition.y)
-    }
-    togglePause() {
-        this.paused = !this.paused
     }
 
 
     keyDown(e: KeyboardEvent) {
         switch (e.code) {
             case 'KeyR':
-                this.resetLevel()
+                this.control(Button.Reset)
             break
             case 'KeyN':
-                this.nextLevel()
+                this.control(Button.Next)
             break
             case 'KeyV':
-                this.previousLevel()
+                this.control(Button.Previous)
             break
             case 'KeyP':
-                this.togglePause()
-                this.buttons[Button.Pause].tap()
+                this.control(Button.Pause)
             break
             case 'KeyS':
-                this.speedPressed = true
+                this.control(Button.Speed)
             break
             case 'KeyF':
-                this.toggleFullscreen()
-                this.buttons[Button.Fullscreen].tap()
+                this.control(Button.Fullscreen)
             break
             case 'KeyM':
-                this.toggleMute()
-                this.buttons[Button.Mute].tap()
+                this.control(Button.Mute)
             break
             case 'KeyU':
+                this.control(Button.Undo)
+            break
+        }
+    }
+
+    control(command: number) {
+        switch (command) {
+            case Button.Reset:
+                this.resetLevel()
+            break
+            case Button.Next:
+                this.nextLevel()
+            break
+            case Button.Previous:
+                this.previousLevel()
+            break
+            case Button.Pause:
+
+            break
+            case Button.Speed:
+                this.speedPressed = true
+            break
+            case Button.Fullscreen:
+                this.toggleFullscreen()
+            break
+            case Button.Mute:
+                this.toggleMute()
+            break
+            case Button.Undo:
                 this.levelCurr.popUndoData()
             break
         }
+        this.buttons[command].tap()
     }
 
     keyUp(e: KeyboardEvent) {
@@ -238,9 +259,26 @@ export default class Game {
             return
         }
 
-        this.tapped     = true
-        this.tapPoint   = this.gamePoint(x, y)
-        console.log(this.tapPoint.x, this.tapPoint.y, Math.floor(this.tapPoint.x / Block.Width), Math.floor(this.tapPoint.y / Block.Height))
+        let buttonIndex = -1
+        if (this.levelCurr.message.state === Message.StateGone) {
+            for (let i = 0; i < Button.Count; i++) {
+                const button = this.buttons[i]
+                if (!button.contains(this.gamePosition.x, this.gamePosition.y)) continue
+                
+                buttonIndex = i
+                break
+            }
+        }
+
+        if (buttonIndex !== -1) {
+            const button = this.buttons[buttonIndex]
+            this.control(button.type)
+        } else {
+            this.levelCurr.tap(this.gamePosition.x, this.gamePosition.y)
+            this.buttons[Button.Pause].pressed = false
+        }
+
+        console.log(x, y, Math.floor(x / Block.Width), Math.floor(y / Block.Height))
 
         if (!this.musicPlaying) {
             this.musicPlaying = true
@@ -257,9 +295,9 @@ export default class Game {
     }
 
     update() {
-        if (this.titleFadeOutFrame > 0 
-            && this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
+        if (this.titleFadeOutFrame > 0 && this.titleFadeOutFrame < Game.TitleFadeoutFrames) {
             this.titleFadeOutFrame++
+            return
         }
 
         this.levelCurr.update()
@@ -286,46 +324,8 @@ export default class Game {
                     this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
                 }
             } else {
-                if (this.tapped) {
-                    let buttonTapped = false
-                    for (const button of this.buttons) {
-                        if (!button.contains(this.gamePosition.x, this.gamePosition.y)) continue
-                        
-                        switch (button.type) {
-                            case Button.Reset:
-                                this.resetLevel()
-                            break
-                            case Button.Next:
-                                this.nextLevel()
-                            break
-                            case Button.Previous:
-                                this.previousLevel()
-                            break
-                            case Button.Pause:
-                                this.togglePause()
-                            break
-                            case Button.Fullscreen:
-                                this.toggleFullscreen()
-                            break
-                            case Button.Mute:
-                                this.toggleMute()
-                            break
-                            case Button.Undo:
-                                this.levelCurr.popUndoData()
-                            break
-                        }
-                        buttonTapped = true
-                        button.tap()
-                        break
-                    }
-                    // Might be worth allowing clicks during pause
-                    if (!buttonTapped && !this.paused) {
-                        this.levelCurr.tap(this.tapPoint.x, this.tapPoint.y)
-                    }
-                    this.tapped = false
-                }
-                if (!this.paused) {
-                    if (this.fast()) {
+                if (!this.buttons[Button.Pause].pressed) {
+                    if (this.speed()) {
                         for (let i = 0; i < Game.FrameSkipCount; i++) {
                             this.update()
                         }

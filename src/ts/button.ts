@@ -8,7 +8,7 @@ export default class Button {
     public static readonly Reset        = 1
     public static readonly Undo         = 2
     public static readonly Pause        = 3
-    public static readonly Fast         = 4
+    public static readonly Speed        = 4
     public static readonly Next         = 5
     public static readonly Fullscreen   = 6
     public static readonly Mute         = 7
@@ -19,7 +19,7 @@ export default class Button {
         'Pre[V]ious level',
         '[R]eset level',
         '[U]ndo move',
-        '[P]ause game',
+        '[P]ause/unpause game',
         '[S]peed up',
         '[N]ext level',
         'Toggle [F]ullscreen',
