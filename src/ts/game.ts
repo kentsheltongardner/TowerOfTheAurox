@@ -184,34 +184,53 @@ export default class Game {
     keyDown(e: KeyboardEvent) {
         switch (e.code) {
             case 'KeyR':
-                this.control(Button.Reset)
+                this.resetLevel()
             break
             case 'KeyN':
-                this.control(Button.Next)
+                this.nextLevel()
             break
             case 'KeyV':
-                this.control(Button.Previous)
+                this.previousLevel()
             break
             case 'KeyP':
-                this.control(Button.Pause)
+                if (this.levelCurr.message.state !== Message.StateGone) {
+                    this.levelCurr.tap(0, 0)
+                    break
+                }
+                this.buttons[Button.Pause].toggle()
             break
             case 'KeyS':
-                this.control(Button.Speed)
+                if (this.levelCurr.message.state !== Message.StateGone) {
+                    this.levelCurr.tap(0, 0)
+                    break
+                }
+                this.buttons[Button.Speed].pressed = true
             break
             case 'KeyF':
-                this.control(Button.Fullscreen)
+                this.toggleFullscreen()
+                this.buttons[Button.Fullscreen].toggle()
             break
             case 'KeyM':
-                this.control(Button.Mute)
+                this.toggleMute()
+                this.buttons[Button.Mute].toggle()
             break
             case 'KeyU':
-                this.control(Button.Undo)
+                this.levelCurr.popUndoData()
             break
         }
     }
 
-    control(command: number) {
-        switch (command) {
+    keyUp(e: KeyboardEvent) {
+        switch (e.code) {
+            case 'KeyS': {
+                this.buttons[Button.Speed].pressed = false
+                break
+            }
+        }
+    }
+
+    buttonTapped(type: number) {
+        switch (type) {
             case Button.Reset:
                 this.resetLevel()
             break
@@ -226,7 +245,7 @@ export default class Game {
                     this.levelCurr.tap(0, 0)
                     break
                 }
-                this.buttons[command].toggle()
+                this.buttons[Button.Pause].toggle()
             break
             case Button.Speed:
                 if (this.levelCurr.message.state !== Message.StateGone) {
@@ -237,11 +256,11 @@ export default class Game {
             break
             case Button.Fullscreen:
                 this.toggleFullscreen()
-                this.buttons[command].toggle()
+                this.buttons[Button.Fullscreen].toggle()
             break
             case Button.Mute:
                 this.toggleMute()
-                this.buttons[command].toggle()
+                this.buttons[Button.Mute].toggle()
             break
             case Button.Undo:
                 this.levelCurr.popUndoData()
@@ -249,14 +268,7 @@ export default class Game {
         }
     }
 
-    keyUp(e: KeyboardEvent) {
-        switch (e.code) {
-            case 'KeyS': {
-                this.buttons[Button.Speed].pressed = false
-                break
-            }
-        }
-    }
+
 
     
     mouseDown(e: MouseEvent) {
@@ -285,7 +297,7 @@ export default class Game {
 
         if (buttonIndex !== -1) {
             const button = this.buttons[buttonIndex]
-            this.control(button.type)
+            this.buttonTapped(button.type)
         } else {
             this.levelCurr.tap(this.gamePosition.x, this.gamePosition.y)
             this.buttons[Button.Pause].pressed = false
@@ -332,7 +344,6 @@ export default class Game {
                     this.levelCurr      = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex)
                     this.levelNext      = new Level(this.levelData[this.levelIndex + 1], this.camera, this.levelIndex + 1)
                     this.levelNextNext  = new Level(this.levelData[this.levelIndex + 2], this.camera, this.levelIndex + 2)
-
                     this.scrollFrame    = 0
                     this.levelCurr.hover(this.gamePosition.x, this.gamePosition.y)
                 }
