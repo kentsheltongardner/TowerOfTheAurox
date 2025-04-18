@@ -222,9 +222,17 @@ export default class Game {
                 this.previousLevel()
             break
             case Button.Pause:
+                if (this.levelCurr.message.state !== Message.StateGone) {
+                    this.levelCurr.tap(0, 0)
+                    break
+                }
                 this.buttons[command].toggle()
             break
             case Button.Speed:
+                if (this.levelCurr.message.state !== Message.StateGone) {
+                    this.levelCurr.tap(0, 0)
+                    break
+                }
                 this.buttons[Button.Speed].pressed = true
             break
             case Button.Fullscreen:
@@ -267,14 +275,12 @@ export default class Game {
         }
 
         let buttonIndex = -1
-        if (this.levelCurr.message.state === Message.StateGone) {
-            for (let i = 0; i < Button.Count; i++) {
-                const button = this.buttons[i]
-                if (!button.contains(this.gamePosition.x, this.gamePosition.y)) continue
-                
-                buttonIndex = i
-                break
-            }
+        for (let i = 0; i < Button.Count; i++) {
+            const button = this.buttons[i]
+            if (!button.contains(this.gamePosition.x, this.gamePosition.y)) continue
+            
+            buttonIndex = i
+            break
         }
 
         if (buttonIndex !== -1) {
