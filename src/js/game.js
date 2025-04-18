@@ -40,7 +40,6 @@ export default class Game {
     scrollFrame = 0;
     camera = new Camera();
     overlayOpacity = 0;
-    speedPressed = false;
     mousePosition = new Point(0, 0);
     gamePosition = new Point(0, 0);
     mousePressed = false;
@@ -67,8 +66,8 @@ export default class Game {
         this.displayContext = this.displayCanvas.getContext('2d');
         this.resize();
         window.addEventListener('resize', () => this.resize());
-        window.addEventListener('mousedown', e => this.tap(e.offsetX, e.offsetY));
-        window.addEventListener('mouseup', () => this.mousePressed = false);
+        window.addEventListener('mousedown', e => this.mouseDown(e));
+        window.addEventListener('mouseup', e => this.mouseUp(e));
         window.addEventListener('mouseenter', () => this.mousePresent = true);
         window.addEventListener('mouseleave', () => this.mousePresent = false);
         window.addEventListener('mousemove', e => this.mouseMove(e.offsetX, e.offsetY));
@@ -99,6 +98,12 @@ export default class Game {
                 break;
             }
         }
+    }
+    mouseUp(e) {
+        if (e.button !== 0)
+            return;
+        this.mousePressed = false;
+        this.buttons[Button.Speed].pressed = false;
     }
     resetLevel() {
         this.levelCurr = new Level(this.levelData[this.levelIndex], this.camera, this.levelIndex);
@@ -151,10 +156,7 @@ export default class Game {
         });
     }
     speed() {
-        if (this.speedPressed)
-            return true;
-        const fastButton = this.buttons[Button.Speed];
-        return this.mousePressed && fastButton.contains(this.gamePosition.x, this.gamePosition.y);
+        return this.mousePressed && this.buttons[Button.Speed].contains(this.gamePosition.x, this.gamePosition.y);
     }
     keyDown(e) {
         switch (e.code) {
@@ -196,31 +198,37 @@ export default class Game {
                 this.previousLevel();
                 break;
             case Button.Pause:
+                this.buttons[command].toggle();
                 break;
             case Button.Speed:
-                this.speedPressed = true;
+                this.buttons[Button.Speed].pressed = true;
                 break;
             case Button.Fullscreen:
                 this.toggleFullscreen();
+                this.buttons[command].toggle();
                 break;
             case Button.Mute:
                 this.toggleMute();
+                this.buttons[command].toggle();
                 break;
             case Button.Undo:
                 this.levelCurr.popUndoData();
                 break;
         }
-        this.buttons[command].tap();
     }
     keyUp(e) {
         switch (e.code) {
             case 'KeyS': {
-                this.speedPressed = false;
+                this.buttons[Button.Speed].pressed = false;
                 break;
             }
         }
     }
-    tap(x, y) {
+    mouseDown(e) {
+        if (e.button !== 0)
+            return;
+        const x = e.offsetX;
+        const y = e.offsetY;
         this.mousePressed = true;
         if (this.titleFadeOutFrame === 0) {
             this.titleFadeOutFrame = 1;
@@ -288,7 +296,7 @@ export default class Game {
             }
             else {
                 if (!this.buttons[Button.Pause].pressed) {
-                    if (this.speed()) {
+                    if (this.buttons[Button.Speed].pressed) {
                         for (let i = 0; i < Game.FrameSkipCount; i++) {
                             this.update();
                         }

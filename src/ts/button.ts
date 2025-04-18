@@ -52,7 +52,7 @@ export default class Button {
         return x >= this.x && y >= this.y && x < this.x + Button.Width && y < this.y + Button.Height
     }
 
-    tap() {
+    toggle() {
         this.pressed = !this.pressed
     }
 }
