@@ -1,12 +1,6 @@
 
 // Font image should be 16 * 8 ascii, text should not contain, leading, trailing, or consecutive spaces
 
-import Images from './images.js'
-
-
-
-
-
 const CharColumns   = 16
 const CharRows      = 8
 
@@ -17,10 +11,7 @@ export default class TextRenderer {
         "As he lays down to die the madding spirit whispers in the aurox's ear. It speaks of the enemy that builds and burns and loves only what it can control. A rage fills the aurox. His nostrils flare and his breath is fire. He dies, but his hatred lingers in the forest of dry bones.",
         "The years pass, and countless lost souls walk into the dark shade of the forest. Stone by stone their tower rises."
     ]
-
-    // static readonly IntroTextImage = TextRenderer.pageCanvas(TextRenderer.IntroText, Images.Font, 360)
-
-
+    
     static pageCanvas(
         pageText: string[], 
         fontImage: HTMLImageElement, 

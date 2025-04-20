@@ -7,7 +7,6 @@ export default class TextRenderer {
         "As he lays down to die the madding spirit whispers in the aurox's ear. It speaks of the enemy that builds and burns and loves only what it can control. A rage fills the aurox. His nostrils flare and his breath is fire. He dies, but his hatred lingers in the forest of dry bones.",
         "The years pass, and countless lost souls walk into the dark shade of the forest. Stone by stone their tower rises."
     ];
-    // static readonly IntroTextImage = TextRenderer.pageCanvas(TextRenderer.IntroText, Images.Font, 360)
     static pageCanvas(pageText, fontImage, wrapWidth) {
         const paragraphCanvases = [];
         let height = 0;
