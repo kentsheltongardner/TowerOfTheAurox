@@ -18,7 +18,7 @@ export default class TextRenderer {
         "The years pass, and countless lost souls walk into the dark shade of the forest. Stone by stone their tower rises."
     ]
 
-    static readonly IntroTextImage = TextRenderer.pageCanvas(TextRenderer.IntroText, Images.Font, 360)
+    // static readonly IntroTextImage = TextRenderer.pageCanvas(TextRenderer.IntroText, Images.Font, 360)
 
 
     static pageCanvas(
